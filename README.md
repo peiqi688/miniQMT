@@ -26,9 +26,9 @@
 '''python
 请按照以下架构使用QMT Python API实现量化交易系统：
 
-一、系统架构设计[^1][^2]
+一、系统架构设计
 1. 核心模块
-|-- configs.py         # **集中管理所有可配置参数**
+|-- config.py          # **集中管理所有可配置参数**
 |-- data_manager.py    # 历史数据获取存储（xtdata接口）
 |-- indicator_calc.py  # 多周期均线/MACD计算（pandas向量化计算）
 |-- strategy_engine.py # **交易策略逻辑实现**
@@ -39,7 +39,7 @@
 
 二、关键实现要点
 1. 数据管理 (data_manager.py)
-- 使用xtdata.get_market_data获取股票历史数据[^6]
+- 使用xtdata.get_market_data获取股票历史数据
 - 采用HDF5存储高频数据，SQLite存储元数据
 - **实现增量更新机制**：last_update_date字段记录最后更新时间
 
@@ -57,7 +57,7 @@ class TradingStrategy:
         # 初始化策略参数（从configs.py加载）
         
     def on_tick(self, context):
-        """**实现QMT的事件驱动机制**[^3]"""
+        """**实现QMT的事件驱动机制**"""
         # 分仓补仓逻辑（示例）：
         if current_price < avg_cost * 0.93:
             self._add_position(context)
@@ -69,7 +69,7 @@ class TradingStrategy:
 4. 交易执行 (trade_executor.py)
 class TradeExecutor:
     def smart_order(self, symbol, price, amount):
-        """**智能下单模块**[^4]
+        """**智能下单模块**
         - 根据买三/卖三价动态调整委托价格
         - 校验当日剩余交易额度
         - 自动拆分大单（单笔≤1000股）"""
@@ -80,7 +80,7 @@ def check_position_risk(position):
     - 整体亏损>9.5%时触发全平仓
     - 个股持仓突破网格阈值触发交易"""
 
-三、QMT API特别注意事项[^1][^3]
+三、QMT API特别注意事项
 1. 必须实现init和handlebar方法
 2. 使用ContextInfo对象传递策略上下文
 3. 区分模拟交易和实盘交易模式
@@ -88,7 +88,7 @@ def check_position_risk(position):
 5. 采用异步订单查询接口
 
 四、调试建议
-1. 在configs.py设置DEBUG模式：
+1. 在config.py设置DEBUG模式：
    DEBUG = True  # 启用详细日志输出
    SIMULATION = True # 使用模拟交易模式
 
