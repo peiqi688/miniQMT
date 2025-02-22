@@ -23,7 +23,6 @@
 4. xtquant的api参考https://dict.thinktrader.net ；
 
 # AI 优化提词
-'''python
 请按照以下架构使用QMT Python API实现量化交易系统：
 
 一、系统架构设计
@@ -95,4 +94,3 @@ def check_position_risk(position):
 2. 日志管理建议：
    - 使用RotatingFileHandler实现日志轮换
    - 保留最近7天日志，单个日志≤10MB
-'''
