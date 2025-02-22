@@ -1,19 +1,33 @@
+# -*- coding:gbk -*-
 class Config:
-    # 交易参数
-    INIT_CAPITAL = 20000     # 初始分仓金额
-    MAX_POSITION = 50000     # 最大持仓金额
-    STOP_LOSS = -0.095       # 整体止损线
-    TAKE_PROFIT = 0.05       # 首次止盈比例
+    # 基础配置
+    DEBUG = True                # 调试模式
+    SIMULATION = True           # 模拟交易模式[^3]
+    TRADE_ACCOUNT = '123456'    # 资金账号
     
-    # 补仓参数
-    BUY_LEVELS = [0.93, 0.86]  # 补仓价格比例
-    GRID_RATIO = 0.02          # 网格交易幅度
+    # 风控参数
+    MAX_LOSS_RATIO = 0.095      # 最大亏损比例9.5%[^5]
+    GRID_INTERVAL = 0.03        # 网格间距3%
+    TICKER_LIMIT = 0.1          # 单票仓位限制
+    
+    # 交易参数
+    COMMISSION_RATE = 0.0003    # 佣金率万三
+    SLIPPAGE = 0.001            # 滑点
+    MAX_ORDER_AMOUNT = 1000     # 单笔最大委托量[^1]
     
     # 数据参数
-    HIST_DATA_DAYS = 180      # 历史数据获取天数
-    INDICATORS = ['MA10', 'MA20', 'MA30', 'MA60', 'MACD']
+    HISTORY_PERIODS = ['1d', '60m', '15m']  # 多周期数据
     
-    # 调试参数
-    DEBUG_MODE = True        # 调试开关
-    LOG_PATH = './trade_logs/'
-    LOG_MAX_DAYS = 30        # 日志保留天数
+    @classmethod
+    def logger_config(cls):
+        return {
+            'version': 1,
+            'handlers': {
+                'file': {
+                    'class': 'logging.handlers.RotatingFileHandler',
+                    'filename': 'qmt_trade.log',
+                    'maxBytes': 10*1024*1024,  # 10MB
+                    'backupCount': 7
+                }
+            }
+        }

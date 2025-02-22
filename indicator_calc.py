@@ -1,29 +1,35 @@
+# -*- coding:gbk -*-
 import pandas as pd
-from MyTT import MACD, MA
+import numpy as np
+from config import Config
 
-def calculate_ma(data, window):
-    """MyTT均线计算"""
-    close = data['close'].values  # 转换为numpy数组
-    return MA(close, window) 
-
-def calculate_macd(data):
-    """MyTT版MACD计算"""
-    close = data['close'].values
-    return MACD(close)  # 返回(DIF, DEA, MACD柱)
-
-def generate_signals(data):
-    signals = pd.DataFrame(index=data.index)
+class IndicatorCalculator:
+    @staticmethod
+    def calculate_emas(df, periods=Config.HISTORY_PERIODS):
+        """多周期EMA计算"""
+        for period in periods:
+            if isinstance(period, str): continue  # 跳过周期字符串
+            col_name = f'EMA_{period}'
+            try:
+                df[col_name] = df['close'].ewm(
+                    span=period, 
+                    adjust=False
+                ).mean().round(2)
+            except Exception as e:
+                print(f"EMA计算错误 {period}: {str(e)}")
+                df[col_name] = np.nan
+        return df
     
-    # 计算均线指标
-    signals['MA10'] = calculate_ma(data, 10)
-    signals['MA20'] = calculate_ma(data, 20)
-    signals['MA30'] = calculate_ma(data, 30)
-    signals['MA60'] = calculate_ma(data, 60)
-    
-    # 计算MACD指标
-    dif, dea, hist = calculate_macd(data)
-    signals['MACD_DIF'] = dif
-    signals['MACD_DEA'] = dea
-    signals['MACD_HIST'] = hist
-    
-    return signals
+    @staticmethod 
+    def calculate_macd(df, fast=12, slow=26, signal=9):
+        """MACD指标计算"""
+        try:
+            ema_fast = df['close'].ewm(span=fast, adjust=False).mean()
+            ema_slow = df['close'].ewm(span=slow, adjust=False).mean()
+            df['DIF'] = ema_fast - ema_slow
+            df['DEA'] = df['DIF'].ewm(span=signal, adjust=False).mean()
+            df['MACD'] = 2 * (df['DIF'] - df['DEA'])
+        except Exception as e:
+            print(f"MACD计算错误: {str(e)}")
+            df[['DIF','DEA','MACD']] = np.nan
+        return df

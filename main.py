@@ -1,28 +1,71 @@
-import time
-from xtquant.xttype import StockAccount
+# -*- coding:gbk -*-
+from xtquant import xtdata
+from xtquant.xttype import ContextInfo
+from strategy_engine import TradingStrategy
+from data_mgr import DataManager
+from risk_mgr import RiskManager
 from config import Config
-from data_fetcher import fetch_history_data
-from trade_engine import TradeEngine
+import logging
+import time
 
-def main():
-    # 初始化交易引擎
-    session_id = 123456
-    account = StockAccount('YOUR_ACCOUNT_ID')
-    trader = TradeEngine(session_id)
-    
-    while True:
-        # 获取实时数据
-        stock_list = ['600000.SH', '000001.SZ']
-        hist_data = fetch_history_data(stock_list)
+def init(context: ContextInfo):
+    """策略初始化入口[^3]"""
+    try:
+        # 初始化日志
+        logging.basicConfig(
+            level=logging.DEBUG if Config.DEBUG else logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.handlers.RotatingFileHandler(
+                    'qmt_strategy.log',
+                    maxBytes=10*1024*1024,
+                    backupCount=7
+                )
+            ]
+        )
         
-        # 执行交易策略
-        trader.auto_trade(hist_data)
+        # 数据订阅[^1]
+        xtdata.subscribe_quote(
+            Config.TARGET_SYMBOLS,
+            Config.HISTORY_PERIODS,
+            callback=handlebar
+        )
         
-        # 监控持仓风险
-        if trader.position_manager.check_risk() == 'FULL_STOP':
-            trader.close_all_positions()
+        # 预加载历史数据
+        DataManager().load_history_data(Config.TARGET_SYMBOLS)
+        
+        # 初始化核心模块
+        context.strategy = TradingStrategy(context)
+        context.risk_mgr = RiskManager(context)
+        context.last_tick_time = 0
+        
+        logging.info("策略初始化完成")
+        
+    except Exception as e:
+        logging.error(f"初始化异常: {str(e)}")
+        raise
+
+def handlebar(context: ContextInfo):
+    """行情驱动主逻辑[^6]"""
+    try:
+        # 节流控制（每秒最多处理10次）
+        current_time = time.time()
+        if current_time - context.last_tick_time < 0.1:
+            return
+        context.last_tick_time = current_time
+        
+        # 前置风控检查
+        if not context.risk_mgr.check_system_risk():
+            logging.warning("风控检查未通过，停止交易")
+            return
             
-        time.sleep(60)  # 每分钟轮询一次
-
-if __name__ == "__main__":
-    main()
+        # 执行交易策略
+        context.strategy.on_tick()
+        
+        # 更新持仓数据
+        context.portfolio.refresh()
+        
+    except Exception as e:
+        logging.error(f"主逻辑异常: {str(e)}", exc_info=True)
+        if Config.DEBUG:
+            raise
