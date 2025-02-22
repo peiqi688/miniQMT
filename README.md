@@ -28,16 +28,16 @@
 一、系统架构设计
 1. 核心模块
 |-- config.py          # **集中管理所有可配置参数**
-|-- data_manager.py    # 历史数据获取存储（xtdata接口）
+|-- data_mgr.py    	   # 历史数据获取存储（xtdata接口）
 |-- indicator_calc.py  # 多周期均线/MACD计算（pandas向量化计算）
 |-- strategy_engine.py # **交易策略逻辑实现**
 |-- trade_executor.py  # 交易指令执行器（xttrader接口）
-|-- position_manager.py# **持仓管理与止盈止损计算**
+|-- position_mgr.py    # **持仓管理与止盈止损计算**
 |-- grid_trader.py     # 网格交易模块
-|-- risk_manager.py    # 风控校验模块
+|-- risk_mgr.py        # 风控校验模块
 
 二、关键实现要点
-1. 数据管理 (data_manager.py)
+1. 数据管理 (data_mgr.py)
 - 使用xtdata.get_market_data获取股票历史数据
 - 采用HDF5存储高频数据，SQLite存储元数据
 - **实现增量更新机制**：last_update_date字段记录最后更新时间
@@ -73,7 +73,7 @@ class TradeExecutor:
         - 校验当日剩余交易额度
         - 自动拆分大单（单笔≤1000股）"""
         
-5. 风控管理 (risk_manager.py)
+5. 风控管理 (risk_mgr.py)
 def check_position_risk(position):
     """实时计算持仓盈亏
     - 整体亏损>9.5%时触发全平仓
@@ -93,4 +93,4 @@ def check_position_risk(position):
 
 2. 日志管理建议：
    - 使用RotatingFileHandler实现日志轮换
-   - 保留最近7天日志，单个日志≤10MB```
+   - 保留最近7天日志，单个日志≤10MB
