@@ -24,7 +24,7 @@
 
 # AI 优化提词
 请按照以下架构使用QMT Python API实现量化交易系统：
-
+```python
 一、系统架构设计
 1. 核心模块
 |-- config.py          # **集中管理所有可配置参数**
@@ -93,4 +93,4 @@ def check_position_risk(position):
 
 2. 日志管理建议：
    - 使用RotatingFileHandler实现日志轮换
-   - 保留最近7天日志，单个日志≤10MB
+   - 保留最近7天日志，单个日志≤10MB```
