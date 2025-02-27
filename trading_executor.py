@@ -1,0 +1,712 @@
+"""
+交易执行模块，负责执行交易指令
+"""
+import time
+from datetime import datetime
+import threading
+import pandas as pd
+import numpy as np
+import sqlite3
+from xtquant import xtdata as xt
+from xtquant import xttrader as xtt
+
+import config
+from logger import get_logger
+from data_manager import get_data_manager
+from position_manager import get_position_manager
+
+# 获取logger
+logger = get_logger("trading_executor")
+
+class TradingExecutor:
+    """交易执行类，负责执行交易指令"""
+    
+    def __init__(self):
+        """初始化交易执行器"""
+        self.data_manager = get_data_manager()
+        self.position_manager = get_position_manager()
+        self.conn = self.data_manager.conn
+        
+        # 初始化迅投交易API
+        self._init_xttrader()
+        
+        # 回调字典，用于存储订单状态变化回调
+        self.callbacks = {}
+        
+        # 委托记录缓存
+        self.order_cache = {}
+        
+        # 交易锁，防止并发交易
+        self.trade_lock = threading.Lock()
+    
+    def _init_xttrader(self):
+        """初始化迅投交易API"""
+        try:
+            # 从配置获取账户信息
+            account_config = config.get_account_config()
+            self.account_id = account_config.get('account_id', '')
+            self.account_type = account_config.get('account_type', 'STOCK')
+            
+            if not self.account_id:
+                logger.warning("未配置交易账户ID，交易功能将不可用")
+                return
+            
+            # 尝试连接交易服务器
+            ret = xtt.start()
+            if ret != 0:
+                logger.error(f"连接交易服务器失败，错误码: {ret}")
+                return
+            
+            # 添加账户
+            ret = xtt.add_account(self.account_type, self.account_id)
+            if ret != 0:
+                logger.error(f"添加交易账户失败，错误码: {ret}")
+                return
+            
+            # 等待账户连接
+            for _ in range(5):
+                accounts = xtt.get_trading_accounts()
+                if accounts and self.account_id in accounts:
+                    logger.info(f"交易账户 {self.account_id} 连接成功")
+                    # 订阅交易推送
+                    xtt.subscribe_trade_data(self.account_id, self.account_type)
+                    # 注册回调函数
+                    self._register_callbacks()
+                    return
+                time.sleep(1)
+            
+            logger.error(f"交易账户 {self.account_id} 连接超时")
+            
+        except Exception as e:
+            logger.error(f"初始化交易API出错: {str(e)}")
+    
+    def _register_callbacks(self):
+        """注册交易回调函数"""
+        try:
+            # 注册成交回调
+            xtt.register_callback('deal_callback', self._on_deal_callback)
+            # 注册委托回调
+            xtt.register_callback('order_callback', self._on_order_callback)
+            # 注册账户资金回调
+            xtt.register_callback('account_callback', self._on_account_callback)
+            # 注册持仓回调
+            xtt.register_callback('position_callback', self._on_position_callback)
+            # 注册错误回调
+            xtt.register_callback('error_callback', self._on_error_callback)
+            
+            logger.info("交易回调函数注册成功")
+            
+        except Exception as e:
+            logger.error(f"注册交易回调函数出错: {str(e)}")
+    
+    def _on_deal_callback(self, deal_info):
+        """
+        成交回调函数
+        
+        参数:
+        deal_info: 成交信息对象
+        """
+        try:
+            logger.info(f"收到成交回调: {deal_info.m_strInstrumentID}, 成交价: {deal_info.m_dPrice}, 成交量: {deal_info.m_nVolume}")
+            
+            # 提取成交信息
+            stock_code = deal_info.m_strInstrumentID
+            trade_type = 'BUY' if deal_info.m_nDirection == 48 else 'SELL'  # 48表示买入，49表示卖出
+            price = deal_info.m_dPrice
+            volume = deal_info.m_nVolume
+            amount = price * volume
+            trade_id = deal_info.m_strTradeID
+            commission = deal_info.m_dComssion
+            trade_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            # 保存成交记录到数据库
+            self._save_trade_record(stock_code, trade_time, trade_type, price, volume, amount, trade_id, commission)
+            
+            # 更新持仓信息
+            self._update_position_after_trade(stock_code, trade_type, price, volume)
+            
+            # 处理网格交易
+            if config.ENABLE_GRID_TRADING:
+                self._handle_grid_trade_after_deal(stock_code, trade_type, price, volume, trade_id)
+            
+            # 执行回调函数
+            if trade_id in self.callbacks:
+                callback_fn = self.callbacks.pop(trade_id)
+                callback_fn(deal_info)
+                
+        except Exception as e:
+            logger.error(f"处理成交回调时出错: {str(e)}")
+    
+    def _on_order_callback(self, order_info):
+        """
+        委托回调函数
+        
+        参数:
+        order_info: 委托信息对象
+        """
+        try:
+            order_id = order_info.m_strOrderSysID
+            stock_code = order_info.m_strInstrumentID
+            status = order_info.m_nOrderStatus
+            
+            # 缓存委托记录
+            self.order_cache[order_id] = order_info
+            
+            status_desc = {
+                48: "未报",
+                49: "待报",
+                50: "已报",
+                51: "已报待撤",
+                52: "部成待撤",
+                53: "部撤",
+                54: "已撤",
+                55: "部成",
+                56: "已成",
+                57: "废单"
+            }
+            
+            logger.info(f"收到委托回调: {stock_code}, 委托号: {order_id}, 状态: {status_desc.get(status, '未知')}")
+            
+            # 如果委托已完成（已成、已撤、废单），移除回调
+            if status in [54, 56, 57]:
+                if order_id in self.callbacks:
+                    logger.debug(f"委托 {order_id} 已完成，移除回调")
+                    # 不要在这里执行回调，因为成交回调会处理
+                
+        except Exception as e:
+            logger.error(f"处理委托回调时出错: {str(e)}")
+    
+    def _on_account_callback(self, account_info):
+        """
+        账户资金回调函数
+        
+        参数:
+        account_info: 账户资金信息对象
+        """
+        try:
+            logger.debug(f"收到账户回调: 可用资金: {account_info.m_dAvailable}, 总资产: {account_info.m_dBalance}")
+            
+        except Exception as e:
+            logger.error(f"处理账户回调时出错: {str(e)}")
+    
+    def _on_position_callback(self, position_info):
+        """
+        持仓回调函数
+        
+        参数:
+        position_info: 持仓信息对象
+        """
+        try:
+            stock_code = position_info.m_strInstrumentID
+            volume = position_info.m_nVolume
+            cost_price = position_info.m_dOpenPrice
+            current_price = position_info.m_dLastPrice
+            
+            logger.debug(f"收到持仓回调: {stock_code}, 数量: {volume}, 成本价: {cost_price}, 当前价: {current_price}")
+            
+            # 更新持仓信息
+            if volume > 0:
+                self.position_manager.update_position(stock_code, volume, cost_price, current_price)
+            else:
+                # 如果数量为0，删除持仓记录
+                self.position_manager.remove_position(stock_code)
+                
+        except Exception as e:
+            logger.error(f"处理持仓回调时出错: {str(e)}")
+    
+    def _on_error_callback(self, error_info):
+        """
+        错误回调函数
+        
+        参数:
+        error_info: 错误信息对象
+        """
+        try:
+            logger.error(f"交易API错误: {error_info}")
+            
+        except Exception as e:
+            logger.error(f"处理错误回调时出错: {str(e)}")
+    
+    def _save_trade_record(self, stock_code, trade_time, trade_type, price, volume, amount, trade_id, commission, strategy='default'):
+        """
+        保存交易记录到数据库
+        
+        参数:
+        stock_code (str): 股票代码
+        trade_time (str): 交易时间
+        trade_type (str): 交易类型（BUY/SELL）
+        price (float): 成交价格
+        volume (int): 成交数量
+        amount (float): 成交金额
+        trade_id (str): 成交编号
+        commission (float): 手续费
+        strategy (str): 策略名称
+        """
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("""
+                INSERT INTO trade_records 
+                (stock_code, trade_time, trade_type, price, volume, amount, trade_id, commission, strategy)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (stock_code, trade_time, trade_type, price, volume, amount, trade_id, commission, strategy))
+            
+            self.conn.commit()
+            logger.info(f"保存交易记录成功: {stock_code}, {trade_type}, 价格: {price}, 数量: {volume}")
+            
+        except Exception as e:
+            logger.error(f"保存交易记录时出错: {str(e)}")
+            self.conn.rollback()
+    
+    def _update_position_after_trade(self, stock_code, trade_type, price, volume):
+        """
+        交易后更新持仓信息
+        
+        参数:
+        stock_code (str): 股票代码
+        trade_type (str): 交易类型（BUY/SELL）
+        price (float): 成交价格
+        volume (int): 成交数量
+        """
+        try:
+            # 获取当前持仓
+            position = self.position_manager.get_position(stock_code)
+            
+            if trade_type == 'BUY':
+                if position:
+                    # 已有持仓，计算新的持仓量和成本价
+                    old_volume = position['volume']
+                    old_cost = position['cost_price']
+                    new_volume = old_volume + volume
+                    new_cost = (old_volume * old_cost + volume * price) / new_volume
+                    
+                    # 更新持仓
+                    self.position_manager.update_position(stock_code, new_volume, new_cost, price)
+                else:
+                    # 新建持仓
+                    self.position_manager.update_position(stock_code, volume, price, price)
+            else:  # SELL
+                if position:
+                    # 减少持仓
+                    old_volume = position['volume']
+                    old_cost = position['cost_price']
+                    new_volume = old_volume - volume
+                    
+                    if new_volume > 0:
+                        # 更新持仓
+                        self.position_manager.update_position(stock_code, new_volume, old_cost, price)
+                    else:
+                        # 清仓
+                        self.position_manager.remove_position(stock_code)
+                else:
+                    logger.warning(f"卖出 {stock_code} 时未找到持仓记录")
+                    
+        except Exception as e:
+            logger.error(f"更新 {stock_code} 的持仓信息时出错: {str(e)}")
+    
+    def _handle_grid_trade_after_deal(self, stock_code, trade_type, price, volume, trade_id):
+        """
+        成交后处理网格交易
+        
+        参数:
+        stock_code (str): 股票代码
+        trade_type (str): 交易类型（BUY/SELL）
+        price (float): 成交价格
+        volume (int): 成交数量
+        trade_id (str): 成交编号
+        """
+        try:
+            if trade_type == 'BUY':
+                # 检查是否有网格买入记录
+                grid_trades = self.position_manager.get_grid_trades(stock_code, status='PENDING')
+                for _, grid in grid_trades.iterrows():
+                    grid_id = grid['id']
+                    buy_price = grid['buy_price']
+                    
+                    # 如果买入价格接近网格买入价，更新网格状态为激活
+                    if abs(price - buy_price) / buy_price < 0.01:  # 价差小于1%
+                        self.position_manager.update_grid_trade_status(grid_id, 'ACTIVE')
+                        logger.info(f"网格交易 {grid_id} 买入成交，更新状态为激活")
+                        
+                        # 创建卖出网格
+                        sell_price = price * (1 + config.GRID_STEP_RATIO)
+                        self.create_grid_trade(stock_code, buy_price, sell_price, int(volume * config.GRID_POSITION_RATIO))
+                        
+            elif trade_type == 'SELL':
+                # 检查是否有网格卖出记录
+                grid_trades = self.position_manager.get_grid_trades(stock_code, status='ACTIVE')
+                for _, grid in grid_trades.iterrows():
+                    grid_id = grid['id']
+                    sell_price = grid['sell_price']
+                    
+                    # 如果卖出价格接近网格卖出价，更新网格状态为完成
+                    if abs(price - sell_price) / sell_price < 0.01:  # 价差小于1%
+                        self.position_manager.update_grid_trade_status(grid_id, 'COMPLETED')
+                        logger.info(f"网格交易 {grid_id} 卖出成交，更新状态为完成")
+                        
+                        # 如果有持仓，创建新的买入网格
+                        position = self.position_manager.get_position(stock_code)
+                        if position and position['volume'] > 0:
+                            buy_price = price * (1 - config.GRID_STEP_RATIO)
+                            self.create_grid_trade(stock_code, buy_price, price, int(volume * config.GRID_POSITION_RATIO))
+                
+        except Exception as e:
+            logger.error(f"处理 {stock_code} 的网格交易成交后逻辑时出错: {str(e)}")
+    
+    def create_grid_trade(self, stock_code, buy_price, sell_price, volume):
+        """
+        创建网格交易
+        
+        参数:
+        stock_code (str): 股票代码
+        buy_price (float): 买入价格
+        sell_price (float): 卖出价格
+        volume (int): 交易数量
+        
+        返回:
+        int: 网格交易ID
+        """
+        try:
+            # 获取当前网格数量
+            grid_trades = self.position_manager.get_grid_trades(stock_code)
+            
+            # 如果网格数量已达上限，不再创建新的网格
+            if len(grid_trades) >= config.GRID_MAX_LEVELS:
+                logger.warning(f"{stock_code} 的网格数量已达上限 {config.GRID_MAX_LEVELS}，不再创建新的网格")
+                return -1
+            
+            # 确定网格级别
+            grid_level = len(grid_trades) + 1
+            
+            # 创建网格交易记录
+            grid_id = self.position_manager.add_grid_trade(stock_code, grid_level, buy_price, sell_price, volume)
+            
+            logger.info(f"创建 {stock_code} 的网格交易成功，ID: {grid_id}, 买入价: {buy_price}, 卖出价: {sell_price}, 数量: {volume}")
+            return grid_id
+            
+        except Exception as e:
+            logger.error(f"创建 {stock_code} 的网格交易时出错: {str(e)}")
+            return -1
+    
+    def get_account_info(self):
+        """
+        获取账户信息
+        
+        返回:
+        dict: 账户信息
+        """
+        try:
+            account_info = xtt.query_account(self.account_id, self.account_type)
+            if not account_info:
+                logger.warning(f"未能获取账户 {self.account_id} 的信息")
+                return None
+            
+            return {
+                'account_id': self.account_id,
+                'account_type': self.account_type,
+                'balance': account_info.m_dBalance,  # 总资产
+                'available': account_info.m_dAvailable,  # 可用资金
+                'market_value': account_info.m_dInstrumentValue,  # 持仓市值
+                'profit_loss': account_info.m_dPositionProfit  # 持仓盈亏
+            }
+            
+        except Exception as e:
+            logger.error(f"获取账户信息时出错: {str(e)}")
+            return None
+    
+    def get_stock_positions(self):
+        """
+        获取股票持仓信息
+        
+        返回:
+        list: 持仓信息列表
+        """
+        try:
+            positions = xtt.query_position(self.account_id, self.account_type)
+            if not positions:
+                return []
+            
+            position_list = []
+            for pos in positions:
+                position_list.append({
+                    'stock_code': pos.m_strInstrumentID,
+                    'stock_name': pos.m_strInstrumentName,
+                    'volume': pos.m_nVolume,
+                    'available': pos.m_nCanUseVolume,
+                    'cost_price': pos.m_dOpenPrice,
+                    'current_price': pos.m_dLastPrice,
+                    'market_value': pos.m_dMarketValue,
+                    'profit_ratio': pos.m_dProfitRate
+                })
+            
+            return position_list
+            
+        except Exception as e:
+            logger.error(f"获取持仓信息时出错: {str(e)}")
+            return []
+    
+    def buy_stock(self, stock_code, volume=None, price=None, amount=None, price_type=0, callback=None):
+        """
+        买入股票
+        
+        参数:
+        stock_code (str): 股票代码
+        volume (int): 买入数量，与amount二选一
+        price (float): 买入价格，为None时使用市价
+        amount (float): 买入金额，与volume二选一
+        price_type (int): 价格类型，0-限价，1-市价
+        callback (function): 成交回调函数
+        
+        返回:
+        str: 委托编号，失败返回None
+        """
+        with self.trade_lock:
+            try:
+                # 检查是否在交易时间
+                if not config.is_trade_time():
+                    logger.warning("当前不是交易时间，无法下单")
+                    return None
+                
+                # 获取最新价格
+                if price is None:
+                    latest_quote = self.data_manager.get_latest_data(stock_code)
+                    if not latest_quote:
+                        logger.error(f"未能获取 {stock_code} 的最新行情，无法下单")
+                        return None
+                    price = latest_quote.get('lastPrice')
+                
+                # 如果指定了金额而不是数量，计算数量
+                if volume is None and amount is not None:
+                    volume = int(amount / price / 100) * 100  # 向下取整到100的倍数
+                
+                if volume <= 0:
+                    logger.error(f"买入数量必须大于0: {volume}")
+                    return None
+                
+                # 调用迅投API下单
+                if price_type == 1:  # 市价单
+                    order_id = xtt.market_order(self.account_id, self.account_type, stock_code, 48, volume)
+                else:  # 限价单
+                    order_id = xtt.limit_order(self.account_id, self.account_type, stock_code, 48, price, volume)
+                
+                if not order_id:
+                    logger.error(f"买入 {stock_code} 失败")
+                    return None
+                
+                logger.info(f"买入 {stock_code} 下单成功，委托号: {order_id}, 价格: {price}, 数量: {volume}")
+                
+                # 注册回调
+                if callback:
+                    self.callbacks[order_id] = callback
+                
+                return order_id
+                
+            except Exception as e:
+                logger.error(f"买入 {stock_code} 时出错: {str(e)}")
+                return None
+    
+    def sell_stock(self, stock_code, volume=None, price=None, ratio=None, price_type=0, callback=None):
+        """
+        卖出股票
+        
+        参数:
+        stock_code (str): 股票代码
+        volume (int): 卖出数量，与ratio二选一
+        price (float): 卖出价格，为None时使用市价
+        ratio (float): 卖出比例，0-1之间，与volume二选一
+        price_type (int): 价格类型，0-限价，1-市价
+        callback (function): 成交回调函数
+        
+        返回:
+        str: 委托编号，失败返回None
+        """
+        with self.trade_lock:
+            try:
+                # 检查是否在交易时间
+                if not config.is_trade_time():
+                    logger.warning("当前不是交易时间，无法下单")
+                    return None
+                
+                # 获取最新价格
+                if price is None:
+                    latest_quote = self.data_manager.get_latest_data(stock_code)
+                    if not latest_quote:
+                        logger.error(f"未能获取 {stock_code} 的最新行情，无法下单")
+                        return None
+                    price = latest_quote.get('lastPrice')
+                
+                # 如果指定了比例而不是数量，计算数量
+                if volume is None and ratio is not None:
+                    position = self.position_manager.get_position(stock_code)
+                    if not position:
+                        logger.error(f"未持有 {stock_code}，无法卖出")
+                        return None
+                    
+                    total_volume = position['volume']
+                    volume = int(total_volume * ratio / 100) * 100  # 向下取整到100的倍数
+                
+                if volume <= 0:
+                    logger.error(f"卖出数量必须大于0: {volume}")
+                    return None
+                
+                # 调用迅投API下单
+                if price_type == 1:  # 市价单
+                    order_id = xtt.market_order(self.account_id, self.account_type, stock_code, 49, volume)
+                else:  # 限价单
+                    order_id = xtt.limit_order(self.account_id, self.account_type, stock_code, 49, price, volume)
+                
+                if not order_id:
+                    logger.error(f"卖出 {stock_code} 失败")
+                    return None
+                
+                logger.info(f"卖出 {stock_code} 下单成功，委托号: {order_id}, 价格: {price}, 数量: {volume}")
+                
+                # 注册回调
+                if callback:
+                    self.callbacks[order_id] = callback
+                
+                return order_id
+                
+            except Exception as e:
+                logger.error(f"卖出 {stock_code} 时出错: {str(e)}")
+                return None
+    
+    def cancel_order(self, order_id):
+        """
+        撤销委托
+        
+        参数:
+        order_id (str): 委托编号
+        
+        返回:
+        bool: 是否成功发送撤单请求
+        """
+        try:
+            # 调用迅投API撤单
+            ret = xtt.cancel_order(self.account_id, self.account_type, order_id)
+            
+            if ret:
+                logger.info(f"撤单请求已发送，委托号: {order_id}")
+                return True
+            else:
+                logger.error(f"撤单请求发送失败，委托号: {order_id}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"撤销委托 {order_id} 时出错: {str(e)}")
+            return False
+    
+    def get_orders(self, status=None):
+        """
+        获取委托列表
+        
+        参数:
+        status (int): 委托状态过滤，为None时获取所有委托
+        
+        返回:
+        list: 委托列表
+        """
+        try:
+            orders = xtt.query_order(self.account_id, self.account_type)
+            if not orders:
+                return []
+            
+            order_list = []
+            for order in orders:
+                # 如果指定了状态过滤，跳过不匹配的委托
+                if status is not None and order.m_nOrderStatus != status:
+                    continue
+                
+                order_list.append({
+                    'order_id': order.m_strOrderSysID,
+                    'stock_code': order.m_strInstrumentID,
+                    'stock_name': order.m_strInstrumentName,
+                    'direction': 'BUY' if order.m_nDirection == 48 else 'SELL',
+                    'price': order.m_dLimitPrice,
+                    'volume': order.m_nVolumeTotalOriginal,
+                    'traded_volume': order.m_nVolumeTraded,
+                    'status': order.m_nOrderStatus,
+                    'status_desc': self._get_order_status_desc(order.m_nOrderStatus),
+                    'submit_time': order.m_strInsertTime
+                })
+            
+            return order_list
+            
+        except Exception as e:
+            logger.error(f"获取委托列表时出错: {str(e)}")
+            return []
+    
+    def _get_order_status_desc(self, status):
+        """获取委托状态描述"""
+        status_dict = {
+            48: "未报",
+            49: "待报",
+            50: "已报",
+            51: "已报待撤",
+            52: "部成待撤",
+            53: "部撤",
+            54: "已撤",
+            55: "部成",
+            56: "已成",
+            57: "废单"
+        }
+        return status_dict.get(status, "未知")
+    
+    def get_trades(self, start_date=None, end_date=None):
+        """
+        获取成交记录
+        
+        参数:
+        start_date (str): 开始日期，格式 'YYYY-MM-DD'
+        end_date (str): 结束日期，格式 'YYYY-MM-DD'
+        
+        返回:
+        pandas.DataFrame: 成交记录
+        """
+        try:
+            query = "SELECT * FROM trade_records"
+            params = []
+            
+            if start_date:
+                query += " WHERE trade_time >= ?"
+                params.append(start_date + " 00:00:00")
+                
+                if end_date:
+                    query += " AND trade_time <= ?"
+                    params.append(end_date + " 23:59:59")
+            elif end_date:
+                query += " WHERE trade_time <= ?"
+                params.append(end_date + " 23:59:59")
+            
+            query += " ORDER BY trade_time DESC"
+            
+            df = pd.read_sql_query(query, self.conn, params=params)
+            return df
+            
+        except Exception as e:
+            logger.error(f"获取成交记录时出错: {str(e)}")
+            return pd.DataFrame()
+    
+    def close(self):
+        """关闭交易执行器"""
+        try:
+            # 取消行情订阅
+            xtt.unsubscribe_trade_data(self.account_id, self.account_type)
+            
+            # 停止交易API
+            xtt.stop()
+            
+            logger.info("交易执行器已关闭")
+            
+        except Exception as e:
+            logger.error(f"关闭交易执行器时出错: {str(e)}")
+
+
+# 单例模式
+_instance = None
+
+def get_trading_executor():
+    """获取TradingExecutor单例"""
+    global _instance
+    if _instance is None:
+        _instance = TradingExecutor()
+    return _instance
