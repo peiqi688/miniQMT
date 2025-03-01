@@ -135,106 +135,150 @@ class DataManager:
     def _init_xtquant(self):
         """初始化迅投行情接口"""
         try:
-                # 修复连接问题
-                if not xt.connect():
-                    logger.error("行情服务连接失败")
-                    return
+            # 连接XtQuant服务器
+            if not xt.connect():
+                logger.error("行情服务连接失败")
+                return
                     
-                logger.info("行情服务连接成功")
-                
-                # 确保股票代码格式正确且不为空
-                valid_stocks = []
-                for stock_code in config.STOCK_POOL:
-                    if '.' in stock_code and len(stock_code.split('.')) == 2:
-                        code, market = stock_code.split('.')
-                        if code and market in ['SH', 'SZ', 'BJ']:
-                            valid_stocks.append(stock_code)
-                        else:
-                            logger.warning(f"股票代码格式不正确: {stock_code}")
+            logger.info("行情服务连接成功")
+            
+            # 由于订阅不可用，使用直接获取模式
+            logger.info("使用直接获取模式代替订阅模式")
+            
+            # 验证股票代码是否能获取数据
+            valid_stocks = []
+            for stock_code in config.STOCK_POOL:
+                try:
+                    # 尝试获取Tick数据
+                    tick_data = xt.get_full_tick([stock_code])
+                    if tick_data and stock_code in tick_data:
+                        valid_stocks.append(stock_code)
+                        logger.info(f"股票 {stock_code} 数据获取成功")
                     else:
-                        logger.warning(f"股票代码格式不正确: {stock_code}")
-                
-                # 检查是否有有效的股票代码
-                if not valid_stocks:
-                    logger.warning("没有有效的股票代码，无法订阅行情")
-                    return
+                        logger.warning(f"无法获取 {stock_code} 的数据")
+                except Exception as e:
+                    logger.warning(f"获取 {stock_code} 的数据时出错: {str(e)}")
+            
+            self.subscribed_stocks = valid_stocks
+            
+            if self.subscribed_stocks:
+                logger.info(f"成功验证 {len(self.subscribed_stocks)} 只股票可获取数据")
+            else:
+                logger.warning("没有有效的股票")
                     
-                # 订阅行情
-                for stock in valid_stocks:
-                    result = xt.subscribe_quote([stock], period='tick')
-                    if result:
-                        self.subscribed_stocks.append(stock)
-                        logger.info(f"成功订阅 {stock} 行情数据")
-                    else:
-                        logger.warning(f"订阅 {stock} 行情数据失败")
-                        
-                logger.info("迅投行情接口初始化成功")
-                
         except Exception as e:
-                logger.error(f"初始化迅投行情接口出错: {str(e)}")
+            logger.error(f"初始化迅投行情接口出错: {str(e)}")
     
     def download_history_data(self, stock_code, period=None, start_date=None, end_date=None):
-        """
-        下载历史行情数据
-        
-        参数:
-        stock_code (str): 股票代码，如 '000001.SZ'
-        period (str): 周期，如 '1d', '1h', '30m', '15m', '5m', '1m'
-        start_date (str): 开始日期，如 '20210101'
-        end_date (str): 结束日期，如 '20210331'
-        
-        返回:
-        pandas.DataFrame: 历史数据
-        """
+        """下载历史行情数据"""
         if period is None:
             period = config.DEFAULT_PERIOD
-            
+                
         if start_date is None:
-            # 默认获取一年的数据
             start_date = (datetime.now() - timedelta(days=config.INITIAL_DAYS)).strftime('%Y%m%d')
-            
+                
         if end_date is None:
             end_date = datetime.now().strftime('%Y%m%d')
         
         logger.info(f"开始下载 {stock_code} 的历史数据，周期: {period}, 日期范围: {start_date} - {end_date}")
         
         try:
-            # 调用迅投API获取历史数据
-            df = xt.get_market_data(
-                fields=['open', 'high', 'low', 'close', 'volume', 'amount'],
-                stock_list=[stock_code],
-                period=period,
-                start_time=start_date,
-                end_time=end_date
-            )
-            
-            if df is None or df.empty:
+            # 检查代码格式
+            if '.' not in stock_code:
+                logger.error(f"股票代码 {stock_code} 格式不正确，应包含市场分隔符'.'")
+                return None
+                    
+            # 尝试获取历史数据 (不使用fields参数)
+            try:
+                # 根据测试结果，移除fields参数
+                df = xt.get_market_data(
+                    stock_list=[stock_code],
+                    period=period,
+                    start_time=start_date,
+                    end_time=end_date
+                )
+            except Exception as e1:
+                logger.warning(f"获取历史数据失败: {str(e1)}")
+                
+                # 尝试其他可能的方法
+                for method_name in ["get_kline_serial", "get_history_data", "get_klines"]:
+                    if hasattr(xt, method_name):
+                        try:
+                            logger.info(f"尝试使用{method_name}方法获取数据")
+                            method = getattr(xt, method_name)
+                            df = method(stock_code, period=period, start_time=start_date, end_time=end_date)
+                            if df is not None and not (hasattr(df, 'empty') and df.empty):
+                                logger.info(f"使用{method_name}方法成功获取数据")
+                                break
+                        except Exception as e:
+                            logger.warning(f"使用{method_name}方法失败: {str(e)}")
+                else:
+                    # 如果所有方法都失败，尝试最基本的调用
+                    try:
+                        logger.info("尝试最基本的API调用")
+                        df = xt.get_market_data(stock_code, period, start_date, end_date)
+                    except Exception as e:
+                        logger.error(f"所有获取历史数据的方法都失败: {str(e)}")
+                        return None
+                
+            if df is None or (hasattr(df, 'empty') and df.empty):
                 logger.warning(f"未获取到 {stock_code} 的历史数据")
                 return None
             
-            # 重塑数据结构
-            if isinstance(df, pd.Panel):
-                # Panel格式转为DataFrame
-                df = df.loc[stock_code].reset_index()
-            elif isinstance(df, pd.DataFrame):
-                # 如果已经是DataFrame，检查是否需要处理
-                if 'time' not in df.columns and 'date' not in df.columns:
-                    # 假设索引是时间
-                    df = df.reset_index()
+            # 处理数据格式
+            try:
+                # 检查并转换数据格式
+                if isinstance(df, pd.DataFrame):
+                    # 如果没有date列，尝试重置索引
+                    if 'date' not in df.columns and hasattr(df, 'index'):
+                        df = df.reset_index()
+                        
+                    # 确保包含必要的列
+                    required_cols = ['open', 'high', 'low', 'close', 'volume', 'amount']
+                    missing_cols = [col for col in required_cols if col not in df.columns]
+                    
+                    if missing_cols:
+                        logger.warning(f"数据缺少以下列: {missing_cols}")
+                        
+                        # 尝试查找替代列名
+                        alt_columns = {
+                            'open': ['Open', 'OPEN', 'o', 'O'],
+                            'high': ['High', 'HIGH', 'h', 'H'],
+                            'low': ['Low', 'LOW', 'l', 'L'],
+                            'close': ['Close', 'CLOSE', 'c', 'C'],
+                            'volume': ['Volume', 'VOLUME', 'vol', 'VOL', 'v', 'V'],
+                            'amount': ['Amount', 'AMOUNT', 'amt', 'AMT', 'a', 'A']
+                        }
+                        
+                        for col in missing_cols:
+                            for alt in alt_columns.get(col, []):
+                                if alt in df.columns:
+                                    df[col] = df[alt]
+                                    logger.info(f"使用列 {alt} 替代 {col}")
+                                    break
+                
+                # 统一日期列名
+                date_columns = ['date', 'time', 'Date', 'Time', 'DATE', 'TIME']
+                for date_col in date_columns:
+                    if date_col in df.columns:
+                        df = df.rename(columns={date_col: 'date'})
+                        break
+                
+                # 确保date列格式正确
+                if 'date' in df.columns:
+                    try:
+                        df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
+                    except Exception as e:
+                        logger.warning(f"日期格式转换失败: {str(e)}")
+                
+                logger.info(f"成功下载 {stock_code} 的历史数据, 共 {len(df)} 条记录")
+                logger.debug(f"数据列: {df.columns.tolist()}")
+                return df
+                    
+            except Exception as e:
+                logger.error(f"处理历史数据时出错: {str(e)}")
+                return None
             
-            # 统一列名
-            df = df.rename(columns={
-                'time': 'date',
-                'index': 'date'
-            })
-            
-            # 确保date列是字符串格式的日期
-            if 'date' in df.columns:
-                df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
-            
-            logger.info(f"成功下载 {stock_code} 的历史数据, 共 {len(df)} 条记录")
-            return df
-        
         except Exception as e:
             logger.error(f"下载 {stock_code} 的历史数据时出错: {str(e)}")
             return None
@@ -279,28 +323,24 @@ class DataManager:
             self.conn.rollback()
     
     def get_latest_data(self, stock_code):
-        """
-        获取最新行情数据
-        
-        参数:
-        stock_code (str): 股票代码
-        
-        返回:
-        dict: 最新行情数据
-        """
+        """获取最新行情数据"""
         try:
-            # 调用迅投API获取最新行情
+            # 测试已证明get_full_tick方法可用
             latest_quote = xt.get_full_tick([stock_code])
             
             if not latest_quote or stock_code not in latest_quote:
                 logger.warning(f"未获取到 {stock_code} 的最新行情")
                 return None
             
-            return latest_quote[stock_code]
+            quote_data = latest_quote[stock_code]
+            logger.debug(f"{stock_code} 最新行情: {quote_data}")
+            
+            return quote_data
             
         except Exception as e:
             logger.error(f"获取 {stock_code} 的最新行情时出错: {str(e)}")
             return None
+
     
     def get_history_data_from_db(self, stock_code, start_date=None, end_date=None):
         """
@@ -420,14 +460,6 @@ class DataManager:
         if self.conn:
             self.conn.close()
             logger.info("数据库连接已关闭")
-        
-        # 取消行情订阅
-        if self.subscribed_stocks:
-            try:
-                xt.unsubscribe_quote(self.subscribed_stocks)
-                logger.info(f"已取消 {len(self.subscribed_stocks)} 只股票的行情订阅")
-            except Exception as e:
-                logger.error(f"取消行情订阅出错: {str(e)}")
         
         # 断开行情连接
         try:
