@@ -31,3 +31,7 @@ xtquant/xtbson/bson37/__pycache__/timestamp.cpython-310.pyc
 xtquant/xtbson/bson37/__pycache__/tz_util.cpython-310.pyc
 account_config.json
 ai_capital_inflow.py
+__pycache__/data_manager.cpython-38.pyc
+__pycache__/trading_executor.cpython-38.pyc
+__pycache__/web_server.cpython-38.pyc
+logs/qmt_trading.log

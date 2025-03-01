@@ -18,6 +18,10 @@ from position_manager import get_position_manager
 # 获取logger
 logger = get_logger("trading_executor")
 
+# 常量定义，替代枚举类型
+DIRECTION_BUY = 48   # 买入方向
+DIRECTION_SELL = 49  # 卖出方向
+
 class TradingExecutor:
     """交易执行类，负责执行交易指令"""
     
@@ -26,6 +30,9 @@ class TradingExecutor:
         self.data_manager = get_data_manager()
         self.position_manager = get_position_manager()
         self.conn = self.data_manager.conn
+        
+        # 交易API客户端
+        self.trader = None
         
         # 初始化迅投交易API
         self._init_xttrader()
@@ -51,50 +58,126 @@ class TradingExecutor:
                 logger.warning("未配置交易账户ID，交易功能将不可用")
                 return
             
-            # 尝试连接交易服务器
-            ret = xtt.start()
-            if ret != 0:
-                logger.error(f"连接交易服务器失败，错误码: {ret}")
-                return
+            # 打印可用的交易API方法，便于调试
+            logger.info(f"xtquant.xttrader支持的方法: {[f for f in dir(xtt) if not f.startswith('_')]}")
             
-            # 添加账户
-            ret = xtt.add_account(self.account_type, self.account_id)
-            if ret != 0:
-                logger.error(f"添加交易账户失败，错误码: {ret}")
-                return
-            
-            # 等待账户连接
-            for _ in range(5):
-                accounts = xtt.get_trading_accounts()
-                if accounts and self.account_id in accounts:
-                    logger.info(f"交易账户 {self.account_id} 连接成功")
-                    # 订阅交易推送
-                    xtt.subscribe_trade_data(self.account_id, self.account_type)
+            # 检查可能的交易API初始化方法
+            if hasattr(xtt, 'create_trader'):
+                # 尝试创建交易API客户端
+                self.trader = xtt.create_trader()
+                logger.info("使用create_trader()创建交易API客户端")
+                
+                # 登录账户
+                result = self.trader.login(self.account_id, self.account_type)
+                logger.info(f"登录账户结果: {result}")
+                
+                # 等待账户连接
+                is_connected = False
+                for _ in range(5):
+                    if hasattr(self.trader, 'is_connected') and self.trader.is_connected():
+                        is_connected = True
+                        logger.info(f"交易账户 {self.account_id} 连接成功")
+                        break
+                    time.sleep(1)
+                
+                if not is_connected:
+                    logger.warning(f"交易账户 {self.account_id} 连接状态未确认")
+                    
+            elif hasattr(xtt, 'connect'):
+                # 尝试直接连接
+                result = xtt.connect()
+                logger.info(f"使用connect()连接交易API，结果: {result}")
+                
+                # 添加账户
+                if hasattr(xtt, 'add_account'):
+                    result = xtt.add_account(self.account_type, self.account_id)
+                    logger.info(f"添加账户结果: {result}")
+                    
                     # 注册回调函数
                     self._register_callbacks()
-                    return
-                time.sleep(1)
-            
-            logger.error(f"交易账户 {self.account_id} 连接超时")
+                    
+            else:
+                # 尝试其他可能的初始化方法
+                init_methods = [m for m in dir(xtt) if m.lower() in ["start", "initialize", "login"]]
+                
+                if init_methods:
+                    logger.info(f"找到可能的初始化方法: {init_methods}")
+                    # 尝试第一个可能的方法
+                    method_name = init_methods[0]
+                    init_method = getattr(xtt, method_name)
+                    
+                    if method_name.lower() == "start":
+                        # start方法可能不需要参数
+                        result = init_method()
+                        logger.info(f"调用 {method_name} 方法初始化交易API，结果: {result}")
+                        
+                        # 尝试添加账户
+                        if hasattr(xtt, 'add_account'):
+                            result = xtt.add_account(self.account_type, self.account_id)
+                            logger.info(f"添加账户结果: {result}")
+                    else:
+                        # 其他方法可能需要账户参数
+                        try:
+                            result = init_method(self.account_id, self.account_type)
+                            logger.info(f"调用 {method_name} 方法初始化交易API，结果: {result}")
+                        except TypeError:
+                            # 如果参数不匹配，尝试不带参数
+                            result = init_method()
+                            logger.info(f"无参数调用 {method_name} 方法初始化交易API，结果: {result}")
+                    
+                    # 注册回调函数
+                    self._register_callbacks()
+                else:
+                    logger.error("未找到可用的交易API初始化方法")
             
         except Exception as e:
             logger.error(f"初始化交易API出错: {str(e)}")
+    
+    def _trade_callback(self, callback_type, data):
+        """统一的交易回调函数"""
+        try:
+            if callback_type == "order":
+                self._on_order_callback(data)
+            elif callback_type == "deal":
+                self._on_deal_callback(data)
+            elif callback_type == "account":
+                self._on_account_callback(data)
+            elif callback_type == "position":
+                self._on_position_callback(data)
+            elif callback_type == "error":
+                self._on_error_callback(data)
+            else:
+                logger.warning(f"收到未知类型的回调: {callback_type}")
+                
+        except Exception as e:
+            logger.error(f"处理交易回调时出错: {str(e)}")
     
     def _register_callbacks(self):
         """注册交易回调函数"""
         try:
             # 注册成交回调
-            xtt.register_callback('deal_callback', self._on_deal_callback)
-            # 注册委托回调
-            xtt.register_callback('order_callback', self._on_order_callback)
-            # 注册账户资金回调
-            xtt.register_callback('account_callback', self._on_account_callback)
-            # 注册持仓回调
-            xtt.register_callback('position_callback', self._on_position_callback)
-            # 注册错误回调
-            xtt.register_callback('error_callback', self._on_error_callback)
-            
-            logger.info("交易回调函数注册成功")
+            if hasattr(xtt, 'register_callback'):
+                xtt.register_callback('deal_callback', self._on_deal_callback)
+                # 注册委托回调
+                xtt.register_callback('order_callback', self._on_order_callback)
+                # 注册账户资金回调
+                xtt.register_callback('account_callback', self._on_account_callback)
+                # 注册持仓回调
+                xtt.register_callback('position_callback', self._on_position_callback)
+                # 注册错误回调
+                xtt.register_callback('error_callback', self._on_error_callback)
+                
+                logger.info("交易回调函数注册成功")
+            elif hasattr(xtt, 'set_callback'):
+                # 另一种可能的回调注册方法
+                xtt.set_callback(self._trade_callback)
+                logger.info("设置统一回调函数成功")
+            elif self.trader and hasattr(self.trader, 'set_callback'):
+                # 对象方法的回调注册
+                self.trader.set_callback(self._trade_callback)
+                logger.info("设置交易对象回调函数成功")
+            else:
+                logger.warning("未找到支持的回调注册方法")
             
         except Exception as e:
             logger.error(f"注册交易回调函数出错: {str(e)}")
@@ -111,7 +194,7 @@ class TradingExecutor:
             
             # 提取成交信息
             stock_code = deal_info.m_strInstrumentID
-            trade_type = 'BUY' if deal_info.m_nDirection == 48 else 'SELL'  # 48表示买入，49表示卖出
+            trade_type = 'BUY' if deal_info.m_nDirection == DIRECTION_BUY else 'SELL'
             price = deal_info.m_dPrice
             volume = deal_info.m_nVolume
             amount = price * volume
@@ -395,7 +478,16 @@ class TradingExecutor:
         dict: 账户信息
         """
         try:
-            account_info = xtt.query_account(self.account_id, self.account_type)
+            account_info = None
+            
+            # 尝试不同的API调用方式获取账户信息
+            if self.trader and hasattr(self.trader, 'query_account'):
+                # 如果使用对象API
+                account_info = self.trader.query_account()
+            elif hasattr(xtt, 'query_account'):
+                # 如果使用函数式API
+                account_info = xtt.query_account(self.account_id, self.account_type)
+            
             if not account_info:
                 logger.warning(f"未能获取账户 {self.account_id} 的信息")
                 return None
@@ -403,10 +495,10 @@ class TradingExecutor:
             return {
                 'account_id': self.account_id,
                 'account_type': self.account_type,
-                'balance': account_info.m_dBalance,  # 总资产
-                'available': account_info.m_dAvailable,  # 可用资金
-                'market_value': account_info.m_dInstrumentValue,  # 持仓市值
-                'profit_loss': account_info.m_dPositionProfit  # 持仓盈亏
+                'balance': getattr(account_info, 'm_dBalance', 0),  # 总资产
+                'available': getattr(account_info, 'm_dAvailable', 0),  # 可用资金
+                'market_value': getattr(account_info, 'm_dInstrumentValue', 0),  # 持仓市值
+                'profit_loss': getattr(account_info, 'm_dPositionProfit', 0)  # 持仓盈亏
             }
             
         except Exception as e:
@@ -421,7 +513,16 @@ class TradingExecutor:
         list: 持仓信息列表
         """
         try:
-            positions = xtt.query_position(self.account_id, self.account_type)
+            positions = None
+            
+            # 尝试不同的API调用方式获取持仓信息
+            if self.trader and hasattr(self.trader, 'query_position'):
+                # 如果使用对象API
+                positions = self.trader.query_position()
+            elif hasattr(xtt, 'query_position'):
+                # 如果使用函数式API
+                positions = xtt.query_position(self.account_id, self.account_type)
+                
             if not positions:
                 return []
             
@@ -482,11 +583,31 @@ class TradingExecutor:
                     logger.error(f"买入数量必须大于0: {volume}")
                     return None
                 
-                # 调用迅投API下单
-                if price_type == 1:  # 市价单
-                    order_id = xtt.market_order(self.account_id, self.account_type, stock_code, 48, volume)
-                else:  # 限价单
-                    order_id = xtt.limit_order(self.account_id, self.account_type, stock_code, 48, price, volume)
+                # 调用交易API下单
+                order_id = None
+                
+                # 尝试不同的API调用方式
+                if self.trader:
+                    # 如果使用对象API
+                    if hasattr(self.trader, 'limit_order') and hasattr(self.trader, 'market_order'):
+                        if price_type == 1:  # 市价单
+                            order_id = self.trader.market_order(stock_code, DIRECTION_BUY, volume)
+                        else:  # 限价单
+                            order_id = self.trader.limit_order(stock_code, DIRECTION_BUY, price, volume)
+                elif hasattr(xtt, 'limit_order') and hasattr(xtt, 'market_order'):
+                    # 如果使用函数式API
+                    if price_type == 1:  # 市价单
+                        order_id = xtt.market_order(self.account_id, self.account_type, stock_code, DIRECTION_BUY, volume)
+                    else:  # 限价单
+                        order_id = xtt.limit_order(self.account_id, self.account_type, stock_code, DIRECTION_BUY, price, volume)
+                else:
+                    # 尝试通用下单接口
+                    if hasattr(xtt, 'order'):
+                        order_type = 1 if price_type == 1 else 0  # 1可能是市价，0可能是限价
+                        order_id = xtt.order(self.account_id, self.account_type, stock_code, DIRECTION_BUY, price, volume, order_type)
+                    else:
+                        logger.error("没有找到可用的下单方法")
+                        return None
                 
                 if not order_id:
                     logger.error(f"买入 {stock_code} 失败")
@@ -548,11 +669,31 @@ class TradingExecutor:
                     logger.error(f"卖出数量必须大于0: {volume}")
                     return None
                 
-                # 调用迅投API下单
-                if price_type == 1:  # 市价单
-                    order_id = xtt.market_order(self.account_id, self.account_type, stock_code, 49, volume)
-                else:  # 限价单
-                    order_id = xtt.limit_order(self.account_id, self.account_type, stock_code, 49, price, volume)
+                # 调用交易API下单
+                order_id = None
+                
+                # 尝试不同的API调用方式
+                if self.trader:
+                    # 如果使用对象API
+                    if hasattr(self.trader, 'limit_order') and hasattr(self.trader, 'market_order'):
+                        if price_type == 1:  # 市价单
+                            order_id = self.trader.market_order(stock_code, DIRECTION_SELL, volume)
+                        else:  # 限价单
+                            order_id = self.trader.limit_order(stock_code, DIRECTION_SELL, price, volume)
+                elif hasattr(xtt, 'limit_order') and hasattr(xtt, 'market_order'):
+                    # 如果使用函数式API
+                    if price_type == 1:  # 市价单
+                        order_id = xtt.market_order(self.account_id, self.account_type, stock_code, DIRECTION_SELL, volume)
+                    else:  # 限价单
+                        order_id = xtt.limit_order(self.account_id, self.account_type, stock_code, DIRECTION_SELL, price, volume)
+                else:
+                    # 尝试通用下单接口
+                    if hasattr(xtt, 'order'):
+                        order_type = 1 if price_type == 1 else 0  # 1可能是市价，0可能是限价
+                        order_id = xtt.order(self.account_id, self.account_type, stock_code, DIRECTION_SELL, price, volume, order_type)
+                    else:
+                        logger.error("没有找到可用的下单方法")
+                        return None
                 
                 if not order_id:
                     logger.error(f"卖出 {stock_code} 失败")
@@ -581,8 +722,19 @@ class TradingExecutor:
         bool: 是否成功发送撤单请求
         """
         try:
-            # 调用迅投API撤单
-            ret = xtt.cancel_order(self.account_id, self.account_type, order_id)
+            # 调用交易API撤单
+            ret = False
+            
+            # 尝试不同的API调用方式
+            if self.trader and hasattr(self.trader, 'cancel_order'):
+                # 如果使用对象API
+                ret = self.trader.cancel_order(order_id)
+            elif hasattr(xtt, 'cancel_order'):
+                # 如果使用函数式API
+                ret = xtt.cancel_order(self.account_id, self.account_type, order_id)
+            else:
+                logger.error("没有找到可用的撤单方法")
+                return False
             
             if ret:
                 logger.info(f"撤单请求已发送，委托号: {order_id}")
@@ -606,7 +758,16 @@ class TradingExecutor:
         list: 委托列表
         """
         try:
-            orders = xtt.query_order(self.account_id, self.account_type)
+            orders = None
+            
+            # 尝试不同的API调用方式
+            if self.trader and hasattr(self.trader, 'query_order'):
+                # 如果使用对象API
+                orders = self.trader.query_order()
+            elif hasattr(xtt, 'query_order'):
+                # 如果使用函数式API
+                orders = xtt.query_order(self.account_id, self.account_type)
+            
             if not orders:
                 return []
             
@@ -620,7 +781,7 @@ class TradingExecutor:
                     'order_id': order.m_strOrderSysID,
                     'stock_code': order.m_strInstrumentID,
                     'stock_name': order.m_strInstrumentName,
-                    'direction': 'BUY' if order.m_nDirection == 48 else 'SELL',
+                    'direction': 'BUY' if order.m_nDirection == DIRECTION_BUY else 'SELL',
                     'price': order.m_dLimitPrice,
                     'volume': order.m_nVolumeTotalOriginal,
                     'traded_volume': order.m_nVolumeTraded,
@@ -689,11 +850,23 @@ class TradingExecutor:
     def close(self):
         """关闭交易执行器"""
         try:
-            # 取消行情订阅
-            xtt.unsubscribe_trade_data(self.account_id, self.account_type)
-            
-            # 停止交易API
-            xtt.stop()
+            # 尝试不同的关闭方法
+            if self.trader:
+                # 如果使用对象API
+                if hasattr(self.trader, 'logout'):
+                    self.trader.logout()
+                elif hasattr(self.trader, 'close'):
+                    self.trader.close()
+            else:
+                # 如果使用函数式API
+                if hasattr(xtt, 'stop'):
+                    xtt.stop()
+                elif hasattr(xtt, 'disconnect'):
+                    xtt.disconnect()
+                
+                # 取消数据订阅
+                if hasattr(xtt, 'unsubscribe_trade_data'):
+                    xtt.unsubscribe_trade_data(self.account_id, self.account_type)
             
             logger.info("交易执行器已关闭")
             

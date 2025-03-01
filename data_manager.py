@@ -8,7 +8,6 @@ import time
 from datetime import datetime, timedelta
 import threading
 import xtquant.xtdata as xt
-from xtquant.xttype import StockAccount
 
 import config
 from logger import get_logger
@@ -30,6 +29,9 @@ class DataManager:
         
         # 创建表结构
         self._create_tables()
+        
+        # 已订阅的股票代码列表
+        self.subscribed_stocks = []
         
         # 初始化行情接口
         self._init_xtquant()
@@ -133,15 +135,43 @@ class DataManager:
     def _init_xtquant(self):
         """初始化迅投行情接口"""
         try:
-            # 登录迅投行情API
-            print(config.STOCK_POOL)
-            result = xt.subscribe_quote(config.STOCK_POOL, 'sse')
-            if result:
+                # 修复连接问题
+                if not xt.connect():
+                    logger.error("行情服务连接失败")
+                    return
+                    
+                logger.info("行情服务连接成功")
+                
+                # 确保股票代码格式正确且不为空
+                valid_stocks = []
+                for stock_code in config.STOCK_POOL:
+                    if '.' in stock_code and len(stock_code.split('.')) == 2:
+                        code, market = stock_code.split('.')
+                        if code and market in ['SH', 'SZ', 'BJ']:
+                            valid_stocks.append(stock_code)
+                        else:
+                            logger.warning(f"股票代码格式不正确: {stock_code}")
+                    else:
+                        logger.warning(f"股票代码格式不正确: {stock_code}")
+                
+                # 检查是否有有效的股票代码
+                if not valid_stocks:
+                    logger.warning("没有有效的股票代码，无法订阅行情")
+                    return
+                    
+                # 订阅行情
+                for stock in valid_stocks:
+                    result = xt.subscribe_quote([stock], period='tick')
+                    if result:
+                        self.subscribed_stocks.append(stock)
+                        logger.info(f"成功订阅 {stock} 行情数据")
+                    else:
+                        logger.warning(f"订阅 {stock} 行情数据失败")
+                        
                 logger.info("迅投行情接口初始化成功")
-            else:
-                logger.error("迅投行情接口初始化失败")
+                
         except Exception as e:
-            logger.error(f"初始化迅投行情接口出错: {str(e)}")
+                logger.error(f"初始化迅投行情接口出错: {str(e)}")
     
     def download_history_data(self, stock_code, period=None, start_date=None, end_date=None):
         """
@@ -390,10 +420,21 @@ class DataManager:
         if self.conn:
             self.conn.close()
             logger.info("数据库连接已关闭")
-            
+        
         # 取消行情订阅
-        xt.unsubscribe_quote(config.STOCK_POOL)
-        logger.info("已取消行情订阅")
+        if self.subscribed_stocks:
+            try:
+                xt.unsubscribe_quote(self.subscribed_stocks)
+                logger.info(f"已取消 {len(self.subscribed_stocks)} 只股票的行情订阅")
+            except Exception as e:
+                logger.error(f"取消行情订阅出错: {str(e)}")
+        
+        # 断开行情连接
+        try:
+            xt.disconnect()
+            logger.info("已断开行情连接")
+        except Exception as e:
+            logger.error(f"断开行情连接出错: {str(e)}")
 
 
 # 单例模式
