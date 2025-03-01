@@ -8,7 +8,7 @@ import time
 from datetime import datetime, timedelta
 import threading
 import xtquant.xtdata as xt
-from xtquant.xttype import StockData
+from xtquant.xttype import StockAccount
 
 import config
 from logger import get_logger
@@ -134,6 +134,7 @@ class DataManager:
         """初始化迅投行情接口"""
         try:
             # 登录迅投行情API
+            print(config.STOCK_POOL)
             result = xt.subscribe_quote(config.STOCK_POOL, 'sse')
             if result:
                 logger.info("迅投行情接口初始化成功")

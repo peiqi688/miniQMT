@@ -1,0 +1,284 @@
+2025-03-01 12:26:12,927 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 12:26:13,034 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 12:26:13,194 - qmt_trading.data_manager - ERROR - 初始化迅投行情接口出错: invalid stock_code, meta:-2, market:
+2025-03-01 12:26:13,196 - qmt_trading.trading_executor - WARNING - 未配置交易账户ID，交易功能将不可用
+2025-03-01 12:26:13,279 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-03-01 12:26:23,080 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 12:26:23,086 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 12:26:23,108 - qmt_trading.data_manager - ERROR - 初始化迅投行情接口出错: invalid stock_code, meta:-2, market:
+2025-03-01 12:26:23,111 - qmt_trading.trading_executor - WARNING - 未配置交易账户ID，交易功能将不可用
+2025-03-01 12:26:23,529 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-03-01 12:30:48,822 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 12:30:48,847 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 12:30:48,971 - qmt_trading.data_manager - ERROR - 初始化迅投行情接口出错: invalid stock_code, meta:-2, market:
+2025-03-01 12:30:48,972 - qmt_trading.trading_executor - WARNING - 未配置交易账户ID，交易功能将不可用
+2025-03-01 12:31:05,080 - qmt_trading.main - INFO - ==================================================
+2025-03-01 12:31:06,899 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-03-01 12:31:06
+2025-03-01 12:31:08,199 - qmt_trading.main - INFO - ==================================================
+2025-03-01 12:31:21,363 - qmt_trading.main - INFO - 开始初始化系统...
+2025-03-01 12:31:21,413 - qmt_trading.main - INFO - 系统初始化完成
+2025-03-01 12:31:25,491 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-03-01 12:31:25,496 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-03-01 12:31:25,502 - qmt_trading.data_manager - INFO - 开始下载 000001.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:31:25,504 - qmt_trading.data_manager - ERROR - 下载 000001.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:31:26,510 - qmt_trading.main - INFO - 下载 600036.SH 的历史数据
+2025-03-01 12:31:26,511 - qmt_trading.data_manager - INFO - 开始下载 600036.SH 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:31:26,512 - qmt_trading.data_manager - ERROR - 下载 600036.SH 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:31:27,513 - qmt_trading.main - INFO - 下载 000333.SZ 的历史数据
+2025-03-01 12:31:27,515 - qmt_trading.data_manager - INFO - 开始下载 000333.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:31:27,516 - qmt_trading.data_manager - ERROR - 下载 000333.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:31:28,531 - qmt_trading.main - INFO - 下载 600519.SH 的历史数据
+2025-03-01 12:31:28,532 - qmt_trading.data_manager - INFO - 开始下载 600519.SH 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:31:28,533 - qmt_trading.data_manager - ERROR - 下载 600519.SH 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:31:29,534 - qmt_trading.main - INFO - 下载 000858.SZ 的历史数据
+2025-03-01 12:31:29,535 - qmt_trading.data_manager - INFO - 开始下载 000858.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:31:29,536 - qmt_trading.data_manager - ERROR - 下载 000858.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:31:30,538 - qmt_trading.main - INFO - 初始数据下载完成
+2025-03-01 12:31:36,587 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-03-01 12:31:36,787 - qmt_trading.data_manager - DEBUG - 从数据库获取 000001.SZ 的历史数据, 共 0 条记录
+2025-03-01 12:31:36,789 - qmt_trading.indicator_calculator - WARNING - 没有 000001.SZ 的历史数据，无法计算指标
+2025-03-01 12:31:36,801 - qmt_trading.data_manager - DEBUG - 从数据库获取 600036.SH 的历史数据, 共 0 条记录
+2025-03-01 12:31:36,802 - qmt_trading.indicator_calculator - WARNING - 没有 600036.SH 的历史数据，无法计算指标
+2025-03-01 12:31:36,867 - qmt_trading.data_manager - DEBUG - 从数据库获取 000333.SZ 的历史数据, 共 0 条记录
+2025-03-01 12:31:36,889 - qmt_trading.indicator_calculator - WARNING - 没有 000333.SZ 的历史数据，无法计算指标
+2025-03-01 12:31:36,920 - qmt_trading.data_manager - DEBUG - 从数据库获取 600519.SH 的历史数据, 共 0 条记录
+2025-03-01 12:31:37,016 - qmt_trading.indicator_calculator - WARNING - 没有 600519.SH 的历史数据，无法计算指标
+2025-03-01 12:31:37,046 - qmt_trading.data_manager - DEBUG - 从数据库获取 000858.SZ 的历史数据, 共 0 条记录
+2025-03-01 12:31:37,060 - qmt_trading.indicator_calculator - WARNING - 没有 000858.SZ 的历史数据，无法计算指标
+2025-03-01 12:31:37,063 - qmt_trading.main - INFO - 初始指标计算完成
+2025-03-01 12:31:39,696 - qmt_trading.main - INFO - 启动数据更新线程
+2025-03-01 12:31:39,717 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-03-01 12:31:40,744 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-03-01 12:31:40,979 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-03-01 12:31:42,863 - qmt_trading.main - INFO - 启动日志清理线程
+2025-03-01 12:31:44,597 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-03-01 12:31:49,434 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-03-01 12:31:49,443 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-03-01 12:31:49,700 - qmt_trading.web_server - ERROR - 启动Web服务器时出错: signal only works in main thread
+2025-03-01 12:31:54,445 - qmt_trading.web_server - INFO - 推送线程已停止
+2025-03-01 12:35:30,928 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 12:35:30,958 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 12:35:31,084 - qmt_trading.data_manager - ERROR - 初始化迅投行情接口出错: invalid stock_code, meta:-2, market:
+2025-03-01 12:35:31,085 - qmt_trading.trading_executor - WARNING - 未配置交易账户ID，交易功能将不可用
+2025-03-01 12:35:31,156 - qmt_trading.main - INFO - ==================================================
+2025-03-01 12:35:31,159 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-03-01 12:35:31
+2025-03-01 12:35:31,160 - qmt_trading.main - INFO - ==================================================
+2025-03-01 12:35:31,161 - qmt_trading.main - INFO - 开始初始化系统...
+2025-03-01 12:35:31,163 - qmt_trading.main - INFO - 系统初始化完成
+2025-03-01 12:35:31,167 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-03-01 12:35:31,168 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-03-01 12:35:31,169 - qmt_trading.data_manager - INFO - 开始下载 000001.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:35:31,171 - qmt_trading.data_manager - ERROR - 下载 000001.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:35:32,185 - qmt_trading.main - INFO - 下载 600036.SH 的历史数据
+2025-03-01 12:35:32,186 - qmt_trading.data_manager - INFO - 开始下载 600036.SH 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:35:32,187 - qmt_trading.data_manager - ERROR - 下载 600036.SH 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:35:33,188 - qmt_trading.main - INFO - 下载 000333.SZ 的历史数据
+2025-03-01 12:35:33,189 - qmt_trading.data_manager - INFO - 开始下载 000333.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:35:33,190 - qmt_trading.data_manager - ERROR - 下载 000333.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:35:34,190 - qmt_trading.main - INFO - 下载 600519.SH 的历史数据
+2025-03-01 12:35:34,191 - qmt_trading.data_manager - INFO - 开始下载 600519.SH 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:35:34,192 - qmt_trading.data_manager - ERROR - 下载 600519.SH 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:35:35,193 - qmt_trading.main - INFO - 下载 000858.SZ 的历史数据
+2025-03-01 12:35:35,194 - qmt_trading.data_manager - INFO - 开始下载 000858.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:35:35,196 - qmt_trading.data_manager - ERROR - 下载 000858.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:35:36,198 - qmt_trading.main - INFO - 初始数据下载完成
+2025-03-01 12:35:36,199 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-03-01 12:35:36,263 - qmt_trading.data_manager - DEBUG - 从数据库获取 000001.SZ 的历史数据, 共 0 条记录
+2025-03-01 12:35:36,264 - qmt_trading.indicator_calculator - WARNING - 没有 000001.SZ 的历史数据，无法计算指标
+2025-03-01 12:35:36,273 - qmt_trading.data_manager - DEBUG - 从数据库获取 600036.SH 的历史数据, 共 0 条记录
+2025-03-01 12:35:36,306 - qmt_trading.indicator_calculator - WARNING - 没有 600036.SH 的历史数据，无法计算指标
+2025-03-01 12:35:36,333 - qmt_trading.data_manager - DEBUG - 从数据库获取 000333.SZ 的历史数据, 共 0 条记录
+2025-03-01 12:35:36,338 - qmt_trading.indicator_calculator - WARNING - 没有 000333.SZ 的历史数据，无法计算指标
+2025-03-01 12:35:36,381 - qmt_trading.data_manager - DEBUG - 从数据库获取 600519.SH 的历史数据, 共 0 条记录
+2025-03-01 12:35:36,388 - qmt_trading.indicator_calculator - WARNING - 没有 600519.SH 的历史数据，无法计算指标
+2025-03-01 12:35:36,399 - qmt_trading.data_manager - DEBUG - 从数据库获取 000858.SZ 的历史数据, 共 0 条记录
+2025-03-01 12:35:36,402 - qmt_trading.indicator_calculator - WARNING - 没有 000858.SZ 的历史数据，无法计算指标
+2025-03-01 12:35:36,430 - qmt_trading.main - INFO - 初始指标计算完成
+2025-03-01 12:35:36,445 - qmt_trading.main - INFO - 启动数据更新线程
+2025-03-01 12:35:36,459 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-03-01 12:35:36,461 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-03-01 12:35:36,523 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-03-01 12:35:36,526 - qmt_trading.main - INFO - 启动日志清理线程
+2025-03-01 12:35:36,557 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-03-01 12:35:36,572 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-03-01 12:35:36,619 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-03-01 12:35:37,271 - qmt_trading.web_server - ERROR - 启动Web服务器时出错: signal only works in main thread
+2025-03-01 12:35:41,620 - qmt_trading.web_server - INFO - 推送线程已停止
+2025-03-01 12:52:32,255 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 12:52:32,277 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 12:52:32,372 - qmt_trading.data_manager - ERROR - 初始化迅投行情接口出错: invalid stock_code, meta:-2, market:
+2025-03-01 12:52:32,376 - qmt_trading.trading_executor - ERROR - 初始化交易API出错: module 'xtquant.xttrader' has no attribute 'start'
+2025-03-01 12:52:32,447 - qmt_trading.main - INFO - ==================================================
+2025-03-01 12:52:32,451 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-03-01 12:52:32
+2025-03-01 12:52:32,452 - qmt_trading.main - INFO - ==================================================
+2025-03-01 12:52:32,453 - qmt_trading.main - INFO - 开始初始化系统...
+2025-03-01 12:52:32,456 - qmt_trading.main - INFO - 系统初始化完成
+2025-03-01 12:52:32,457 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-03-01 12:52:32,458 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-03-01 12:52:32,459 - qmt_trading.data_manager - INFO - 开始下载 000001.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:52:32,463 - qmt_trading.data_manager - ERROR - 下载 000001.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:52:33,466 - qmt_trading.main - INFO - 下载 600036.SH 的历史数据
+2025-03-01 12:52:33,466 - qmt_trading.data_manager - INFO - 开始下载 600036.SH 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:52:33,467 - qmt_trading.data_manager - ERROR - 下载 600036.SH 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:52:34,469 - qmt_trading.main - INFO - 下载 000333.SZ 的历史数据
+2025-03-01 12:52:34,470 - qmt_trading.data_manager - INFO - 开始下载 000333.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:52:34,471 - qmt_trading.data_manager - ERROR - 下载 000333.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:52:35,473 - qmt_trading.main - INFO - 下载 600519.SH 的历史数据
+2025-03-01 12:52:35,473 - qmt_trading.data_manager - INFO - 开始下载 600519.SH 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:52:35,477 - qmt_trading.data_manager - ERROR - 下载 600519.SH 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:52:36,478 - qmt_trading.main - INFO - 下载 000858.SZ 的历史数据
+2025-03-01 12:52:36,481 - qmt_trading.data_manager - INFO - 开始下载 000858.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:52:36,481 - qmt_trading.data_manager - ERROR - 下载 000858.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:52:37,483 - qmt_trading.main - INFO - 初始数据下载完成
+2025-03-01 12:52:37,485 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-03-01 12:52:37,536 - qmt_trading.data_manager - DEBUG - 从数据库获取 000001.SZ 的历史数据, 共 0 条记录
+2025-03-01 12:52:37,537 - qmt_trading.indicator_calculator - WARNING - 没有 000001.SZ 的历史数据，无法计算指标
+2025-03-01 12:52:37,549 - qmt_trading.data_manager - DEBUG - 从数据库获取 600036.SH 的历史数据, 共 0 条记录
+2025-03-01 12:52:37,557 - qmt_trading.indicator_calculator - WARNING - 没有 600036.SH 的历史数据，无法计算指标
+2025-03-01 12:52:37,587 - qmt_trading.data_manager - DEBUG - 从数据库获取 000333.SZ 的历史数据, 共 0 条记录
+2025-03-01 12:52:37,613 - qmt_trading.indicator_calculator - WARNING - 没有 000333.SZ 的历史数据，无法计算指标
+2025-03-01 12:52:37,625 - qmt_trading.data_manager - DEBUG - 从数据库获取 600519.SH 的历史数据, 共 0 条记录
+2025-03-01 12:52:37,629 - qmt_trading.indicator_calculator - WARNING - 没有 600519.SH 的历史数据，无法计算指标
+2025-03-01 12:52:37,642 - qmt_trading.data_manager - DEBUG - 从数据库获取 000858.SZ 的历史数据, 共 0 条记录
+2025-03-01 12:52:37,656 - qmt_trading.indicator_calculator - WARNING - 没有 000858.SZ 的历史数据，无法计算指标
+2025-03-01 12:52:37,662 - qmt_trading.main - INFO - 初始指标计算完成
+2025-03-01 12:52:37,682 - qmt_trading.main - INFO - 启动数据更新线程
+2025-03-01 12:52:37,751 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-03-01 12:52:37,752 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-03-01 12:52:37,769 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-03-01 12:52:37,770 - qmt_trading.main - INFO - 启动日志清理线程
+2025-03-01 12:52:37,782 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-03-01 12:52:37,874 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-03-01 12:52:37,879 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-03-01 12:52:38,140 - qmt_trading.web_server - ERROR - 启动Web服务器时出错: signal only works in main thread
+2025-03-01 12:52:42,882 - qmt_trading.web_server - INFO - 推送线程已停止
+2025-03-01 12:53:27,935 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-03-01 12:53:27,938 - qmt_trading.main - INFO - 开始清理资源...
+2025-03-01 12:53:27,939 - qmt_trading.main - INFO - 停止 data_thread...
+2025-03-01 12:53:28,221 - qmt_trading.data_manager - INFO - 数据更新线程已停止
+2025-03-01 12:53:28,223 - qmt_trading.main - INFO - 停止 position_thread...
+2025-03-01 12:53:29,222 - qmt_trading.position_manager - INFO - 持仓监控线程已停止
+2025-03-01 12:53:29,224 - qmt_trading.main - INFO - 停止 log_thread...
+2025-03-01 12:53:29,225 - qmt_trading.main - INFO - 停止 web_thread...
+2025-03-01 12:53:29,225 - qmt_trading.trading_executor - ERROR - 关闭交易执行器时出错: module 'xtquant.xttrader' has no attribute 'unsubscribe_trade_data'
+2025-03-01 12:53:29,228 - qmt_trading.data_manager - INFO - 数据库连接已关闭
+2025-03-01 12:53:29,230 - qmt_trading.main - ERROR - 关闭数据管理器时出错: unsubscribe_quote(): incompatible function arguments. The following argument types are supported:
+    1. (self: xtquant.datacenter.IPythonApiClient, arg0: int) -> None
+
+Invoked with: <xtquant.datacenter.IPythonApiClient object at 0x0000023D45137670>, ['000001.SZ', '600036.SH', '000333.SZ', '600519.SH', '000858.SZ']
+2025-03-01 12:53:29,231 - qmt_trading.main - INFO - 资源清理完成
+2025-03-01 12:53:29,231 - qmt_trading.main - INFO - 系统已退出
+2025-03-01 12:56:00,478 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 12:56:00,500 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 12:56:00,586 - qmt_trading.data_manager - ERROR - 初始化迅投行情接口出错: invalid stock_code, meta:-2, market:
+2025-03-01 12:56:00,589 - qmt_trading.trading_executor - ERROR - 初始化交易API出错: module 'xtquant.xttrader' has no attribute 'start'
+2025-03-01 12:56:00,656 - qmt_trading.main - INFO - ==================================================
+2025-03-01 12:56:00,656 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-03-01 12:56:00
+2025-03-01 12:56:00,657 - qmt_trading.main - INFO - ==================================================
+2025-03-01 12:56:00,658 - qmt_trading.main - INFO - 开始初始化系统...
+2025-03-01 12:56:00,658 - qmt_trading.main - INFO - 系统初始化完成
+2025-03-01 12:56:00,659 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-03-01 12:56:00,659 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-03-01 12:56:00,660 - qmt_trading.data_manager - INFO - 开始下载 000001.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:56:00,662 - qmt_trading.data_manager - ERROR - 下载 000001.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:56:01,664 - qmt_trading.main - INFO - 下载 600036.SH 的历史数据
+2025-03-01 12:56:01,665 - qmt_trading.data_manager - INFO - 开始下载 600036.SH 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:56:01,666 - qmt_trading.data_manager - ERROR - 下载 600036.SH 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:56:02,666 - qmt_trading.main - INFO - 下载 000333.SZ 的历史数据
+2025-03-01 12:56:02,666 - qmt_trading.data_manager - INFO - 开始下载 000333.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:56:02,668 - qmt_trading.data_manager - ERROR - 下载 000333.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:56:03,670 - qmt_trading.main - INFO - 下载 600519.SH 的历史数据
+2025-03-01 12:56:03,671 - qmt_trading.data_manager - INFO - 开始下载 600519.SH 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:56:03,673 - qmt_trading.data_manager - ERROR - 下载 600519.SH 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:56:04,674 - qmt_trading.main - INFO - 下载 000858.SZ 的历史数据
+2025-03-01 12:56:04,674 - qmt_trading.data_manager - INFO - 开始下载 000858.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 12:56:04,676 - qmt_trading.data_manager - ERROR - 下载 000858.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 12:56:05,676 - qmt_trading.main - INFO - 初始数据下载完成
+2025-03-01 12:56:05,677 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-03-01 12:56:05,719 - qmt_trading.data_manager - DEBUG - 从数据库获取 000001.SZ 的历史数据, 共 0 条记录
+2025-03-01 12:56:05,720 - qmt_trading.indicator_calculator - WARNING - 没有 000001.SZ 的历史数据，无法计算指标
+2025-03-01 12:56:05,729 - qmt_trading.data_manager - DEBUG - 从数据库获取 600036.SH 的历史数据, 共 0 条记录
+2025-03-01 12:56:05,733 - qmt_trading.indicator_calculator - WARNING - 没有 600036.SH 的历史数据，无法计算指标
+2025-03-01 12:56:05,740 - qmt_trading.data_manager - DEBUG - 从数据库获取 000333.SZ 的历史数据, 共 0 条记录
+2025-03-01 12:56:05,742 - qmt_trading.indicator_calculator - WARNING - 没有 000333.SZ 的历史数据，无法计算指标
+2025-03-01 12:56:05,751 - qmt_trading.data_manager - DEBUG - 从数据库获取 600519.SH 的历史数据, 共 0 条记录
+2025-03-01 12:56:05,752 - qmt_trading.indicator_calculator - WARNING - 没有 600519.SH 的历史数据，无法计算指标
+2025-03-01 12:56:05,760 - qmt_trading.data_manager - DEBUG - 从数据库获取 000858.SZ 的历史数据, 共 0 条记录
+2025-03-01 12:56:05,762 - qmt_trading.indicator_calculator - WARNING - 没有 000858.SZ 的历史数据，无法计算指标
+2025-03-01 12:56:05,763 - qmt_trading.main - INFO - 初始指标计算完成
+2025-03-01 12:56:05,763 - qmt_trading.main - INFO - 启动数据更新线程
+2025-03-01 12:56:05,772 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-03-01 12:56:05,773 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-03-01 12:56:05,780 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-03-01 12:56:05,781 - qmt_trading.main - INFO - 启动日志清理线程
+2025-03-01 12:56:05,795 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-03-01 12:56:05,831 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-03-01 12:56:05,834 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-03-01 12:56:06,012 - qmt_trading.web_server - ERROR - 启动Web服务器时出错: signal only works in main thread
+2025-03-01 12:56:10,608 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-03-01 12:56:10,612 - qmt_trading.main - INFO - 开始清理资源...
+2025-03-01 12:56:10,613 - qmt_trading.main - INFO - 停止 data_thread...
+2025-03-01 12:56:10,891 - qmt_trading.web_server - INFO - 推送线程已停止
+2025-03-01 12:56:10,916 - qmt_trading.data_manager - INFO - 数据更新线程已停止
+2025-03-01 12:56:10,961 - qmt_trading.main - INFO - 停止 position_thread...
+2025-03-01 12:56:11,921 - qmt_trading.position_manager - INFO - 持仓监控线程已停止
+2025-03-01 12:56:11,924 - qmt_trading.main - INFO - 停止 log_thread...
+2025-03-01 12:56:11,925 - qmt_trading.main - INFO - 停止 web_thread...
+2025-03-01 12:56:11,926 - qmt_trading.trading_executor - ERROR - 关闭交易执行器时出错: module 'xtquant.xttrader' has no attribute 'unsubscribe_trade_data'
+2025-03-01 12:56:11,935 - qmt_trading.data_manager - INFO - 数据库连接已关闭
+2025-03-01 12:56:11,936 - qmt_trading.main - ERROR - 关闭数据管理器时出错: unsubscribe_quote(): incompatible function arguments. The following argument types are supported:
+    1. (self: xtquant.datacenter.IPythonApiClient, arg0: int) -> None
+
+Invoked with: <xtquant.datacenter.IPythonApiClient object at 0x000001EA0207D3B0>, ['000001.SZ', '600036.SH', '000333.SZ', '600519.SH', '000858.SZ']
+2025-03-01 12:56:11,937 - qmt_trading.main - INFO - 资源清理完成
+2025-03-01 12:56:11,937 - qmt_trading.main - INFO - 系统已退出
+2025-03-01 12:59:28,070 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 12:59:28,095 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 13:02:42,055 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 13:02:42,078 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 13:02:42,176 - qmt_trading.data_manager - ERROR - 初始化迅投行情接口出错: invalid stock_code, meta:-2, market:
+2025-03-01 13:02:42,178 - qmt_trading.trading_executor - ERROR - 初始化交易API出错: module 'xtquant.xttrader' has no attribute 'start'
+2025-03-01 13:02:42,262 - qmt_trading.main - INFO - ==================================================
+2025-03-01 13:02:42,266 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-03-01 13:02:42
+2025-03-01 13:02:42,271 - qmt_trading.main - INFO - ==================================================
+2025-03-01 13:02:42,272 - qmt_trading.main - INFO - 开始初始化系统...
+2025-03-01 13:02:42,273 - qmt_trading.main - INFO - 系统初始化完成
+2025-03-01 13:02:42,274 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-03-01 13:02:42,280 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-03-01 13:02:42,285 - qmt_trading.data_manager - INFO - 开始下载 000001.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 13:02:42,303 - qmt_trading.data_manager - ERROR - 下载 000001.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 13:02:43,306 - qmt_trading.main - INFO - 下载 600036.SH 的历史数据
+2025-03-01 13:02:43,307 - qmt_trading.data_manager - INFO - 开始下载 600036.SH 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 13:02:43,308 - qmt_trading.data_manager - ERROR - 下载 600036.SH 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 13:02:44,309 - qmt_trading.main - INFO - 下载 000333.SZ 的历史数据
+2025-03-01 13:02:44,310 - qmt_trading.data_manager - INFO - 开始下载 000333.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 13:02:44,311 - qmt_trading.data_manager - ERROR - 下载 000333.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 13:02:45,315 - qmt_trading.main - INFO - 下载 600519.SH 的历史数据
+2025-03-01 13:02:45,317 - qmt_trading.data_manager - INFO - 开始下载 600519.SH 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 13:02:45,318 - qmt_trading.data_manager - ERROR - 下载 600519.SH 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 13:02:46,335 - qmt_trading.main - INFO - 下载 000858.SZ 的历史数据
+2025-03-01 13:02:46,340 - qmt_trading.data_manager - INFO - 开始下载 000858.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 13:02:46,343 - qmt_trading.data_manager - ERROR - 下载 000858.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 13:02:47,350 - qmt_trading.main - INFO - 初始数据下载完成
+2025-03-01 13:02:47,353 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-03-01 13:02:47,411 - qmt_trading.data_manager - DEBUG - 从数据库获取 000001.SZ 的历史数据, 共 0 条记录
+2025-03-01 13:02:47,414 - qmt_trading.indicator_calculator - WARNING - 没有 000001.SZ 的历史数据，无法计算指标
+2025-03-01 13:02:47,422 - qmt_trading.data_manager - DEBUG - 从数据库获取 600036.SH 的历史数据, 共 0 条记录
+2025-03-01 13:02:47,425 - qmt_trading.indicator_calculator - WARNING - 没有 600036.SH 的历史数据，无法计算指标
+2025-03-01 13:02:47,432 - qmt_trading.data_manager - DEBUG - 从数据库获取 000333.SZ 的历史数据, 共 0 条记录
+2025-03-01 13:02:47,432 - qmt_trading.indicator_calculator - WARNING - 没有 000333.SZ 的历史数据，无法计算指标
+2025-03-01 13:02:47,441 - qmt_trading.data_manager - DEBUG - 从数据库获取 600519.SH 的历史数据, 共 0 条记录
+2025-03-01 13:02:47,447 - qmt_trading.indicator_calculator - WARNING - 没有 600519.SH 的历史数据，无法计算指标
+2025-03-01 13:02:47,460 - qmt_trading.data_manager - DEBUG - 从数据库获取 000858.SZ 的历史数据, 共 0 条记录
+2025-03-01 13:02:47,464 - qmt_trading.indicator_calculator - WARNING - 没有 000858.SZ 的历史数据，无法计算指标
+2025-03-01 13:02:47,466 - qmt_trading.main - INFO - 初始指标计算完成
+2025-03-01 13:02:47,466 - qmt_trading.main - INFO - 启动数据更新线程
+2025-03-01 13:02:47,511 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-03-01 13:02:47,516 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-03-01 13:02:47,529 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-03-01 13:02:47,534 - qmt_trading.main - INFO - 启动日志清理线程
+2025-03-01 13:02:47,542 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-03-01 13:02:47,573 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-03-01 13:02:47,580 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-03-01 13:02:47,773 - qmt_trading.web_server - ERROR - 启动Web服务器时出错: signal only works in main thread
+2025-03-01 13:02:52,592 - qmt_trading.web_server - INFO - 推送线程已停止

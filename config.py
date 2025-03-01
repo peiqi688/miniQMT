@@ -70,9 +70,9 @@ DYNAMIC_TAKE_PROFIT = [
 
 # 网格交易参数
 GRID_TRADING_ENABLED = True
-GRID_STEP_RATIO = 0.03  # 网格步长（价格变动3%创建一个网格）
+GRID_STEP_RATIO = 0.05  # 网格步长（价格变动3%创建一个网格）
 GRID_POSITION_RATIO = 0.2  # 每个网格交易的仓位比例
-GRID_MAX_LEVELS = 5  # 最大网格数量
+GRID_MAX_LEVELS = 6  # 最大网格数量
 
 # ======================= 指标配置 =======================
 # MACD参数
