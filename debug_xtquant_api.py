@@ -81,12 +81,17 @@ def test_download_history_data(stocks):
         # 1. 测试单个股票下载
         test_stock = stocks[0]
         logger.info(f"单个下载: {test_stock}的日线数据")
-        xt.download_history_data(
+        data = xt.download_history_data(
             test_stock,
             period='1d', 
             start_time=start_time,
             end_time=end_time
         )
+        if data:
+            logger.info(f"下载的数据 (前5条): {data[:5]}")
+        else:
+            logger.warning(f"下载 {test_stock} 的数据为空")
+        
         logger.info(f"下载完成: {test_stock}")
         success_count += 1
         
@@ -96,13 +101,17 @@ def test_download_history_data(stocks):
         def on_progress(data):
             logger.info(f"下载进度: {data['finished']}/{data['total']} - {data['stockcode']}")
         
-        xt.download_history_data2(
+        data=xt.download_history_data2(
             stocks,
             period='1d', 
             start_time=start_time,
             end_time=end_time,
             callback=on_progress
         )
+        if data:
+            logger.info(f"下载的数据 (前5条): {data[:5]}")
+        else:
+            logger.warning(f"下载 {test_stock} 的数据为空")
         logger.info("批量下载完成")
         success_count += 1
         
@@ -113,12 +122,17 @@ def test_download_history_data(stocks):
         for period in test_periods:
             try:
                 logger.info(f"下载 {test_stock} 的 {period} 周期数据")
-                xt.download_history_data(
+                data=xt.download_history_data(
                     test_stock,
                     period=period,
                     start_time=short_start,
                     end_time=end_time
                 )
+                if data:
+                    logger.info(f"下载的数据 (前5条): {data[:5]}")
+                else:
+                    logger.warning(f"下载 {test_stock} 的数据为空")
+
                 logger.info(f"{period}周期数据下载完成")
                 success_count += 1
             except Exception as e:
@@ -129,6 +143,12 @@ def test_download_history_data(stocks):
     except Exception as e:
         logger.error(f"下载历史数据时出错: {str(e)}")
         return False
+
+def on_quote_data(datas):
+    logger.info(f"收到行情回调数据，包含股票: {list(datas.keys())}")
+    for stock_code in datas:
+        data_count = len(datas[stock_code]) if isinstance(datas[stock_code], list) else 1
+        logger.info(f"股票 {stock_code} 收到 {data_count} 条数据")
 
 def test_subscribe_quote(stocks):
     """测试订阅行情数据"""
@@ -141,49 +161,130 @@ def test_subscribe_quote(stocks):
         # 1. 测试订阅日线数据
         test_stock = stocks[0]
         
-        def on_quote_data(datas):
-            logger.info(f"收到行情回调数据，包含股票: {list(datas.keys())}")
-            for stock_code in datas:
-                data_count = len(datas[stock_code]) if isinstance(datas[stock_code], list) else 1
-                logger.info(f"股票 {stock_code} 收到 {data_count} 条数据")
+        # 设置日期范围
+        end_time = datetime.now().strftime('%Y%m%d')
+        start_time = (datetime.now() - timedelta(days=30)).strftime('%Y%m%d')  # 获取最近30天数据
         
-        # 订阅日线行情
-        logger.info(f"订阅 {test_stock} 的日线行情")
-        seq1 = xt.subscribe_quote(
-            test_stock,
-            period='1d',
-            callback=on_quote_data
-        )
+        # 订阅日线行情，包含历史数据
+        logger.info(f"订阅 {test_stock} 的日线行情，包含历史数据")
+        try:
+            seq1 = xt.subscribe_quote(
+                test_stock,
+                period='1d',
+                start_time=start_time,
+                end_time=end_time,
+                count=-1,  # 获取所有数据
+                callback=on_quote_data
+            )
+        except Exception as e:
+            logger.error(f"订阅日线行情时出错: {str(e)}")
+            seq1 = -1
         
         if seq1 > 0:
             logger.info(f"成功订阅 {test_stock} 日线行情，订阅号: {seq1}")
             subscribed_seqs.append(seq1)
             success_count += 1
+            
+            # 等待两秒钟确保订阅生效
+            logger.info("等待2秒钟让订阅生效...")
+            time.sleep(2)
+            
+            # 使用get_market_data获取已订阅的数据
+            logger.info(f"使用get_market_data获取 {test_stock} 的日线数据")
+            try:
+                data_dict = xt.get_market_data(
+                    stock_list=[test_stock],  # 修正：使用stock_list而非symbol
+                    period='1d', 
+                    start_time=start_time,
+                    end_time=end_time,
+                    count=-1,
+                    dividend_type='front'
+                )
+                
+                # 检查数据字典是否为None
+                if data_dict is None:
+                    logger.warning(f"get_market_data返回None，检查参数是否正确")
+                # 检查数据字典是否为空
+                elif not data_dict:
+                    logger.warning(f"get_market_data返回空字典")
+                else:
+                    logger.info(f"成功获取 {test_stock} 的日线数据")
+                    logger.info(f"数据包含字段: {list(data_dict.keys())}")
+                    for field in data_dict:
+                        df = data_dict[field]
+                        if isinstance(df, pd.DataFrame) and not df.empty:
+                            logger.info(f"字段 {field} 包含 {len(df)} 条记录")
+                            if len(df) > 0:
+                                logger.info(f"数据示例:\n{df.head(2)}")
+            except Exception as e:
+                logger.error(f"使用get_market_data获取数据时出错: {str(e)}")
+                logger.error(f"错误类型: {type(e).__name__}")
+                # 尝试调用其他API方法获取数据
+                try:
+                    logger.info("尝试使用其他方法获取数据...")
+                    tick_data = xt.get_full_tick([test_stock])
+                    logger.info(f"使用get_full_tick获取到的数据: {tick_data}")
+                except Exception as e2:
+                    logger.error(f"尝试替代方法也失败: {str(e2)}")
         else:
             logger.error(f"订阅 {test_stock} 日线行情失败")
         
         # 2. 测试订阅分钟线行情
         logger.info(f"订阅 {test_stock} 的1分钟行情")
-        seq2 = xt.subscribe_quote(
-            test_stock,
-            period='1m',
-            callback=on_quote_data
-        )
+        # 分钟级别数据一般只需要获取最近几天
+        short_start = (datetime.now() - timedelta(days=3)).strftime('%Y%m%d')
+        try:
+            seq2 = xt.subscribe_quote(
+                test_stock,
+                period='1m',
+                start_time=short_start,
+                end_time=end_time, 
+                count=-1,
+                callback=on_quote_data
+            )
+        except Exception as e:
+            logger.error(f"订阅分钟线行情时出错: {str(e)}")
+            seq2 = -1
         
         if seq2 > 0:
-            logger.info(f"成功订阅 {test_stock} 1分钟行情，订阅号: {seq2}")
+            logger.info(f"成功订阅 {test_stock} 1分钟线行情，订阅号: {seq2}")
             subscribed_seqs.append(seq2)
             success_count += 1
-        else:
-            logger.error(f"订阅 {test_stock} 1分钟行情失败")
+            
+            # 等待两秒钟确保订阅生效
+            logger.info("等待2秒钟让订阅生效...")
+            time.sleep(2)
+            
+            # 使用get_market_data获取数据
+            logger.info(f"使用get_market_data获取 {test_stock} 的1分钟线数据")
+            try:
+                data_dict = xt.get_market_data(
+                    stock_list=[test_stock],  # 修正：使用stock_list而非symbol
+                    period='1m', 
+                    start_time=short_start,
+                    end_time=end_time,
+                    count=-1
+                )
+                
+                if data_dict is not None and len(data_dict) > 0:
+                    logger.info(f"成功获取 {test_stock} 的1分钟线数据")
+                    logger.info(f"数据包含字段: {list(data_dict.keys())}")
+                else:
+                    logger.warning(f"未获取到 {test_stock} 的1分钟线数据或数据为空")
+            except Exception as e:
+                logger.error(f"获取1分钟线数据时出错: {str(e)}")
         
         # 3. 测试订阅Tick行情
         logger.info(f"订阅 {test_stock} 的Tick行情")
-        seq3 = xt.subscribe_quote(
-            test_stock,
-            period='tick',
-            callback=on_quote_data
-        )
+        try:
+            seq3 = xt.subscribe_quote(
+                test_stock,
+                period='tick',
+                callback=on_quote_data
+            )
+        except Exception as e:
+            logger.error(f"订阅Tick行情时出错: {str(e)}")
+            seq3 = -1
         
         if seq3 > 0:
             logger.info(f"成功订阅 {test_stock} Tick行情，订阅号: {seq3}")
@@ -231,7 +332,7 @@ def test_get_market_data_after_download(stocks):
         # 使用get_market_data获取数据
         logger.info(f"使用get_market_data获取 {test_stock} 的日线数据")
         data_dict = xt.get_market_data(
-            [test_stock],
+            stock_list=[test_stock],  # 修正：使用stock_list而非symbol
             period='1d', 
             start_time=start_time,
             end_time=end_time,
@@ -274,7 +375,7 @@ def test_get_market_data_after_download(stocks):
                 
                 logger.info(f"使用get_market_data获取 {test_stock} 的 {period} 周期数据")
                 period_data = xt.get_market_data(
-                    [test_stock],
+                    stock_list=[test_stock],  # 修正：使用stock_list而非symbol
                     period=period,
                     start_time=short_start,
                     end_time=end_time,
@@ -347,7 +448,7 @@ def test_get_market_data_after_subscribe(stocks):
             # 使用get_market_data获取数据
             logger.info(f"使用get_market_data获取 {test_stock} 的日线数据")
             data_dict = xt.get_market_data(
-                [test_stock],
+                stock_list=[test_stock],  # 修正：使用stock_list而非symbol
                 period='1d', 
                 start_time=start_time,
                 end_time=end_time,
@@ -391,7 +492,7 @@ def test_get_market_data_after_subscribe(stocks):
             # 使用get_market_data获取数据
             logger.info(f"使用get_market_data获取 {test_stock} 的1分钟线数据")
             data_dict = xt.get_market_data(
-                [test_stock],
+                stock_list=[test_stock],  # 修正：使用stock_list而非symbol
                 period='1m', 
                 start_time=start_time,
                 end_time=end_time,
@@ -423,7 +524,7 @@ def test_get_market_data_after_subscribe(stocks):
             # 使用get_market_data获取数据
             logger.info(f"使用get_market_data获取 {test_stock} 的Tick数据")
             data_dict = xt.get_market_data(
-                [test_stock],
+                stock_list=[test_stock],  # 修正：使用stock_list而非symbol
                 period='tick',
                 count=10  # 获取最近10条
             )
@@ -507,7 +608,7 @@ def test_get_market_data(stocks):
                 logger.info(f"获取 {stock} 的历史数据")
                 # 修正API调用方式，使用正确的参数名
                 df = xt.get_market_data(
-                    [stock],  # 直接将股票代码列表作为第一个参数
+                    stock_list=[stock],  # 直接将股票代码列表作为第一个参数
                     period='1d', 
                     start_time=start_time,  # 修改为start_time
                     end_time=end_time,      # 修改为end_time
@@ -546,7 +647,7 @@ def test_get_market_data(stocks):
                     short_start = (datetime.now() - timedelta(days=3)).strftime('%Y%m%d')
                     
                     minute_df = xt.get_market_data(
-                        [stocks[0]],  # 直接将股票代码列表作为第一个参数
+                        stock_list=[stocks[0]],  # 直接将股票代码列表作为第一个参数
                         period=period,
                         start_time=short_start,  # 修改为start_time
                         end_time=end_time,       # 修改为end_time
@@ -606,20 +707,20 @@ def run_all_tests():
     # 订阅测试
     subscribed_seqs = test_subscribe_quote(TEST_STOCKS)
     
-    # Tick数据测试
-    test_get_full_tick(TEST_STOCKS)
+    # # Tick数据测试
+    # test_get_full_tick(TEST_STOCKS)
     
-    # 历史数据测试
-    test_download_history_data(TEST_STOCKS)
+    # # 历史数据测试
+    # test_download_history_data(TEST_STOCKS)
     
-    # 下载后获取数据测试
-    test_get_market_data_after_download(TEST_STOCKS)
+    # # 下载后获取数据测试
+    # test_get_market_data_after_download(TEST_STOCKS)
     
-    # 订阅后获取数据测试
-    test_get_market_data_after_subscribe(TEST_STOCKS)
+    # # 订阅后获取数据测试
+    # test_get_market_data_after_subscribe(TEST_STOCKS)
 
     # 取消订阅和断开连接测试
-    test_unsubscribe_and_disconnect(subscribed_seqs)
+    # test_unsubscribe_and_disconnect(subscribed_seqs)
     
     logger.info("XtQuant API测试完成")
     return True
