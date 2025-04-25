@@ -3,9 +3,9 @@
 """
 import pandas as pd
 import numpy as np
-import talib
 import sqlite3
 from datetime import datetime
+from MyTT import *
 
 import config
 from logger import get_logger
@@ -105,7 +105,7 @@ class IndicatorCalculator:
         """
         try:
             # 使用talib计算MA
-            ma = talib.SMA(df['close'].values, timeperiod=period)
+            ma = SMA(df['close'].values, timeperiod=period)
             return ma
         except Exception as e:
             logger.error(f"计算MA{period}指标时出错: {str(e)}")

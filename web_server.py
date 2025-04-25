@@ -842,8 +842,8 @@ def stop_push_thread():
         logger.info("推送线程已停止")
 
 def start_web_server():
-    """启动Web服务器"""
-    try:
+        """启动Web服务器"""
+    # try:
         # 启动推送线程
         start_push_thread()
         
@@ -851,11 +851,12 @@ def start_web_server():
         app.run(
             host=config.WEB_SERVER_HOST,
             port=config.WEB_SERVER_PORT,
-            debug=config.WEB_SERVER_DEBUG
+            debug=config.WEB_SERVER_DEBUG,
+            use_reloader=False # disable reloader
         )
-    except Exception as e:
-        logger.error(f"启动Web服务器时出错: {str(e)}")
-    finally:
+    # except Exception as e:
+    #     logger.error(f"启动Web服务器时出错: {str(e)}")
+    # finally:
         # 停止推送线程
         stop_push_thread()
 

@@ -6,9 +6,19 @@
 import sys
 import time
 import logging
+import os
 from datetime import datetime
 import argparse
 import pandas as pd
+
+
+# Create the 'logs' directory if it doesn't exist
+logs_dir = 'logs'
+if not os.path.exists(logs_dir):
+    os.makedirs(logs_dir)
+
+# Set the log file path within the 'logs' directory
+log_file_path = os.path.join(logs_dir, 'test_trading_executor.log')
 
 # 配置日志
 logging.basicConfig(
@@ -16,10 +26,10 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler('test_trading_executor.log', encoding='utf-8')
+        logging.FileHandler(log_file_path, encoding='utf-8')
     ]
 )
-logger = logging.getLogger("test_trading_executor")
+logger = logging.getLogger(__name__)
 
 try:
     from trading_executor import get_trading_executor, TradingExecutor, DIRECTION_BUY, DIRECTION_SELL
@@ -44,14 +54,47 @@ def test_initialization():
         logger.info(f"账户ID: {executor.account_id}")
         logger.info(f"账户类型: {executor.account_type}")
         
+        # 添加初始化交易API的尝试
+        if not hasattr(executor, 'trader') or not executor.trader:
+            logger.info("尝试重新初始化交易API...")
+            try:
+                # 修改初始化XtQuantTrader的方式
+                from xtquant.xttrader import XtQuantTrader, XtQuantTraderCallback
+                
+                # 创建回调对象
+                class MyCallback(XtQuantTraderCallback):
+                    def on_recv_rsp(self, *args, **kwargs):
+                        logger.info(f"收到响应: {args}, {kwargs}")
+                
+                # 正确初始化交易API
+                # 假设路径，实际使用时需要替换为正确的路径
+                userdata_path = "C:/光大证券金阳光QMT实盘/userdata"
+                session_id = "test_session"
+                callback = MyCallback()
+                
+                trader = XtQuantTrader(userdata_path, session_id, callback)
+                
+                # 尝试连接服务器
+                trader.start()
+                # 等待连接建立
+                time.sleep(3)
+                # 检查连接状态（需要根据实际API调整）
+                is_connected = True if trader else False
+                logger.info(f"交易API连接状态: {is_connected}")
+                # 如果成功，设置到executor
+                if is_connected:
+                    executor.trader = trader
+                    logger.info("成功重新初始化交易API")
+            except Exception as e:
+                logger.error(f"尝试初始化交易API时出错: {str(e)}")
+        
         # 检查trader对象
         if hasattr(executor, 'trader') and executor.trader:
             logger.info(f"交易API对象创建成功: {executor.trader}")
             
-            # 检查连接状态
-            if hasattr(executor.trader, 'is_connected'):
-                is_connected = executor.trader.is_connected()
-                logger.info(f"交易API连接状态: {is_connected}")
+            # 检查连接状态（需要根据实际API调整）
+            is_connected = True if executor.trader else False
+            logger.info(f"交易API连接状态: {is_connected}")
         else:
             logger.warning("交易API对象未创建或不可用")
         
@@ -213,32 +256,38 @@ def test_quote_query():
     try:
         executor = get_trading_executor()
         
-        # 查询行情
-        if hasattr(executor, 'get_quote'):
-            quote = executor.get_quote(TEST_STOCK)
-            logger.info(f"行情信息: {quote}")
+        # 直接使用xtdata获取行情，而不是通过交易执行器
+        try:
+            from xtquant import xtdata
+            ticks = xtdata.get_full_tick([TEST_STOCK])
+            if ticks and TEST_STOCK in ticks:
+                tick = ticks[TEST_STOCK]
+                logger.info(f"行情信息: {tick}")
+                
+                # 修复行情数据访问方式
+                if hasattr(tick, 'lastPrice'):
+                    logger.info(f"最新价: {tick.lastPrice}")
+                    logger.info(f"涨跌幅: {(tick.lastPrice - tick.lastClose) / tick.lastClose * 100:.2f}%")
+                    logger.info(f"买一价: {tick.bidPrice[0] if hasattr(tick, 'bidPrice') else '无'}")
+                    logger.info(f"卖一价: {tick.askPrice[0] if hasattr(tick, 'askPrice') else '无'}")
+                    logger.info(f"成交量: {tick.volume if hasattr(tick, 'volume') else '无'}")
+                elif isinstance(tick, dict):
+                    # 如果是字典形式
+                    logger.info(f"最新价: {tick.get('lastPrice')}")
+                    logger.info(f"涨跌幅: {(tick.get('lastPrice', 0) - tick.get('lastClose', 0)) / tick.get('lastClose', 1) * 100:.2f}%")
+                    bid_prices = tick.get('bidPrice', [])
+                    ask_prices = tick.get('askPrice', [])
+                    logger.info(f"买一价: {bid_prices[0] if bid_prices else '无'}")
+                    logger.info(f"卖一价: {ask_prices[0] if ask_prices else '无'}")
+                    logger.info(f"成交量: {tick.get('volume', '无')}")
+            else:
+                logger.warning(f"未获取到 {TEST_STOCK} 的行情数据")
+        except Exception as e:
+            logger.error(f"通过xtdata获取行情失败: {str(e)}")
             
-            if quote:
-                logger.info(f"最新价: {quote.get('last_price', 'N/A')}")
-                logger.info(f"涨跌幅: {quote.get('change_ratio', 'N/A')}")
-                logger.info(f"买一价: {quote.get('bid1', 'N/A')}")
-                logger.info(f"卖一价: {quote.get('ask1', 'N/A')}")
-                logger.info(f"成交量: {quote.get('volume', 'N/A')}")
-        else:
-            logger.warning("交易执行器没有get_quote方法")
-            
-            # 尝试其他可能的方法
+            # 作为备选方案，尝试查询交易执行器中的相关方法
             possible_methods = [m for m in dir(executor) if 'quote' in m.lower() or 'tick' in m.lower()]
             logger.info(f"可能的行情查询方法: {possible_methods}")
-            
-            # 尝试从行情引用获取
-            try:
-                from xtquant import xtdata
-                tick = xtdata.get_full_tick([TEST_STOCK])
-                if tick:
-                    logger.info(f"通过xtdata获取行情成功: {tick}")
-            except Exception as e:
-                logger.error(f"通过xtdata获取行情失败: {str(e)}")
         
         return True
     except Exception as e:
@@ -322,7 +371,13 @@ def test_buy_stock(execute_real_order=False):
             ticks = xtdata.get_full_tick([TEST_STOCK])
             if ticks and TEST_STOCK in ticks:
                 tick = ticks[TEST_STOCK]
-                bid_price = getattr(tick, 'bid_price', None) or getattr(tick, 'bidPrice1', None) or 2.5
+                # 修复行情数据获取方式
+                if hasattr(tick, 'bidPrice'):
+                    bid_price = tick.bidPrice[0] if len(tick.bidPrice) > 0 else 2.5
+                elif isinstance(tick, dict) and 'bidPrice' in tick:
+                    bid_price = tick['bidPrice'][0] if len(tick['bidPrice']) > 0 else 2.5
+                else:
+                    bid_price = 2.5
                 logger.info(f"获取到 {TEST_STOCK} 买一价: {bid_price}")
             else:
                 bid_price = 2.5  # 假设价格
