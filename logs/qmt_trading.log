@@ -1065,3 +1065,868 @@ Invoked with: b'25105132', 'xtquant', '127.0.0.1'
 2025-04-25 12:48:40,572 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
 2025-04-25 12:48:40,593 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.5
 2025-04-25 12:48:40,600 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-04-25 13:17:24,740 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 13:17:24,761 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 13:17:27,197 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 13:17:27,197 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 13:17:27,197 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 13:17:27,197 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 13:17:27,197 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 13:17:27,209 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['Future', 'Thread', 'ThreadPoolExecutor', 'XTQC', 'XtQuantTrader', 'XtQuantTraderCallback', 'asyncio', 'cp', 'current_thread', 'os', 'title', 'xttype']
+2025-04-25 13:17:27,209 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-04-25 13:17:27,230 - qmt_trading.main - INFO - ==================================================
+2025-04-25 13:17:27,236 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-04-25 13:17:27
+2025-04-25 13:17:27,252 - qmt_trading.main - INFO - ==================================================
+2025-04-25 13:17:27,253 - qmt_trading.main - INFO - 开始初始化系统...
+2025-04-25 13:17:27,254 - qmt_trading.main - INFO - 系统初始化完成
+2025-04-25 13:17:27,255 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-04-25 13:17:27,257 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-04-25 13:17:27,258 - qmt_trading.data_manager - INFO - 下载 000001.SZ 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 13:17:27,785 - qmt_trading.data_manager - WARNING - 获取 000001.SZ 的历史数据为空
+2025-04-25 13:17:28,796 - qmt_trading.main - INFO - 下载 600519.SH 的历史数据
+2025-04-25 13:17:28,796 - qmt_trading.data_manager - INFO - 下载 600519.SH 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 13:17:29,311 - qmt_trading.data_manager - WARNING - 获取 600519.SH 的历史数据为空
+2025-04-25 13:17:30,325 - qmt_trading.main - INFO - 下载 000858.SZ 的历史数据
+2025-04-25 13:17:30,334 - qmt_trading.data_manager - INFO - 下载 000858.SZ 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 13:17:30,890 - qmt_trading.data_manager - WARNING - 获取 000858.SZ 的历史数据为空
+2025-04-25 13:17:31,900 - qmt_trading.main - INFO - 初始数据下载完成
+2025-04-25 13:17:31,995 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-04-25 13:17:32,026 - qmt_trading.data_manager - DEBUG - 从数据库获取 000001.SZ 的历史数据, 共 0 条记录
+2025-04-25 13:17:32,041 - qmt_trading.indicator_calculator - WARNING - 没有 000001.SZ 的历史数据，无法计算指标
+2025-04-25 13:17:32,045 - qmt_trading.data_manager - DEBUG - 从数据库获取 600519.SH 的历史数据, 共 0 条记录
+2025-04-25 13:17:32,047 - qmt_trading.indicator_calculator - WARNING - 没有 600519.SH 的历史数据，无法计算指标
+2025-04-25 13:17:32,056 - qmt_trading.data_manager - DEBUG - 从数据库获取 000858.SZ 的历史数据, 共 0 条记录
+2025-04-25 13:17:32,060 - qmt_trading.indicator_calculator - WARNING - 没有 000858.SZ 的历史数据，无法计算指标
+2025-04-25 13:17:32,064 - qmt_trading.main - INFO - 初始指标计算完成
+2025-04-25 13:17:32,066 - qmt_trading.main - INFO - 启动数据更新线程
+2025-04-25 13:17:32,071 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-04-25 13:17:32,071 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-04-25 13:17:32,077 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-04-25 13:17:32,078 - qmt_trading.data_manager - INFO - 获取 000001.SZ 的完整历史数据
+2025-04-25 13:17:32,146 - qmt_trading.data_manager - INFO - 下载 000001.SZ 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 13:17:32,416 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-04-25 13:17:32,483 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:17:32,490 - qmt_trading.main - INFO - 启动日志清理线程
+2025-04-25 13:17:32,496 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:17:29', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887018400, 'volume': 3265139, 'pvolume': 326513866, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.717, 2.718, 2.719, 2.72, 2.721], 'bidPrice': [2.716, 2.715, 2.714, 2.713, 2.712], 'askVol': [56044, 85825, 30784, 60974, 43569], 'bidVol': [872, 21921, 47157, 30517, 18480]}
+2025-04-25 13:17:32,509 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-04-25 13:17:32,519 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:17:32,523 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:17:32,547 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:17:32,560 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:17:29', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887018400, 'volume': 3265139, 'pvolume': 326513866, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.717, 2.718, 2.719, 2.72, 2.721], 'bidPrice': [2.716, 2.715, 2.714, 2.713, 2.712], 'askVol': [56044, 85825, 30784, 60974, 43569], 'bidVol': [872, 21921, 47157, 30517, 18480]}
+2025-04-25 13:17:32,571 - qmt_trading.position_manager - INFO - 510050.SH 触发初次止盈，当前盈利: 8.64%, 初次止盈阈值: 5.00%
+2025-04-25 13:17:32,576 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:17:32,617 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:17:29', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887018400, 'volume': 3265139, 'pvolume': 326513866, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.717, 2.718, 2.719, 2.72, 2.721], 'bidPrice': [2.716, 2.715, 2.714, 2.713, 2.712], 'askVol': [56044, 85825, 30784, 60974, 43569], 'bidVol': [872, 21921, 47157, 30517, 18480]}
+2025-04-25 13:17:32,623 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-04-25 13:17:32,626 - qmt_trading.position_manager - INFO - 510050.SH 触发止盈信号，类型: HALF
+2025-04-25 13:17:32,993 - qmt_trading.data_manager - WARNING - 获取 000001.SZ 的历史数据为空
+2025-04-25 13:17:34,004 - qmt_trading.data_manager - INFO - 获取 600519.SH 的完整历史数据
+2025-04-25 13:17:34,004 - qmt_trading.data_manager - INFO - 下载 600519.SH 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 13:17:34,521 - qmt_trading.data_manager - WARNING - 获取 600519.SH 的历史数据为空
+2025-04-25 13:17:35,537 - qmt_trading.data_manager - INFO - 获取 000858.SZ 的完整历史数据
+2025-04-25 13:17:35,537 - qmt_trading.data_manager - INFO - 下载 000858.SZ 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 13:17:36,045 - qmt_trading.data_manager - WARNING - 获取 000858.SZ 的历史数据为空
+2025-04-25 13:17:37,054 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-04-25 13:17:37,630 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:17:37,631 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:17:35', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887255200, 'volume': 3266011, 'pvolume': 326601066, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [13772, 51075, 87349, 30157, 60281], 'bidVol': [7423, 38245, 47478, 24152, 20899]}
+2025-04-25 13:17:37,631 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:17:42,658 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:17:42,730 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:17:41', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887255200, 'volume': 3266011, 'pvolume': 326601066, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [13872, 51075, 88254, 30157, 60281], 'bidVol': [7339, 38245, 48378, 24152, 20899]}
+2025-04-25 13:17:42,747 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:17:47,803 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:17:47,803 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:17:44', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887255200, 'volume': 3266011, 'pvolume': 326601066, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [9904, 51575, 87754, 30157, 60281], 'bidVol': [7339, 42011, 48378, 24152, 20899]}
+2025-04-25 13:17:47,803 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:17:52,835 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:17:52,840 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:17:50', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887260900, 'volume': 3266032, 'pvolume': 326603166, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [3245, 52409, 87733, 34419, 61519], 'bidVol': [23851, 45064, 33478, 23892, 20159]}
+2025-04-25 13:17:52,920 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:17:57,922 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:17:57,926 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:17:56', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887267200, 'volume': 3266055, 'pvolume': 326605466, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [1111, 52876, 83135, 43419, 66519], 'bidVol': [26212, 42064, 43378, 23892, 20159]}
+2025-04-25 13:17:58,013 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:18:03,049 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:03,054 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:17:59', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887267500, 'volume': 3266056, 'pvolume': 326605566, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [1111, 52876, 83135, 42519, 66519], 'bidVol': [26211, 42064, 43378, 22992, 20159]}
+2025-04-25 13:18:03,447 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:18:08,452 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:08,457 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:05', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887269600, 'volume': 3266064, 'pvolume': 326606366, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [8646, 46575, 88145, 34319, 61519], 'bidVol': [15469, 42324, 43378, 33892, 20159]}
+2025-04-25 13:18:10,568 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:18:15,573 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:15,578 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:14', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887270400, 'volume': 3266067, 'pvolume': 326606666, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [8875, 51550, 89782, 26782, 61519], 'bidVol': [13233, 42506, 43398, 23992, 20159]}
+2025-04-25 13:18:15,664 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:18:20,676 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:20,680 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:17', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887278600, 'volume': 3266097, 'pvolume': 326609666, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [12524, 51550, 88882, 28420, 60781], 'bidVol': [12454, 40273, 42498, 33152, 20899]}
+2025-04-25 13:18:20,680 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:18:25,694 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:25,694 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:23', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887278900, 'volume': 3266098, 'pvolume': 326609766, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [13982, 51550, 87286, 30057, 60781], 'bidVol': [12474, 40773, 43398, 33152, 20899]}
+2025-04-25 13:18:25,710 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:18:30,727 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:30,727 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:26', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887278900, 'volume': 3266098, 'pvolume': 326609766, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [13881, 51550, 87786, 30057, 60781], 'bidVol': [11474, 40773, 43398, 33152, 20899]}
+2025-04-25 13:18:30,746 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:18:33,652 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:33,652 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:30', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887279100, 'volume': 3266099, 'pvolume': 326609866, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [13880, 51550, 87786, 30057, 60781], 'bidVol': [12534, 40773, 43398, 33152, 20903]}
+2025-04-25 13:18:33,652 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:18:33,670 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:33,684 - qmt_trading.position_manager - INFO - 510050.SH 触发初次止盈，当前盈利: 8.64%, 初次止盈阈值: 5.00%
+2025-04-25 13:18:33,703 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:30', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887279100, 'volume': 3266099, 'pvolume': 326609866, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [13880, 51550, 87786, 30057, 60781], 'bidVol': [12534, 40773, 43398, 33152, 20903]}
+2025-04-25 13:18:33,712 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-04-25 13:18:33,726 - qmt_trading.position_manager - INFO - 510050.SH 触发止盈信号，类型: HALF
+2025-04-25 13:18:35,758 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:35,758 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:32', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887281000, 'volume': 3266106, 'pvolume': 326610566, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [13873, 51550, 86886, 30057, 60781], 'bidVol': [12534, 40773, 42498, 33152, 20903]}
+2025-04-25 13:18:35,758 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:18:38,196 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-04-25 13:18:38,196 - qmt_trading.data_manager - INFO - 获取 000001.SZ 的完整历史数据
+2025-04-25 13:18:38,196 - qmt_trading.data_manager - INFO - 下载 000001.SZ 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 13:18:38,712 - qmt_trading.data_manager - WARNING - 获取 000001.SZ 的历史数据为空
+2025-04-25 13:18:39,727 - qmt_trading.data_manager - INFO - 获取 600519.SH 的完整历史数据
+2025-04-25 13:18:39,727 - qmt_trading.data_manager - INFO - 下载 600519.SH 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 13:18:40,243 - qmt_trading.data_manager - WARNING - 获取 600519.SH 的历史数据为空
+2025-04-25 13:18:40,779 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:40,779 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:35', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 887281600, 'volume': 3266108, 'pvolume': 326610766, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [17081, 33550, 88645, 30057, 60781], 'bidVol': [11534, 40773, 43398, 33152, 20853]}
+2025-04-25 13:18:40,798 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:18:41,255 - qmt_trading.data_manager - INFO - 获取 000858.SZ 的完整历史数据
+2025-04-25 13:18:41,255 - qmt_trading.data_manager - INFO - 下载 000858.SZ 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 13:18:41,808 - qmt_trading.data_manager - WARNING - 获取 000858.SZ 的历史数据为空
+2025-04-25 13:18:42,837 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-04-25 13:18:45,806 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:45,806 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:41', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888367900, 'volume': 3270109, 'pvolume': 327010866, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [10415, 33555, 90288, 27515, 60817], 'bidVol': [2533, 33539, 57403, 32352, 20853]}
+2025-04-25 13:18:45,821 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:18:50,837 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:50,845 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:47', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888518800, 'volume': 3270665, 'pvolume': 327066466, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [41666, 33681, 79688, 30052, 60817], 'bidVol': [1998, 26305, 43403, 38233, 25853]}
+2025-04-25 13:18:50,907 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:18:55,918 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:18:55,918 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:54', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888518800, 'volume': 3270665, 'pvolume': 327066466, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [20901, 55448, 75388, 30052, 60817], 'bidVol': [2764, 39539, 43403, 29233, 25853]}
+2025-04-25 13:18:55,931 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:19:00,947 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:00,947 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:18:56', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888518800, 'volume': 3270665, 'pvolume': 327066466, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [20201, 54682, 81651, 29589, 60817], 'bidVol': [2744, 42369, 48403, 28333, 20853]}
+2025-04-25 13:19:00,947 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:19:05,966 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:05,966 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:03', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888747100, 'volume': 3271506, 'pvolume': 327150566, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [16357, 60450, 81651, 30489, 60817], 'bidVol': [2903, 42369, 48383, 29233, 20853]}
+2025-04-25 13:19:06,040 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:19:11,057 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:11,057 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:08', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888747700, 'volume': 3271508, 'pvolume': 327150766, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [14290, 62517, 81643, 30489, 60817], 'bidVol': [2951, 42371, 48383, 29243, 20853]}
+2025-04-25 13:19:11,127 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:19:16,138 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:16,138 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:14', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888780000, 'volume': 3271627, 'pvolume': 327162666, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [7339, 60458, 89738, 30489, 60817], 'bidVol': [2851, 47371, 47483, 24247, 20853]}
+2025-04-25 13:19:16,151 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:19:21,168 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:21,168 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:17', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888782700, 'volume': 3271637, 'pvolume': 327163666, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [11329, 56691, 90638, 30489, 60822], 'bidVol': [2851, 47371, 48383, 24247, 20853]}
+2025-04-25 13:19:21,182 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:19:26,198 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:26,198 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:23', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888784300, 'volume': 3271643, 'pvolume': 327164266, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [14323, 56691, 91375, 28852, 60940], 'bidVol': [1858, 42371, 43383, 28347, 25853]}
+2025-04-25 13:19:26,284 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:19:31,287 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:31,291 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:26', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888784300, 'volume': 3271643, 'pvolume': 327164266, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [14323, 56691, 91780, 29752, 60990], 'bidVol': [1858, 42371, 43383, 29247, 25853]}
+2025-04-25 13:19:31,305 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:19:34,510 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:34,516 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:32', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888784300, 'volume': 3271643, 'pvolume': 327164266, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [36947, 38691, 90921, 29752, 61190], 'bidVol': [1861, 42786, 43383, 29247, 25853]}
+2025-04-25 13:19:34,538 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:19:34,542 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:34,546 - qmt_trading.position_manager - INFO - 510050.SH 触发初次止盈，当前盈利: 8.64%, 初次止盈阈值: 5.00%
+2025-04-25 13:19:34,587 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:32', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888784300, 'volume': 3271643, 'pvolume': 327164266, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [36947, 38691, 90921, 29752, 61190], 'bidVol': [1861, 42786, 43383, 29247, 25853]}
+2025-04-25 13:19:34,601 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-04-25 13:19:34,603 - qmt_trading.position_manager - INFO - 510050.SH 触发止盈信号，类型: HALF
+2025-04-25 13:19:36,311 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:36,315 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:32', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888784300, 'volume': 3271643, 'pvolume': 327164266, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [36947, 38691, 90921, 29752, 61190], 'bidVol': [1861, 42786, 43383, 29247, 25853]}
+2025-04-25 13:19:36,345 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:19:41,349 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:41,357 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:38', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888784300, 'volume': 3271643, 'pvolume': 327164266, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [41946, 38691, 86771, 28852, 60990], 'bidVol': [1861, 42886, 43383, 29247, 25853]}
+2025-04-25 13:19:41,445 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:19:43,589 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-04-25 13:19:43,589 - qmt_trading.data_manager - INFO - 获取 000001.SZ 的完整历史数据
+2025-04-25 13:19:43,589 - qmt_trading.data_manager - INFO - 下载 000001.SZ 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 13:19:44,105 - qmt_trading.data_manager - WARNING - 获取 000001.SZ 的历史数据为空
+2025-04-25 13:19:45,404 - qmt_trading.data_manager - INFO - 获取 600519.SH 的完整历史数据
+2025-04-25 13:19:45,505 - qmt_trading.data_manager - INFO - 下载 600519.SH 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 13:19:46,506 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:46,895 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:45', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888784300, 'volume': 3271643, 'pvolume': 327164266, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [36087, 38641, 90993, 30489, 60990], 'bidVol': [1861, 42886, 48383, 29247, 20873]}
+2025-04-25 13:19:46,913 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:19:47,006 - qmt_trading.data_manager - WARNING - 获取 600519.SH 的历史数据为空
+2025-04-25 13:19:48,008 - qmt_trading.data_manager - INFO - 获取 000858.SZ 的完整历史数据
+2025-04-25 13:19:48,010 - qmt_trading.data_manager - INFO - 下载 000858.SZ 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 13:19:48,527 - qmt_trading.data_manager - WARNING - 获取 000858.SZ 的历史数据为空
+2025-04-25 13:19:49,542 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-04-25 13:19:51,931 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:52,051 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:47', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888784300, 'volume': 3271643, 'pvolume': 327164266, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [36972, 38641, 90134, 30489, 60990], 'bidVol': [1861, 42886, 48383, 29447, 20873]}
+2025-04-25 13:19:52,063 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:19:57,066 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:19:57,070 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:54', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888844600, 'volume': 3271865, 'pvolume': 327186466, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [15381, 38641, 55771, 28852, 60990], 'bidVol': [1641, 42886, 43383, 29447, 25873]}
+2025-04-25 13:19:57,084 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:20:02,189 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:20:02,218 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:19:59', 'lastPrice': 2.716, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 888876900, 'volume': 3271984, 'pvolume': 327198366, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.716, 2.717, 2.718, 2.719, 2.72], 'bidPrice': [2.715, 2.714, 2.713, 2.712, 2.711], 'askVol': [51141, 74641, 41776, 29852, 59990], 'bidVol': [816, 31185, 42403, 48447, 25873]}
+2025-04-25 13:20:02,269 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.716
+2025-04-25 13:20:07,398 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:20:07,427 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:20:05', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 889479400, 'volume': 3274203, 'pvolume': 327420266, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.715, 2.716, 2.717, 2.718, 2.719], 'bidPrice': [2.714, 2.713, 2.712, 2.711, 2.71], 'askVol': [306, 24375, 92641, 46776, 28752], 'bidVol': [53419, 43403, 38447, 25873, 54303]}
+2025-04-25 13:20:07,490 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:20:12,496 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:20:12,496 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:20:08', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 889479400, 'volume': 3274203, 'pvolume': 327420266, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.715, 2.716, 2.717, 2.718, 2.719], 'bidPrice': [2.714, 2.713, 2.712, 2.711, 2.71], 'askVol': [398, 46151, 71324, 40893, 34762], 'bidVol': [52284, 47628, 32610, 20485, 52573]}
+2025-04-25 13:20:12,562 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:20:17,591 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:20:17,591 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:20:14', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 889481000, 'volume': 3274209, 'pvolume': 327420866, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.715, 2.716, 2.717, 2.718, 2.719], 'bidPrice': [2.714, 2.713, 2.712, 2.711, 2.71], 'askVol': [1392, 46154, 72224, 45043, 35762], 'bidVol': [55284, 57728, 34510, 20485, 52573]}
+2025-04-25 13:20:17,605 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:20:22,628 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:20:22,630 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:20:20', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 889526900, 'volume': 3274378, 'pvolume': 327437766, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.715, 2.716, 2.717, 2.718, 2.719], 'bidPrice': [2.714, 2.713, 2.712, 2.711, 2.71], 'askVol': [233, 46154, 72274, 40943, 34062], 'bidVol': [52460, 58738, 32610, 21385, 51773]}
+2025-04-25 13:20:22,644 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:20:27,700 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:20:27,700 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:20:26', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 889527700, 'volume': 3274381, 'pvolume': 327438066, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.715, 2.716, 2.717, 2.718, 2.719], 'bidPrice': [2.714, 2.713, 2.712, 2.711, 2.71], 'askVol': [440, 46153, 72274, 40943, 34062], 'bidVol': [52460, 58738, 32610, 21385, 51773]}
+2025-04-25 13:20:27,716 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:20:32,732 - qmt_trading.position_manager - DEBUG - 获取到 1 条持仓记录
+2025-04-25 13:20:32,737 - qmt_trading.data_manager - DEBUG - 510050.SH 最新行情: {'timetag': '20250425 13:20:29', 'lastPrice': 2.715, 'open': 2.717, 'high': 2.724, 'low': 2.71, 'lastClose': 2.715, 'amount': 889528000, 'volume': 3274382, 'pvolume': 327438166, 'stockStatus': 0, 'openInt': 13, 'settlementPrice': 0, 'lastSettlementPrice': 0, 'askPrice': [2.715, 2.716, 2.717, 2.718, 2.719], 'bidPrice': [2.714, 2.713, 2.712, 2.711, 2.71], 'askVol': [439, 20387, 94041, 40118, 34062], 'bidVol': [65796, 49738, 32610, 20485, 51773]}
+2025-04-25 13:20:32,767 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.715
+2025-04-25 13:20:33,640 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-04-25 13:20:33,641 - qmt_trading.main - INFO - 开始清理资源...
+2025-04-25 13:20:33,641 - qmt_trading.main - INFO - 停止 data_thread...
+2025-04-25 13:20:33,919 - qmt_trading.data_manager - INFO - 数据更新线程已停止
+2025-04-25 13:20:33,919 - qmt_trading.main - INFO - 停止 position_thread...
+2025-04-25 13:20:34,861 - qmt_trading.position_manager - INFO - 持仓监控线程已停止
+2025-04-25 13:20:34,861 - qmt_trading.main - INFO - 停止 log_thread...
+2025-04-25 13:20:34,861 - qmt_trading.trading_executor - INFO - 交易执行器已关闭
+2025-04-25 13:20:34,861 - qmt_trading.data_manager - INFO - 数据库连接已关闭
+2025-04-25 13:20:34,861 - qmt_trading.data_manager - ERROR - 断开行情连接出错: module 'xtquant.xtdata' has no attribute 'disconnect'
+2025-04-25 13:20:34,861 - qmt_trading.main - INFO - 资源清理完成
+2025-04-25 13:20:34,861 - qmt_trading.main - INFO - 系统已退出
+2025-04-25 16:16:56,888 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 16:16:56,909 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 16:16:59,013 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 16:16:59,014 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 16:16:59,017 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 16:16:59,019 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 16:16:59,021 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 16:16:59,022 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['Future', 'Thread', 'ThreadPoolExecutor', 'XTQC', 'XtQuantTrader', 'XtQuantTraderCallback', 'asyncio', 'cp', 'current_thread', 'os', 'title', 'xttype']
+2025-04-25 16:16:59,023 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-04-25 16:16:59,051 - qmt_trading.main - INFO - ==================================================
+2025-04-25 16:16:59,063 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-04-25 16:16:59
+2025-04-25 16:16:59,085 - qmt_trading.main - INFO - ==================================================
+2025-04-25 16:16:59,095 - qmt_trading.main - INFO - 开始初始化系统...
+2025-04-25 16:16:59,107 - qmt_trading.main - INFO - 系统初始化完成
+2025-04-25 16:16:59,127 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-04-25 16:16:59,135 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-04-25 16:16:59,143 - qmt_trading.data_manager - INFO - 下载 000001.SZ 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 16:16:59,723 - qmt_trading.data_manager - WARNING - 获取 000001.SZ 的历史数据为空
+2025-04-25 16:17:00,725 - qmt_trading.main - INFO - 下载 600519.SH 的历史数据
+2025-04-25 16:17:00,726 - qmt_trading.data_manager - INFO - 下载 600519.SH 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 16:17:01,229 - qmt_trading.data_manager - WARNING - 获取 600519.SH 的历史数据为空
+2025-04-25 16:17:02,229 - qmt_trading.main - INFO - 下载 000858.SZ 的历史数据
+2025-04-25 16:17:02,230 - qmt_trading.data_manager - INFO - 下载 000858.SZ 的历史数据, 周期: day, 从 20200101 到 20250425
+2025-04-25 16:17:02,732 - qmt_trading.data_manager - WARNING - 获取 000858.SZ 的历史数据为空
+2025-04-25 16:17:03,734 - qmt_trading.main - INFO - 初始数据下载完成
+2025-04-25 16:17:03,735 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-04-25 16:17:03,762 - qmt_trading.data_manager - DEBUG - 从数据库获取 000001.SZ 的历史数据, 共 0 条记录
+2025-04-25 16:17:03,764 - qmt_trading.indicator_calculator - WARNING - 没有 000001.SZ 的历史数据，无法计算指标
+2025-04-25 16:17:03,769 - qmt_trading.data_manager - DEBUG - 从数据库获取 600519.SH 的历史数据, 共 0 条记录
+2025-04-25 16:17:03,771 - qmt_trading.indicator_calculator - WARNING - 没有 600519.SH 的历史数据，无法计算指标
+2025-04-25 16:17:03,778 - qmt_trading.data_manager - DEBUG - 从数据库获取 000858.SZ 的历史数据, 共 0 条记录
+2025-04-25 16:17:03,787 - qmt_trading.indicator_calculator - WARNING - 没有 000858.SZ 的历史数据，无法计算指标
+2025-04-25 16:17:03,791 - qmt_trading.main - INFO - 初始指标计算完成
+2025-04-25 16:17:03,792 - qmt_trading.main - INFO - 启动数据更新线程
+2025-04-25 16:17:03,793 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-04-25 16:17:03,798 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-04-25 16:17:03,800 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-04-25 16:17:03,801 - qmt_trading.main - INFO - 启动日志清理线程
+2025-04-25 16:17:03,813 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-04-25 16:18:11,354 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-04-25 16:18:30,703 - qmt_trading.utils - WARNING - 未安装psutil模块，无法获取内存使用情况
+2025-04-25 16:18:30,705 - qmt_trading.utils - WARNING - 未安装psutil模块，无法获取磁盘使用情况
+2025-04-25 16:19:41,163 - qmt_trading.web_server - ERROR - 获取成交记录时出错: Object of type int64 is not JSON serializable
+2025-04-25 16:24:47,968 - qmt_trading.web_server - ERROR - 获取日志时出错: 'utf-8' codec can't decode byte 0xd2 in position 60: invalid continuation byte
+2025-04-25 16:33:00,573 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-04-25 16:33:00,573 - qmt_trading.main - INFO - 开始清理资源...
+2025-04-25 16:33:00,574 - qmt_trading.main - INFO - 停止 data_thread...
+2025-04-25 16:33:00,800 - qmt_trading.data_manager - INFO - 数据更新线程已停止
+2025-04-25 16:33:00,801 - qmt_trading.main - INFO - 停止 position_thread...
+2025-04-25 16:33:01,804 - qmt_trading.position_manager - INFO - 持仓监控线程已停止
+2025-04-25 16:33:01,804 - qmt_trading.main - INFO - 停止 log_thread...
+2025-04-25 16:33:01,805 - qmt_trading.trading_executor - INFO - 交易执行器已关闭
+2025-04-25 16:33:01,807 - qmt_trading.data_manager - INFO - 数据库连接已关闭
+2025-04-25 16:33:01,807 - qmt_trading.data_manager - ERROR - 断开行情连接出错: module 'xtquant.xtdata' has no attribute 'disconnect'
+2025-04-25 16:33:01,808 - qmt_trading.main - INFO - 资源清理完成
+2025-04-25 16:33:01,809 - qmt_trading.main - INFO - 系统已退出
+2025-04-25 19:27:48,721 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 19:27:48,739 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 19:27:50,853 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 19:27:50,865 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 19:27:50,877 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 19:27:50,883 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 19:27:50,884 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 19:30:04,975 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 19:30:04,992 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 19:30:07,459 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 19:30:07,461 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 19:30:07,497 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 19:30:07,524 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 19:30:07,527 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 19:30:07,558 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110
+2025-04-25 19:30:07,581 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 108
+2025-04-25 19:30:07,615 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 8.00%, 初次止盈阈值: 5.00%
+2025-04-25 19:30:07,720 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105
+2025-04-25 19:30:07,723 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 19:30:07,782 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111
+2025-04-25 19:30:07,799 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 19:30:07,834 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109
+2025-04-25 19:30:07,842 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 19:30:07,902 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95
+2025-04-25 19:30:07,939 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90
+2025-04-25 19:30:07,949 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 20:34:31,312 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 20:34:31,328 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 20:34:33,740 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 20:34:33,793 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 20:34:33,811 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 20:34:33,848 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 20:34:33,865 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 20:34:33,901 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110
+2025-04-25 20:34:33,962 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 108
+2025-04-25 20:34:34,453 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 8.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:34:34,588 - qmt_trading.position_manager - ERROR - 检查 TEST_STOCK 的动态止盈条件时出错: 'PositionManager' object has no attribute 'profit_triggered'
+2025-04-25 20:34:34,678 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105
+2025-04-25 20:34:34,684 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:34:34,703 - qmt_trading.position_manager - ERROR - 检查 TEST_STOCK 的动态止盈条件时出错: 'PositionManager' object has no attribute 'profit_triggered'
+2025-04-25 20:34:34,778 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111
+2025-04-25 20:34:34,785 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:34:34,787 - qmt_trading.position_manager - ERROR - 检查 TEST_STOCK 的动态止盈条件时出错: 'PositionManager' object has no attribute 'profit_triggered'
+2025-04-25 20:34:34,807 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 107
+2025-04-25 20:34:34,819 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 7.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:34:34,831 - qmt_trading.position_manager - ERROR - 检查 TEST_STOCK 的动态止盈条件时出错: 'PositionManager' object has no attribute 'profit_triggered'
+2025-04-25 20:34:34,895 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109
+2025-04-25 20:34:34,914 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:34:34,915 - qmt_trading.position_manager - ERROR - 检查 TEST_STOCK 的动态止盈条件时出错: 'PositionManager' object has no attribute 'profit_triggered'
+2025-04-25 20:34:34,995 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95
+2025-04-25 20:34:35,069 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90
+2025-04-25 20:34:35,086 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 20:34:35,158 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105
+2025-04-25 20:34:35,164 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:34:35,165 - qmt_trading.position_manager - ERROR - 检查 TEST_STOCK 的动态止盈条件时出错: 'PositionManager' object has no attribute 'profit_triggered'
+2025-04-25 20:34:35,246 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105
+2025-04-25 20:34:35,254 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:34:35,258 - qmt_trading.position_manager - ERROR - 检查 TEST_STOCK 的动态止盈条件时出错: 'PositionManager' object has no attribute 'profit_triggered'
+2025-04-25 20:52:15,656 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 20:52:15,671 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 20:52:17,976 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 20:52:17,997 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 20:52:18,152 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 20:52:18,173 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 20:52:18,178 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 20:52:18,215 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:18,236 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:18,271 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 8.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:52:18,309 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:18,392 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:18,396 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:52:18,412 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:18,508 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:18,517 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:52:18,528 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:18,628 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:18,632 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:52:18,647 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:18,726 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:18,832 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:18,836 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 20:52:18,869 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:18,873 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:52:18,944 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:19,008 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:19,024 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:19,110 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 8.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:52:19,145 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:19,244 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:19,295 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:52:19,343 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:52:19,363 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: name 'initial_take_profit_triggered' is not defined
+2025-04-25 20:53:08,751 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 20:53:08,753 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 20:53:11,093 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 20:53:11,095 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 20:53:11,164 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 20:53:11,180 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 20:53:11,181 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 20:53:11,210 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False
+2025-04-25 20:53:11,288 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 108, 首次止盈触发: False
+2025-04-25 20:53:11,306 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 8.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:53:11,349 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 108.0, 首次止盈触发: True
+2025-04-25 20:53:11,424 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False
+2025-04-25 20:53:11,441 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:53:11,473 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True
+2025-04-25 20:53:11,555 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111, 首次止盈触发: False
+2025-04-25 20:53:11,569 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:53:11,605 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 111.0, 首次止盈触发: True
+2025-04-25 20:53:11,680 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109, 首次止盈触发: False
+2025-04-25 20:53:11,715 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:53:11,751 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 109.0, 首次止盈触发: True
+2025-04-25 20:53:12,234 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95, 首次止盈触发: False
+2025-04-25 20:53:12,340 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90, 首次止盈触发: False
+2025-04-25 20:53:12,345 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 20:53:12,524 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False
+2025-04-25 20:53:12,542 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:53:12,562 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True
+2025-04-25 20:53:12,618 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False
+2025-04-25 20:53:12,628 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 108, 首次止盈触发: False
+2025-04-25 20:53:12,631 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 8.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:53:12,650 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 108.0, 首次止盈触发: True
+2025-04-25 20:53:12,720 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False
+2025-04-25 20:53:12,728 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 20:53:12,746 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True
+2025-04-25 20:53:12,829 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 92, 首次止盈触发: False
+2025-04-25 21:38:13,332 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 21:38:13,349 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 21:38:15,469 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 21:38:15,486 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 21:38:15,679 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 21:38:15,687 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 21:38:15,689 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 21:38:15,701 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:15,702 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:15,747 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:15,752 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:38:15,791 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:15,794 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:15,799 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:15,801 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:38:15,854 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:15,867 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:15,871 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:16,175 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:16,182 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:16,184 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:38:16,216 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:16,234 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:16,235 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:38:16,241 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:16,245 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:16,254 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:38:16,323 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:16,327 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:38:16,368 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:16,379 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:16,382 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:38:16,417 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:16,423 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 21:38:16,459 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:16,469 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:16,477 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 21:38:16,671 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:16,741 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:16,747 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 21:38:16,798 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:16,804 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:16,804 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:38:16,861 - qmt_trading.position_manager - ERROR - 更新 TEST_STOCK 的持仓信息时出错: no such column: highest_price
+2025-04-25 21:38:16,866 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:38:16,867 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:40:53,533 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 21:40:53,535 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 21:40:55,555 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 21:40:55,556 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 21:40:55,603 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 21:40:55,611 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 21:40:55,613 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 21:40:55,640 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 21:40:55,655 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:40:55,667 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 21:40:55,719 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 21:40:55,742 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:40:55,751 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 21:40:56,032 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:40:56,045 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:40:56,072 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 100, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:40:56,117 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:40:56,122 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:40:56,134 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 21:40:56,215 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111, 首次止盈触发: False, 最高价: 111
+2025-04-25 21:40:56,229 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:40:56,250 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 111.0, 首次止盈触发: True, 最高价: 111.0
+2025-04-25 21:40:56,398 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:40:56,403 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:40:56,468 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109, 首次止盈触发: False, 最高价: 109
+2025-04-25 21:40:56,513 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:40:56,566 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 109.0, 首次止盈触发: True, 最高价: 109.0
+2025-04-25 21:40:56,597 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:40:56,603 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 21:40:56,675 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95, 首次止盈触发: False, 最高价: 95
+2025-04-25 21:40:56,749 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90, 首次止盈触发: False, 最高价: 90
+2025-04-25 21:40:56,841 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 21:40:56,897 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:40:56,901 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:40:57,202 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 21:40:57,216 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:40:57,245 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:40:57,256 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 21:40:57,333 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:40:57,343 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:40:57,361 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 21:40:57,390 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 89, 首次止盈触发: True, 最高价: 105
+2025-04-25 21:40:57,396 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -11.00%, 止损阈值: -10.00%
+2025-04-25 21:46:17,447 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 21:46:17,449 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 21:46:19,516 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 21:46:19,571 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 21:46:19,665 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 21:46:19,673 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 21:46:19,681 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 21:46:19,721 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 21:46:19,746 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 101, 首次止盈触发: False, 最高价: 110
+2025-04-25 21:46:19,803 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 21:46:19,822 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:46:19,852 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 21:46:19,936 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:46:19,962 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:46:19,992 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 100, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:46:20,092 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:46:20,098 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:46:20,121 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 21:46:20,203 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111, 首次止盈触发: False, 最高价: 111
+2025-04-25 21:46:20,435 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:46:20,499 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 111.0, 首次止盈触发: True, 最高价: 111.0
+2025-04-25 21:46:20,528 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:46:20,531 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:46:20,577 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109, 首次止盈触发: False, 最高价: 109
+2025-04-25 21:46:20,602 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:46:20,623 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 109.0, 首次止盈触发: True, 最高价: 109.0
+2025-04-25 21:46:20,670 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:46:20,671 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 21:46:20,729 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95, 首次止盈触发: False, 最高价: 95
+2025-04-25 21:46:20,792 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90, 首次止盈触发: False, 最高价: 90
+2025-04-25 21:46:20,807 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 21:46:20,853 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:46:20,969 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:46:20,985 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 21:46:21,004 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:46:21,069 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:46:21,075 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 21:46:21,310 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:46:21,395 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:46:21,407 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 21:46:21,438 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 89, 首次止盈触发: True, 最高价: 105
+2025-04-25 21:46:21,443 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -11.00%, 止损阈值: -10.00%
+2025-04-25 21:51:10,366 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 21:51:10,391 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 21:51:12,576 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 21:51:12,578 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 21:51:12,595 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 21:51:12,669 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 21:51:12,671 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 21:51:12,714 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 21:51:12,919 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 101, 首次止盈触发: False, 最高价: 110
+2025-04-25 21:51:13,198 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 21:51:13,219 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:51:13,265 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 21:51:13,335 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:51:13,351 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:51:13,368 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 100, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:51:13,417 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:51:13,428 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:51:13,516 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 21:51:13,558 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111, 首次止盈触发: False, 最高价: 111
+2025-04-25 21:51:13,609 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:51:13,620 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 111.0, 首次止盈触发: True, 最高价: 111.0
+2025-04-25 21:51:13,698 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:51:13,741 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:51:13,802 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109, 首次止盈触发: False, 最高价: 109
+2025-04-25 21:51:13,807 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:51:13,950 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 109.0, 首次止盈触发: True, 最高价: 109.0
+2025-04-25 21:51:13,989 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:51:13,990 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 21:51:14,042 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95, 首次止盈触发: False, 最高价: 95
+2025-04-25 21:51:14,522 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90, 首次止盈触发: False, 最高价: 90
+2025-04-25 21:51:14,528 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 21:51:14,720 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:51:14,733 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:51:14,759 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 21:51:14,773 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:51:14,806 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:51:14,887 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 21:51:14,994 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:51:15,000 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:51:15,026 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 21:51:15,041 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 89, 首次止盈触发: True, 最高价: 105
+2025-04-25 21:51:15,045 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -11.00%, 止损阈值: -10.00%
+2025-04-25 21:57:17,601 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 21:57:17,620 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 21:57:19,687 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 21:57:19,691 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 21:57:19,822 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 21:57:19,825 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 21:57:19,829 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 21:57:19,854 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 21:57:19,866 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 101, 首次止盈触发: False, 最高价: 110
+2025-04-25 21:57:19,966 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 21:57:19,975 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:57:19,978 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 21:57:20,033 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:57:20,062 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:57:20,104 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 100, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:57:20,382 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:57:20,387 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:57:20,399 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 21:57:20,470 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111, 首次止盈触发: False, 最高价: 111
+2025-04-25 21:57:20,480 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:57:20,500 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 111.0, 首次止盈触发: True, 最高价: 111.0
+2025-04-25 21:57:20,539 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:57:20,550 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 21:57:20,601 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109, 首次止盈触发: False, 最高价: 109
+2025-04-25 21:57:20,606 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:57:20,628 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 109.0, 首次止盈触发: True, 最高价: 109.0
+2025-04-25 21:57:20,745 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 21:57:20,748 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 21:57:20,875 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95, 首次止盈触发: False, 最高价: 95
+2025-04-25 21:57:20,966 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90, 首次止盈触发: False, 最高价: 90
+2025-04-25 21:57:20,974 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 21:57:21,027 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:57:21,333 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:57:21,369 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 21:57:21,398 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:57:21,425 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 21:57:21,438 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 21:57:21,500 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 21:57:21,544 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 21:57:21,630 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 21:57:21,656 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 89, 首次止盈触发: True, 最高价: 105
+2025-04-25 21:57:21,661 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -11.00%, 止损阈值: -10.00%
+2025-04-25 22:01:23,811 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 22:01:23,815 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 22:01:25,886 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 22:01:25,887 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 22:01:25,893 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 22:01:25,894 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 22:01:25,895 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 22:01:25,919 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:01:26,170 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 101, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:01:26,228 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:01:26,248 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:01:26,364 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 22:01:26,788 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:01:26,847 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:01:26,880 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 100, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:01:27,066 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:01:27,077 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:01:27,104 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:01:27,205 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111, 首次止盈触发: False, 最高价: 111
+2025-04-25 22:01:27,225 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:01:27,240 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 111.0, 首次止盈触发: True, 最高价: 111.0
+2025-04-25 22:01:27,318 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 22:01:27,646 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 22:01:27,980 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109, 首次止盈触发: False, 最高价: 109
+2025-04-25 22:01:27,988 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:01:28,038 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 109.0, 首次止盈触发: True, 最高价: 109.0
+2025-04-25 22:01:28,151 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 22:01:28,153 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 22:01:28,223 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95, 首次止盈触发: False, 最高价: 95
+2025-04-25 22:01:28,591 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90, 首次止盈触发: False, 最高价: 90
+2025-04-25 22:01:28,595 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 22:01:28,662 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:01:28,674 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:01:28,688 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:01:28,725 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:01:28,750 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:01:28,935 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 22:01:28,990 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:01:29,093 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:01:29,112 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:01:29,125 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 89, 首次止盈触发: True, 最高价: 105
+2025-04-25 22:01:29,130 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -11.00%, 止损阈值: -10.00%
+2025-04-25 22:05:02,584 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 22:05:02,588 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 22:05:04,719 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 22:05:04,721 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 22:05:04,790 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 22:05:05,090 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 22:05:05,094 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 22:05:05,117 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:05:05,132 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 101, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:05:05,278 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:05:05,289 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:05:05,295 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 22:05:05,334 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:05:05,350 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:05:05,370 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 100, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:05:05,426 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:05:05,435 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:05:05,461 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:05:05,500 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111, 首次止盈触发: False, 最高价: 111
+2025-04-25 22:05:05,506 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:05:05,522 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 111.0, 首次止盈触发: True, 最高价: 111.0
+2025-04-25 22:05:05,559 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 22:05:05,564 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 22:05:05,629 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109, 首次止盈触发: False, 最高价: 109
+2025-04-25 22:05:05,743 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:05:05,767 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 109.0, 首次止盈触发: True, 最高价: 109.0
+2025-04-25 22:05:05,817 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 22:05:05,826 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 22:05:06,211 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95, 首次止盈触发: False, 最高价: 95
+2025-04-25 22:05:06,279 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90, 首次止盈触发: False, 最高价: 90
+2025-04-25 22:05:06,285 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 22:05:06,344 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:05:06,355 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:05:06,379 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:05:06,429 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:05:06,461 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:05:06,468 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 22:05:06,521 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:05:06,555 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:05:06,580 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:05:06,918 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 89, 首次止盈触发: True, 最高价: 105
+2025-04-25 22:05:07,066 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -11.00%, 止损阈值: -10.00%
+2025-04-25 22:17:16,083 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 22:17:16,086 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 22:17:18,263 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 22:17:18,265 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 22:17:18,269 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 22:17:18,363 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 22:17:18,366 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 22:17:18,391 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:17:18,414 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 101, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:17:18,526 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:17:18,539 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:17:18,555 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 22:17:18,606 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:17:18,617 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:17:18,646 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 100, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:17:18,830 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:17:18,842 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:17:18,868 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:17:18,911 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111, 首次止盈触发: False, 最高价: 111
+2025-04-25 22:17:18,923 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:17:18,954 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 111.0, 首次止盈触发: True, 最高价: 111.0
+2025-04-25 22:17:19,238 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 22:17:19,327 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 22:17:19,391 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109, 首次止盈触发: False, 最高价: 109
+2025-04-25 22:17:19,402 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:17:19,428 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 109.0, 首次止盈触发: True, 最高价: 109.0
+2025-04-25 22:17:19,619 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 22:17:19,631 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 22:17:19,685 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95, 首次止盈触发: False, 最高价: 95
+2025-04-25 22:17:19,821 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90, 首次止盈触发: False, 最高价: 90
+2025-04-25 22:17:19,826 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 22:17:20,029 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:17:20,033 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:17:20,056 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:17:20,071 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:17:20,485 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:17:20,490 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 22:17:20,529 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:17:20,548 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:17:20,566 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:17:20,597 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 89, 首次止盈触发: True, 最高价: 105
+2025-04-25 22:17:20,616 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -11.00%, 止损阈值: -10.00%
+2025-04-25 22:20:46,056 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 22:20:46,059 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 22:20:48,291 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 22:20:48,293 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 22:20:48,614 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 22:20:48,620 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 22:20:48,621 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 22:20:48,642 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:20:48,655 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 101, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:20:48,841 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:20:48,928 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:20:48,932 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 22:20:48,965 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:20:49,075 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:20:49,090 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 100, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:20:49,260 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:20:49,265 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:20:49,275 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:20:49,307 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111, 首次止盈触发: False, 最高价: 111
+2025-04-25 22:20:49,310 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:20:49,319 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 111.0, 首次止盈触发: True, 最高价: 111.0
+2025-04-25 22:20:49,469 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 22:20:49,470 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 22:20:49,606 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109, 首次止盈触发: False, 最高价: 109
+2025-04-25 22:20:49,610 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:20:49,621 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 109.0, 首次止盈触发: True, 最高价: 109.0
+2025-04-25 22:20:49,667 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 22:20:49,670 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 22:20:49,987 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95, 首次止盈触发: False, 最高价: 95
+2025-04-25 22:20:50,024 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90, 首次止盈触发: False, 最高价: 90
+2025-04-25 22:20:50,174 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 22:20:50,238 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:20:50,243 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:20:50,256 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:20:50,276 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:20:50,288 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:20:50,294 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 22:20:50,412 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:20:50,615 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:20:50,631 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:20:50,641 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 89, 首次止盈触发: True, 最高价: 105
+2025-04-25 22:20:50,654 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -11.00%, 止损阈值: -10.00%
+2025-04-25 22:24:14,267 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 22:24:14,270 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 22:24:16,583 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 22:24:16,583 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 22:24:16,587 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 22:24:16,591 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 22:24:16,591 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 22:24:16,612 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:24:16,639 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 101, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:24:16,685 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:24:16,749 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:24:16,755 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 22:24:16,803 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:24:16,834 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:24:16,862 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 100, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:24:16,939 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:24:16,991 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:24:17,004 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:24:17,037 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111, 首次止盈触发: False, 最高价: 111
+2025-04-25 22:24:17,050 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:24:17,067 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 111.0, 首次止盈触发: True, 最高价: 111.0
+2025-04-25 22:24:17,120 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 22:24:17,122 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 22:24:17,187 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109, 首次止盈触发: False, 最高价: 109
+2025-04-25 22:24:17,193 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:24:17,214 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 109.0, 首次止盈触发: True, 最高价: 109.0
+2025-04-25 22:24:17,247 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 22:24:17,250 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 22:24:17,296 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95, 首次止盈触发: False, 最高价: 95
+2025-04-25 22:24:17,362 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90, 首次止盈触发: False, 最高价: 90
+2025-04-25 22:24:17,646 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 22:24:17,692 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:24:17,712 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:24:17,772 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:24:17,808 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:24:17,847 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:24:17,854 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 22:24:18,041 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:24:18,050 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:24:18,068 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:24:18,084 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 89, 首次止盈触发: True, 最高价: 105
+2025-04-25 22:24:18,368 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -11.00%, 止损阈值: -10.00%
+2025-04-25 22:28:52,931 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 22:28:52,956 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 22:28:55,544 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 22:28:55,890 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 22:28:55,902 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 22:28:55,945 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 22:28:55,947 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 22:28:56,002 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:28:56,095 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 101, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:28:56,254 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 110, 首次止盈触发: False, 最高价: 110
+2025-04-25 22:28:56,349 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:28:56,417 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 22:28:56,613 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:28:56,633 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:28:56,648 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 100, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:28:56,709 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:28:56,713 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:28:56,726 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:28:56,799 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 111, 首次止盈触发: False, 最高价: 111
+2025-04-25 22:28:56,832 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 11.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:28:56,848 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 111.0, 首次止盈触发: True, 最高价: 111.0
+2025-04-25 22:28:56,940 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 22:28:56,942 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止盈
+2025-04-25 22:28:57,004 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 109, 首次止盈触发: False, 最高价: 109
+2025-04-25 22:28:57,066 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 9.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:28:57,334 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 109.0, 首次止盈触发: True, 最高价: 109.0
+2025-04-25 22:28:57,409 - qmt_trading.position_manager - DEBUG - 未找到 TEST_STOCK 的持仓信息
+2025-04-25 22:28:57,414 - qmt_trading.position_manager - DEBUG - 未持有 TEST_STOCK，不需要检查止损
+2025-04-25 22:28:57,447 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 95, 首次止盈触发: False, 最高价: 95
+2025-04-25 22:28:57,566 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 90, 首次止盈触发: False, 最高价: 90
+2025-04-25 22:28:57,571 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -10.00%, 止损阈值: -10.00%
+2025-04-25 22:28:57,654 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:28:57,659 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:28:57,761 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:28:57,771 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 110, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:28:57,783 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 101, 首次止盈触发: True, 最高价: 110
+2025-04-25 22:28:57,831 - qmt_trading.position_manager - INFO - TEST_STOCK 触发动态止盈，当前价格: 101.00, 动态止盈位: 102.30, 最高价: 110.00
+2025-04-25 22:28:57,890 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 100, 成本价: 100, 当前价: 105, 首次止盈触发: False, 最高价: 105
+2025-04-25 22:28:58,008 - qmt_trading.position_manager - INFO - TEST_STOCK 触发初次止盈，当前盈利: 5.00%, 初次止盈阈值: 5.00%
+2025-04-25 22:28:58,033 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50.0, 成本价: 100.0, 当前价: 105.0, 首次止盈触发: True, 最高价: 105.0
+2025-04-25 22:28:58,397 - qmt_trading.position_manager - INFO - 更新 TEST_STOCK 的持仓信息成功，数量: 50, 成本价: 100, 当前价: 89, 首次止盈触发: True, 最高价: 105
+2025-04-25 22:28:58,403 - qmt_trading.position_manager - WARNING - TEST_STOCK 触发止损条件，当前亏损: -11.00%, 止损阈值: -10.00%
