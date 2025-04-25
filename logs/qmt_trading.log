@@ -503,3 +503,565 @@ Invoked with: <xtquant.datacenter.IPythonApiClient object at 0x000001A1045D0E30>
 2025-03-01 16:06:07,281 - qmt_trading.main - INFO - 下载 600036.SH 的历史数据
 2025-03-01 16:06:07,283 - qmt_trading.data_manager - INFO - 开始下载 600036.SH 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
 2025-03-01 16:06:07,284 - qmt_trading.data_manager - ERROR - 下载 600036.SH 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 16:18:40,385 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 16:18:40,469 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 16:18:40,650 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-01 16:18:40,660 - qmt_trading.data_manager - ERROR - 初始化迅投行情接口出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:18:40,662 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-01 16:18:40,662 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-01 16:18:40,721 - qmt_trading.main - INFO - ==================================================
+2025-03-01 16:18:40,721 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-03-01 16:18:40
+2025-03-01 16:18:40,722 - qmt_trading.main - INFO - ==================================================
+2025-03-01 16:18:40,723 - qmt_trading.main - INFO - 开始初始化系统...
+2025-03-01 16:18:40,724 - qmt_trading.main - INFO - 系统初始化完成
+2025-03-01 16:18:40,725 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-03-01 16:18:40,725 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-03-01 16:18:40,726 - qmt_trading.data_manager - INFO - 开始下载 000001.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 16:18:40,727 - qmt_trading.data_manager - ERROR - 下载 000001.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 16:26:09,331 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 16:26:09,354 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 16:26:09,483 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-01 16:26:09,487 - qmt_trading.data_manager - ERROR - 订阅行情时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:26:09,489 - qmt_trading.data_manager - WARNING - 未能成功订阅任何股票行情
+2025-03-01 16:26:09,490 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-01 16:26:09,491 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-01 16:26:09,553 - qmt_trading.main - INFO - ==================================================
+2025-03-01 16:26:09,554 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-03-01 16:26:09
+2025-03-01 16:26:09,556 - qmt_trading.main - INFO - ==================================================
+2025-03-01 16:26:09,557 - qmt_trading.main - INFO - 开始初始化系统...
+2025-03-01 16:26:09,557 - qmt_trading.main - INFO - 系统初始化完成
+2025-03-01 16:26:09,558 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-03-01 16:26:09,558 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-03-01 16:26:09,559 - qmt_trading.data_manager - INFO - 开始下载 000001.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 16:26:09,560 - qmt_trading.data_manager - ERROR - 下载 000001.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 16:29:03,521 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 16:29:03,544 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 16:29:03,625 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-01 16:29:03,625 - qmt_trading.data_manager - INFO - 使用的股票池: ['000001.SZ', '600036.SH', '000333.SZ', '600519.SH', '000858.SZ']
+2025-03-01 16:29:03,627 - qmt_trading.data_manager - INFO - 尝试使用原始格式逐个订阅股票...
+2025-03-01 16:29:03,646 - qmt_trading.data_manager - WARNING - 订阅 000001.SZ 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,655 - qmt_trading.data_manager - WARNING - 订阅 600036.SH 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,656 - qmt_trading.data_manager - WARNING - 订阅 000333.SZ 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,663 - qmt_trading.data_manager - WARNING - 订阅 600519.SH 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,672 - qmt_trading.data_manager - WARNING - 订阅 000858.SZ 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,673 - qmt_trading.data_manager - INFO - 尝试使用转换后的格式订阅股票...
+2025-03-01 16:29:03,676 - qmt_trading.data_manager - WARNING - 使用转换格式订阅 000001.SZ 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,679 - qmt_trading.data_manager - WARNING - 使用转换格式订阅 600036.SH 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,686 - qmt_trading.data_manager - WARNING - 使用转换格式订阅 000333.SZ 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,687 - qmt_trading.data_manager - WARNING - 使用转换格式订阅 600519.SH 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,690 - qmt_trading.data_manager - WARNING - 使用转换格式订阅 000858.SZ 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,691 - qmt_trading.data_manager - INFO - 尝试使用不同的period参数订阅股票...
+2025-03-01 16:29:03,691 - qmt_trading.data_manager - WARNING - 使用period=tick订阅时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,700 - qmt_trading.data_manager - WARNING - 使用period=1m订阅时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,703 - qmt_trading.data_manager - WARNING - 使用period=1d订阅时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:29:03,705 - qmt_trading.data_manager - WARNING - 未能成功订阅任何股票行情
+2025-03-01 16:29:03,706 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-01 16:29:03,707 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-01 16:29:03,805 - qmt_trading.main - INFO - ==================================================
+2025-03-01 16:29:03,807 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-03-01 16:29:03
+2025-03-01 16:29:03,808 - qmt_trading.main - INFO - ==================================================
+2025-03-01 16:29:03,809 - qmt_trading.main - INFO - 开始初始化系统...
+2025-03-01 16:29:03,810 - qmt_trading.main - INFO - 系统初始化完成
+2025-03-01 16:29:03,810 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-03-01 16:29:03,811 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-03-01 16:29:03,814 - qmt_trading.data_manager - INFO - 开始下载 000001.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 16:29:03,815 - qmt_trading.data_manager - ERROR - 下载 000001.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 16:32:37,565 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 16:32:37,586 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 16:32:37,687 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-01 16:32:37,688 - qmt_trading.data_manager - INFO - 股票池内容: ['000001.SZ', '600036.SH', '000333.SZ', '600519.SH', '000858.SZ']
+2025-03-01 16:32:37,689 - qmt_trading.data_manager - INFO - 原始股票代码: 000001.SZ, 转换后格式1: SZ.000001, 格式2: SZ000001
+2025-03-01 16:32:37,690 - qmt_trading.data_manager - INFO - 原始股票代码: 600036.SH, 转换后格式1: SH.600036, 格式2: SH600036
+2025-03-01 16:32:37,690 - qmt_trading.data_manager - INFO - 原始股票代码: 000333.SZ, 转换后格式1: SZ.000333, 格式2: SZ000333
+2025-03-01 16:32:37,691 - qmt_trading.data_manager - INFO - 原始股票代码: 600519.SH, 转换后格式1: SH.600519, 格式2: SH600519
+2025-03-01 16:32:37,691 - qmt_trading.data_manager - INFO - 原始股票代码: 000858.SZ, 转换后格式1: SZ.000858, 格式2: SZ000858
+2025-03-01 16:32:37,699 - qmt_trading.data_manager - DEBUG - 订阅 SZ.000001 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,705 - qmt_trading.data_manager - DEBUG - 订阅 SZ000001 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,708 - qmt_trading.data_manager - DEBUG - 订阅 SH.600036 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,711 - qmt_trading.data_manager - DEBUG - 订阅 SH600036 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,715 - qmt_trading.data_manager - DEBUG - 订阅 SZ.000333 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,719 - qmt_trading.data_manager - DEBUG - 订阅 SZ000333 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,736 - qmt_trading.data_manager - DEBUG - 订阅 SH.600519 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,738 - qmt_trading.data_manager - DEBUG - 订阅 SH600519 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,741 - qmt_trading.data_manager - DEBUG - 订阅 SZ.000858 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,743 - qmt_trading.data_manager - DEBUG - 订阅 SZ000858 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,745 - qmt_trading.data_manager - DEBUG - 使用原始代码订阅 000001.SZ 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,754 - qmt_trading.data_manager - DEBUG - 使用原始代码订阅 600036.SH 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,756 - qmt_trading.data_manager - DEBUG - 使用原始代码订阅 000333.SZ 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,758 - qmt_trading.data_manager - DEBUG - 使用原始代码订阅 600519.SH 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,760 - qmt_trading.data_manager - DEBUG - 使用原始代码订阅 000858.SZ 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,761 - qmt_trading.data_manager - DEBUG - 使用参数 {'period': 'tick'} 订阅时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,763 - qmt_trading.data_manager - DEBUG - 使用参数 {'period': '1m'} 订阅时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,816 - qmt_trading.data_manager - DEBUG - 使用参数 {'period': '1d'} 订阅时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,847 - qmt_trading.data_manager - DEBUG - 使用参数 {} 订阅时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:32:37,848 - qmt_trading.data_manager - WARNING - 未能成功订阅任何股票行情
+2025-03-01 16:32:37,850 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-01 16:32:37,851 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-01 16:32:38,027 - qmt_trading.main - INFO - ==================================================
+2025-03-01 16:32:38,041 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-03-01 16:32:38
+2025-03-01 16:32:38,070 - qmt_trading.main - INFO - ==================================================
+2025-03-01 16:32:38,101 - qmt_trading.main - INFO - 开始初始化系统...
+2025-03-01 16:32:38,105 - qmt_trading.main - INFO - 系统初始化完成
+2025-03-01 16:32:38,106 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-03-01 16:32:38,137 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-03-01 16:32:38,140 - qmt_trading.data_manager - INFO - 开始下载 000001.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 16:32:38,164 - qmt_trading.data_manager - ERROR - 下载 000001.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 16:35:45,506 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 16:35:45,527 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 16:35:45,645 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-01 16:35:45,648 - qmt_trading.data_manager - INFO - 股票池内容: ['000001.SZ', '600036.SH', '000333.SZ', '600519.SH', '000858.SZ']
+2025-03-01 16:35:45,653 - qmt_trading.data_manager - INFO - 原始股票代码: 000001.SZ, 转换后格式1: SZSES.000001, 格式2: SZSES000001
+2025-03-01 16:35:45,655 - qmt_trading.data_manager - INFO - 原始股票代码: 600036.SH, 转换后格式1: SHSES.600036, 格式2: SHSES600036
+2025-03-01 16:35:45,664 - qmt_trading.data_manager - INFO - 原始股票代码: 000333.SZ, 转换后格式1: SZSES.000333, 格式2: SZSES000333
+2025-03-01 16:35:45,666 - qmt_trading.data_manager - INFO - 原始股票代码: 600519.SH, 转换后格式1: SHSES.600519, 格式2: SHSES600519
+2025-03-01 16:35:45,688 - qmt_trading.data_manager - INFO - 原始股票代码: 000858.SZ, 转换后格式1: SZSES.000858, 格式2: SZSES000858
+2025-03-01 16:35:45,708 - qmt_trading.data_manager - DEBUG - 订阅 SZSES.000001 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,713 - qmt_trading.data_manager - DEBUG - 订阅 SZSES000001 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,715 - qmt_trading.data_manager - DEBUG - 订阅 SHSES.600036 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,716 - qmt_trading.data_manager - DEBUG - 订阅 SHSES600036 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,722 - qmt_trading.data_manager - DEBUG - 订阅 SZSES.000333 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,729 - qmt_trading.data_manager - DEBUG - 订阅 SZSES000333 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,731 - qmt_trading.data_manager - DEBUG - 订阅 SHSES.600519 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,732 - qmt_trading.data_manager - DEBUG - 订阅 SHSES600519 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,734 - qmt_trading.data_manager - DEBUG - 订阅 SZSES.000858 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,740 - qmt_trading.data_manager - DEBUG - 订阅 SZSES000858 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,742 - qmt_trading.data_manager - DEBUG - 使用原始代码订阅 000001.SZ 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,744 - qmt_trading.data_manager - DEBUG - 使用原始代码订阅 600036.SH 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,746 - qmt_trading.data_manager - DEBUG - 使用原始代码订阅 000333.SZ 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,748 - qmt_trading.data_manager - DEBUG - 使用原始代码订阅 600519.SH 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,751 - qmt_trading.data_manager - DEBUG - 使用原始代码订阅 000858.SZ 时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,754 - qmt_trading.data_manager - DEBUG - 使用参数 {'period': 'tick'} 订阅时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,759 - qmt_trading.data_manager - DEBUG - 使用参数 {'period': '1m'} 订阅时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,773 - qmt_trading.data_manager - DEBUG - 使用参数 {'period': '1d'} 订阅时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,775 - qmt_trading.data_manager - DEBUG - 使用参数 {} 订阅时出错: invalid stock_code, meta:-2, market:
+2025-03-01 16:35:45,776 - qmt_trading.data_manager - WARNING - 未能成功订阅任何股票行情
+2025-03-01 16:35:45,779 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-01 16:35:45,781 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-01 16:35:45,842 - qmt_trading.main - INFO - ==================================================
+2025-03-01 16:35:45,846 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-03-01 16:35:45
+2025-03-01 16:35:45,848 - qmt_trading.main - INFO - ==================================================
+2025-03-01 16:35:45,850 - qmt_trading.main - INFO - 开始初始化系统...
+2025-03-01 16:35:45,851 - qmt_trading.main - INFO - 系统初始化完成
+2025-03-01 16:35:45,852 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-03-01 16:35:45,853 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-03-01 16:35:45,854 - qmt_trading.data_manager - INFO - 开始下载 000001.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 16:35:45,856 - qmt_trading.data_manager - ERROR - 下载 000001.SZ 的历史数据时出错: get_market_data() got an unexpected keyword argument 'fields'
+2025-03-01 17:17:03,872 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-01 17:17:03,895 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-01 17:17:04,040 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-01 17:17:04,073 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-01 17:17:04,266 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-01 17:17:04,275 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-01 17:17:04,281 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-01 17:17:04,284 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-01 17:17:04,286 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-01 17:17:04,395 - qmt_trading.main - INFO - ==================================================
+2025-03-01 17:17:04,395 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-03-01 17:17:04
+2025-03-01 17:17:04,396 - qmt_trading.main - INFO - ==================================================
+2025-03-01 17:17:04,397 - qmt_trading.main - INFO - 开始初始化系统...
+2025-03-01 17:17:04,397 - qmt_trading.main - INFO - 系统初始化完成
+2025-03-01 17:17:04,398 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-03-01 17:17:04,398 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-03-01 17:17:04,400 - qmt_trading.data_manager - INFO - 开始下载 000001.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 17:17:04,411 - qmt_trading.data_manager - WARNING - 未获取到 000001.SZ 的历史数据
+2025-03-01 17:17:05,413 - qmt_trading.main - INFO - 下载 600519.SH 的历史数据
+2025-03-01 17:17:05,415 - qmt_trading.data_manager - INFO - 开始下载 600519.SH 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 17:17:05,416 - qmt_trading.data_manager - WARNING - 未获取到 600519.SH 的历史数据
+2025-03-01 17:17:06,450 - qmt_trading.main - INFO - 下载 000858.SZ 的历史数据
+2025-03-01 17:17:06,450 - qmt_trading.data_manager - INFO - 开始下载 000858.SZ 的历史数据，周期: 1d, 日期范围: 20240301 - 20250301
+2025-03-01 17:17:06,451 - qmt_trading.data_manager - WARNING - 未获取到 000858.SZ 的历史数据
+2025-03-01 17:17:07,452 - qmt_trading.main - INFO - 初始数据下载完成
+2025-03-01 17:17:07,453 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-03-01 17:17:07,512 - qmt_trading.data_manager - DEBUG - 从数据库获取 000001.SZ 的历史数据, 共 0 条记录
+2025-03-01 17:17:07,513 - qmt_trading.indicator_calculator - WARNING - 没有 000001.SZ 的历史数据，无法计算指标
+2025-03-01 17:17:07,523 - qmt_trading.data_manager - DEBUG - 从数据库获取 600519.SH 的历史数据, 共 0 条记录
+2025-03-01 17:17:07,524 - qmt_trading.indicator_calculator - WARNING - 没有 600519.SH 的历史数据，无法计算指标
+2025-03-01 17:17:07,536 - qmt_trading.data_manager - DEBUG - 从数据库获取 000858.SZ 的历史数据, 共 0 条记录
+2025-03-01 17:17:07,543 - qmt_trading.indicator_calculator - WARNING - 没有 000858.SZ 的历史数据，无法计算指标
+2025-03-01 17:17:07,550 - qmt_trading.main - INFO - 初始指标计算完成
+2025-03-01 17:17:07,550 - qmt_trading.main - INFO - 启动数据更新线程
+2025-03-01 17:17:07,582 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-03-01 17:17:07,582 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-03-01 17:17:07,618 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-03-01 17:17:07,619 - qmt_trading.main - INFO - 启动日志清理线程
+2025-03-01 17:17:07,651 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-03-01 17:17:07,682 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-03-01 17:17:07,740 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-03-01 17:17:08,135 - qmt_trading.web_server - ERROR - 启动Web服务器时出错: signal only works in main thread
+2025-03-09 19:01:42,622 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-09 19:01:42,649 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-09 19:01:42,711 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-09 19:01:42,719 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-09 19:01:42,746 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-09 19:01:42,773 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-09 19:01:42,777 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-09 19:01:42,783 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-09 19:01:42,784 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-09 19:01:42,806 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-03-09 19:01:42,910 - qmt_trading.trading_executor - ERROR - 处理委托回调时出错: 'dict' object has no attribute 'm_strOrderSysID'
+2025-03-09 19:01:42,930 - qmt_trading.trading_executor - ERROR - 处理成交回调时出错: 'dict' object has no attribute 'm_strInstrumentID'
+2025-03-09 19:04:30,088 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-09 19:04:30,094 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-09 19:04:30,330 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-09 19:04:30,350 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-09 19:04:30,370 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-09 19:04:30,415 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-09 19:04:30,416 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-09 19:04:30,430 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-09 19:04:30,452 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-09 19:04:30,533 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-03-09 19:04:30,649 - qmt_trading.trading_executor - ERROR - 处理委托回调时出错: 'dict' object has no attribute 'm_strOrderSysID'
+2025-03-09 19:04:30,652 - qmt_trading.trading_executor - ERROR - 处理成交回调时出错: 'dict' object has no attribute 'm_strInstrumentID'
+2025-03-09 19:07:36,848 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-09 19:07:36,852 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-09 19:07:36,861 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-09 19:07:36,867 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-09 19:07:36,872 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-09 19:07:36,877 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-09 19:07:36,879 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-09 19:07:36,881 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-09 19:07:36,883 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-09 19:07:36,915 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-03-09 19:07:37,594 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-03-09 19:07:37,597 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-03-09 19:07:37,599 - qmt_trading.trading_executor - ERROR - 处理成交回调时出错: 'MockDeal' object has no attribute 'm_dComssion'
+2025-03-09 19:08:50,947 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-09 19:08:50,950 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-09 19:08:50,965 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-09 19:08:50,968 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-09 19:08:50,976 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-09 19:08:50,987 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-09 19:08:50,990 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-09 19:08:50,998 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-09 19:08:51,016 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-09 19:08:51,073 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-03-09 19:08:51,162 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-03-09 19:08:51,173 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-03-09 19:08:51,220 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-03-09 19:08:51,242 - qmt_trading.position_manager - DEBUG - 未找到 510050.SH 的持仓信息
+2025-03-09 19:08:51,267 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 100, 成本价: 2.5, 当前价: 2.5
+2025-03-09 19:08:51,284 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-03-10 14:26:42,370 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-10 14:26:42,404 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-10 14:26:42,491 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-10 14:26:42,495 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-10 14:26:42,501 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-10 14:26:42,507 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-10 14:26:42,508 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-10 14:26:42,510 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-10 14:26:42,519 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-10 14:26:42,536 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-03-10 14:26:42,680 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-03-10 14:26:42,686 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-03-10 14:26:42,757 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-03-10 14:26:42,788 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 200, 成本价: 2.5, 当前价: 2.5
+2025-03-10 14:26:42,809 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-03-10 14:33:11,798 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-10 14:33:11,891 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-10 14:33:12,151 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-10 14:33:12,156 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-10 14:33:12,163 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-10 14:33:12,173 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-10 14:33:12,176 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-10 14:33:12,179 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-10 14:33:12,183 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-10 14:33:12,211 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-03-10 14:33:12,368 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-03-10 14:33:12,385 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-03-10 14:33:12,402 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-03-10 14:33:12,447 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 300, 成本价: 2.5, 当前价: 2.5
+2025-03-10 14:33:12,469 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-03-10 14:37:18,073 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-10 14:37:18,098 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-10 14:37:18,274 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-10 14:37:18,289 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-10 14:37:18,335 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-10 14:37:18,338 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-10 14:37:18,380 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-10 14:37:18,407 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-10 14:37:18,446 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-10 14:37:18,785 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-03-10 14:37:18,997 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-03-10 14:37:19,017 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-03-10 14:37:19,052 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-03-10 14:37:19,086 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 400, 成本价: 2.5, 当前价: 2.5
+2025-03-10 14:37:19,102 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-03-10 14:41:12,847 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-10 14:41:12,850 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-10 14:41:12,869 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-10 14:41:12,871 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-10 14:41:12,879 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-10 14:41:12,884 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-10 14:41:12,884 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-10 14:41:12,902 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-10 14:41:13,066 - qmt_trading.trading_executor - ERROR - XtQuantTrader初始化参数错误: __init__(): incompatible constructor arguments. The following argument types are supported:
+    1. xtquant.xtpythonclient.XtQuantAsyncClient(arg0: str, arg1: str, arg2: int)
+
+Invoked with: b'25105132', 'xtquant', '127.0.0.1'
+2025-03-10 14:41:13,069 - qmt_trading.trading_executor - INFO - XtQuantTrader可能的初始化方式: 
+        :param path: mini版迅投极速交易客户端安装路径下，userdata文件夹具体路径
+        :param session: 当前任务执行所属的会话id
+        :param callback: 回调方法
+        
+2025-03-10 14:41:13,075 - qmt_trading.trading_executor - WARNING - 尝试备用方法初始化交易API...
+2025-03-10 14:41:13,077 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-10 14:41:13,109 - qmt_trading.trading_executor - WARNING - 交易API未初始化，无法获取账户信息
+2025-03-10 14:41:13,690 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-03-10 14:41:13,764 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-03-10 14:41:13,830 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-03-10 14:41:13,873 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 500, 成本价: 2.5, 当前价: 2.5
+2025-03-10 14:41:13,887 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-03-10 14:43:37,157 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-10 14:43:37,161 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-10 14:43:37,176 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-10 14:43:37,177 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-10 14:43:37,184 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-10 14:43:37,191 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-10 14:43:37,192 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-10 14:43:37,194 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-10 14:43:37,293 - qmt_trading.trading_executor - ERROR - XtQuantTrader初始化参数错误: __init__(): incompatible constructor arguments. The following argument types are supported:
+    1. xtquant.xtpythonclient.XtQuantAsyncClient(arg0: str, arg1: str, arg2: int)
+
+Invoked with: b'25105132', 'xtquant', '127.0.0.1'
+2025-03-10 14:43:37,296 - qmt_trading.trading_executor - INFO - XtQuantTrader可能的初始化方式: 
+        :param path: mini版迅投极速交易客户端安装路径下，userdata文件夹具体路径
+        :param session: 当前任务执行所属的会话id
+        :param callback: 回调方法
+        
+2025-03-10 14:43:37,301 - qmt_trading.trading_executor - WARNING - 尝试备用方法初始化交易API...
+2025-03-10 14:43:37,302 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-10 14:43:37,340 - qmt_trading.trading_executor - WARNING - 交易API未初始化，无法获取账户信息
+2025-03-10 14:43:38,123 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-03-10 14:43:38,143 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-03-10 14:43:38,204 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-03-10 14:43:38,246 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 600, 成本价: 2.5, 当前价: 2.5
+2025-03-10 14:43:38,427 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-03-10 14:44:56,602 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-10 14:44:56,606 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-10 14:44:56,642 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-10 14:44:56,644 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-10 14:44:56,650 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-10 14:44:56,652 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-10 14:44:56,664 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-10 14:44:56,670 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-10 14:44:56,674 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-10 14:44:56,864 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-03-10 14:44:58,247 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-03-10 14:44:58,263 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-03-10 14:44:58,295 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-03-10 14:44:58,337 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 700, 成本价: 2.5, 当前价: 2.5
+2025-03-10 14:44:58,355 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-03-13 11:20:22,656 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-13 11:20:22,681 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-13 11:20:24,740 - qmt_trading.data_manager - ERROR - 初始化迅投行情接口出错: 无法连接xtquant服务，请检查QMT-投研版或QMT-极简版是否开启
+2025-03-13 11:20:24,744 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-13 11:20:24,921 - qmt_trading.trading_executor - ERROR - 创建XtQuantTrader实例失败: __init__() missing 1 required positional argument: 'session'
+2025-03-13 11:20:24,922 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-13 11:20:24,952 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-03-13 11:20:24,966 - qmt_trading.trading_executor - WARNING - 未能获取持仓信息
+2025-03-13 11:20:27,210 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-03-13 11:20:27,228 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-03-13 11:20:27,258 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-03-13 11:20:27,300 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 800, 成本价: 2.5, 当前价: 2.5
+2025-03-13 11:20:27,441 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-03-13 11:20:29,490 - qmt_trading.trading_executor - WARNING - 未能获取持仓信息
+2025-03-13 11:21:45,528 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-13 11:21:45,559 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-13 11:21:45,671 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-13 11:21:45,673 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-13 11:21:45,677 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-13 11:21:45,694 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-13 11:21:45,696 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-13 11:21:45,698 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-13 11:21:45,831 - qmt_trading.trading_executor - ERROR - 创建XtQuantTrader实例失败: __init__() missing 1 required positional argument: 'session'
+2025-03-13 11:21:45,832 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-13 11:21:45,881 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-03-13 11:21:45,906 - qmt_trading.trading_executor - WARNING - 未能获取持仓信息
+2025-03-13 11:21:46,365 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-03-13 11:21:46,392 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-03-13 11:21:46,417 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-03-13 11:21:46,454 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 900, 成本价: 2.5, 当前价: 2.5
+2025-03-13 11:21:46,477 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-03-13 11:21:46,583 - qmt_trading.trading_executor - WARNING - 未能获取持仓信息
+2025-03-13 11:34:23,464 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-03-13 11:34:23,488 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-03-13 11:34:23,575 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-03-13 11:34:23,578 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-03-13 11:34:23,583 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-03-13 11:34:23,591 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-03-13 11:34:23,593 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-03-13 11:34:23,595 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-03-13 11:34:23,715 - qmt_trading.trading_executor - ERROR - 创建XtQuantTrader实例失败: __init__() missing 1 required positional argument: 'session'
+2025-03-13 11:34:23,717 - qmt_trading.trading_executor - ERROR - 使用XtQuantAsyncClient初始化失败: module 'config' has no attribute 'get_xtquant_path'
+2025-03-13 11:34:23,724 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-03-13 11:34:23,918 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-03-13 11:34:23,956 - qmt_trading.trading_executor - WARNING - 未能获取持仓信息
+2025-03-13 11:34:24,384 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-03-13 11:34:24,388 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-03-13 11:34:24,406 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-03-13 11:34:24,431 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1000, 成本价: 2.5, 当前价: 2.5
+2025-03-13 11:34:24,452 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-03-13 11:34:24,487 - qmt_trading.trading_executor - WARNING - 未能获取持仓信息
+2025-04-24 23:10:39,837 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-24 23:10:39,859 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-24 23:10:40,039 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-24 23:10:40,170 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-24 23:10:40,423 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-24 23:10:40,547 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-24 23:10:40,554 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-24 23:10:40,556 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-04-24 23:10:40,558 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-04-24 23:10:40,576 - qmt_trading.main - INFO - ==================================================
+2025-04-24 23:10:40,580 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-04-24 23:10:40
+2025-04-24 23:10:40,581 - qmt_trading.main - INFO - ==================================================
+2025-04-24 23:10:40,583 - qmt_trading.main - INFO - 开始初始化系统...
+2025-04-24 23:10:40,586 - qmt_trading.main - INFO - 系统初始化完成
+2025-04-24 23:10:40,588 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-04-24 23:10:40,589 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-04-24 23:10:40,590 - qmt_trading.data_manager - INFO - 下载 000001.SZ 的历史数据, 周期: day, 从 20200101 到 20250424
+2025-04-24 23:10:41,134 - qmt_trading.data_manager - WARNING - 获取 000001.SZ 的历史数据为空
+2025-04-24 23:10:42,138 - qmt_trading.main - INFO - 下载 600519.SH 的历史数据
+2025-04-24 23:10:42,139 - qmt_trading.data_manager - INFO - 下载 600519.SH 的历史数据, 周期: day, 从 20200101 到 20250424
+2025-04-24 23:10:42,650 - qmt_trading.data_manager - WARNING - 获取 600519.SH 的历史数据为空
+2025-04-24 23:10:43,656 - qmt_trading.main - INFO - 下载 000858.SZ 的历史数据
+2025-04-24 23:10:43,716 - qmt_trading.data_manager - INFO - 下载 000858.SZ 的历史数据, 周期: day, 从 20200101 到 20250424
+2025-04-24 23:10:44,224 - qmt_trading.data_manager - WARNING - 获取 000858.SZ 的历史数据为空
+2025-04-24 23:10:45,224 - qmt_trading.main - INFO - 初始数据下载完成
+2025-04-24 23:10:45,225 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-04-24 23:10:45,271 - qmt_trading.data_manager - DEBUG - 从数据库获取 000001.SZ 的历史数据, 共 0 条记录
+2025-04-24 23:10:45,272 - qmt_trading.indicator_calculator - WARNING - 没有 000001.SZ 的历史数据，无法计算指标
+2025-04-24 23:10:45,287 - qmt_trading.data_manager - DEBUG - 从数据库获取 600519.SH 的历史数据, 共 0 条记录
+2025-04-24 23:10:45,362 - qmt_trading.indicator_calculator - WARNING - 没有 600519.SH 的历史数据，无法计算指标
+2025-04-24 23:10:45,371 - qmt_trading.data_manager - DEBUG - 从数据库获取 000858.SZ 的历史数据, 共 0 条记录
+2025-04-24 23:10:45,371 - qmt_trading.indicator_calculator - WARNING - 没有 000858.SZ 的历史数据，无法计算指标
+2025-04-24 23:10:45,372 - qmt_trading.main - INFO - 初始指标计算完成
+2025-04-24 23:10:45,373 - qmt_trading.main - INFO - 启动数据更新线程
+2025-04-24 23:10:45,375 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-04-24 23:10:45,377 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-04-24 23:10:45,379 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-04-24 23:10:45,380 - qmt_trading.main - INFO - 启动日志清理线程
+2025-04-24 23:10:45,381 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-04-24 23:10:45,382 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-04-24 23:10:45,382 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-04-24 23:10:45,724 - qmt_trading.web_server - ERROR - 启动Web服务器时出错: signal only works in main thread of the main interpreter
+2025-04-24 23:10:50,390 - qmt_trading.web_server - INFO - 推送线程已停止
+2025-04-24 23:23:21,220 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-04-24 23:23:21,224 - qmt_trading.main - INFO - 开始清理资源...
+2025-04-24 23:23:21,224 - qmt_trading.main - INFO - 停止 data_thread...
+2025-04-24 23:23:22,013 - qmt_trading.data_manager - INFO - 数据更新线程已停止
+2025-04-24 23:23:22,013 - qmt_trading.main - INFO - 停止 position_thread...
+2025-04-24 23:23:23,025 - qmt_trading.position_manager - INFO - 持仓监控线程已停止
+2025-04-24 23:23:23,025 - qmt_trading.main - INFO - 停止 log_thread...
+2025-04-24 23:23:23,025 - qmt_trading.main - INFO - 停止 web_thread...
+2025-04-24 23:23:23,025 - qmt_trading.trading_executor - INFO - 交易执行器已关闭
+2025-04-24 23:23:23,025 - qmt_trading.data_manager - INFO - 数据库连接已关闭
+2025-04-24 23:23:23,025 - qmt_trading.data_manager - INFO - 已断开行情连接
+2025-04-24 23:23:23,025 - qmt_trading.main - INFO - 资源清理完成
+2025-04-24 23:23:23,025 - qmt_trading.main - INFO - 系统已退出
+2025-04-24 23:23:29,183 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-24 23:23:29,185 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-24 23:23:29,199 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-24 23:23:29,207 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-24 23:23:29,211 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-24 23:23:29,214 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-24 23:23:29,221 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-24 23:23:29,230 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-04-24 23:23:29,233 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-04-24 23:23:29,288 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-04-24 23:23:54,390 - qmt_trading.web_server - INFO - 推送线程已停止
+2025-04-24 23:24:04,231 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-24 23:24:04,235 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-24 23:24:04,252 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-24 23:24:04,254 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-24 23:24:04,265 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-24 23:24:04,280 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-24 23:24:04,282 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-24 23:24:04,283 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-04-24 23:24:04,284 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-04-24 23:24:04,312 - qmt_trading.main - INFO - ==================================================
+2025-04-24 23:24:04,319 - qmt_trading.main - INFO - QMT量化交易系统启动 - 2025-04-24 23:24:04
+2025-04-24 23:24:04,409 - qmt_trading.main - INFO - ==================================================
+2025-04-24 23:24:04,447 - qmt_trading.main - INFO - 开始初始化系统...
+2025-04-24 23:24:04,465 - qmt_trading.main - INFO - 系统初始化完成
+2025-04-24 23:24:04,467 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-04-24 23:24:04,471 - qmt_trading.main - INFO - 下载 000001.SZ 的历史数据
+2025-04-24 23:24:04,476 - qmt_trading.data_manager - INFO - 下载 000001.SZ 的历史数据, 周期: day, 从 20200101 到 20250424
+2025-04-24 23:24:05,007 - qmt_trading.data_manager - WARNING - 获取 000001.SZ 的历史数据为空
+2025-04-24 23:24:06,007 - qmt_trading.main - INFO - 下载 600519.SH 的历史数据
+2025-04-24 23:24:06,009 - qmt_trading.data_manager - INFO - 下载 600519.SH 的历史数据, 周期: day, 从 20200101 到 20250424
+2025-04-24 23:24:06,536 - qmt_trading.data_manager - WARNING - 获取 600519.SH 的历史数据为空
+2025-04-24 23:24:07,541 - qmt_trading.main - INFO - 下载 000858.SZ 的历史数据
+2025-04-24 23:24:07,541 - qmt_trading.data_manager - INFO - 下载 000858.SZ 的历史数据, 周期: day, 从 20200101 到 20250424
+2025-04-24 23:24:08,042 - qmt_trading.data_manager - WARNING - 获取 000858.SZ 的历史数据为空
+2025-04-24 23:24:09,057 - qmt_trading.main - INFO - 初始数据下载完成
+2025-04-24 23:24:09,057 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-04-24 23:24:09,138 - qmt_trading.data_manager - DEBUG - 从数据库获取 000001.SZ 的历史数据, 共 0 条记录
+2025-04-24 23:24:09,140 - qmt_trading.indicator_calculator - WARNING - 没有 000001.SZ 的历史数据，无法计算指标
+2025-04-24 23:24:09,144 - qmt_trading.data_manager - DEBUG - 从数据库获取 600519.SH 的历史数据, 共 0 条记录
+2025-04-24 23:24:09,146 - qmt_trading.indicator_calculator - WARNING - 没有 600519.SH 的历史数据，无法计算指标
+2025-04-24 23:24:09,156 - qmt_trading.data_manager - DEBUG - 从数据库获取 000858.SZ 的历史数据, 共 0 条记录
+2025-04-24 23:24:09,157 - qmt_trading.indicator_calculator - WARNING - 没有 000858.SZ 的历史数据，无法计算指标
+2025-04-24 23:24:09,159 - qmt_trading.main - INFO - 初始指标计算完成
+2025-04-24 23:24:09,159 - qmt_trading.main - INFO - 启动数据更新线程
+2025-04-24 23:24:09,186 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-04-24 23:24:09,187 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-04-24 23:24:09,207 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-04-24 23:24:09,216 - qmt_trading.main - INFO - 启动日志清理线程
+2025-04-24 23:24:09,335 - qmt_trading.web_server - INFO - 推送线程已启动
+2025-04-24 23:24:25,645 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-04-24 23:24:25,645 - qmt_trading.main - INFO - 开始清理资源...
+2025-04-24 23:24:25,645 - qmt_trading.main - INFO - 停止 data_thread...
+2025-04-24 23:24:26,466 - qmt_trading.data_manager - INFO - 数据更新线程已停止
+2025-04-24 23:24:26,466 - qmt_trading.main - INFO - 停止 position_thread...
+2025-04-24 23:24:26,466 - qmt_trading.position_manager - INFO - 持仓监控线程已停止
+2025-04-24 23:24:26,466 - qmt_trading.main - INFO - 停止 log_thread...
+2025-04-24 23:24:26,466 - qmt_trading.trading_executor - INFO - 交易执行器已关闭
+2025-04-24 23:24:26,568 - qmt_trading.data_manager - INFO - 数据库连接已关闭
+2025-04-24 23:24:26,574 - qmt_trading.data_manager - INFO - 已断开行情连接
+2025-04-24 23:24:26,584 - qmt_trading.main - INFO - 资源清理完成
+2025-04-24 23:24:26,589 - qmt_trading.main - INFO - 系统已退出
+2025-04-24 23:29:15,069 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-24 23:29:15,074 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-24 23:29:15,090 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-24 23:29:15,095 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-24 23:29:15,101 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-24 23:29:15,109 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-24 23:29:15,110 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-24 23:29:15,111 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['XtQuantTrader', 'XtQuantTraderCallback', 'bson', 'cp', 'title']
+2025-04-24 23:29:15,112 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-04-24 23:29:15,324 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-04-24 23:29:15,844 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-04-24 23:29:16,176 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-04-24 23:29:16,236 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-04-24 23:29:16,280 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1100, 成本价: 2.5, 当前价: 2.5
+2025-04-24 23:29:16,310 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-04-25 12:44:36,523 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 12:44:36,543 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 12:44:38,753 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 12:44:38,772 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 12:44:38,798 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 12:44:38,826 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 12:44:38,846 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 12:44:38,863 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['Future', 'Thread', 'ThreadPoolExecutor', 'XTQC', 'XtQuantTrader', 'XtQuantTraderCallback', 'asyncio', 'cp', 'current_thread', 'os', 'title', 'xttype']
+2025-04-25 12:44:38,867 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-04-25 12:44:39,568 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-04-25 12:44:39,840 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-04-25 12:44:39,842 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-04-25 12:44:39,887 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-04-25 12:44:39,911 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1200, 成本价: 2.5, 当前价: 2.5
+2025-04-25 12:44:39,924 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
+2025-04-25 12:48:37,796 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-04-25 12:48:37,801 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-04-25 12:48:39,825 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-04-25 12:48:39,827 - qmt_trading.data_manager - INFO - 股票 000001.SZ 数据获取成功
+2025-04-25 12:48:39,833 - qmt_trading.data_manager - INFO - 股票 600519.SH 数据获取成功
+2025-04-25 12:48:39,835 - qmt_trading.data_manager - INFO - 股票 000858.SZ 数据获取成功
+2025-04-25 12:48:39,836 - qmt_trading.data_manager - INFO - 成功验证 3 只股票可获取数据
+2025-04-25 12:48:39,838 - qmt_trading.trading_executor - INFO - xtquant.xttrader支持的方法: ['Future', 'Thread', 'ThreadPoolExecutor', 'XTQC', 'XtQuantTrader', 'XtQuantTraderCallback', 'asyncio', 'cp', 'current_thread', 'os', 'title', 'xttype']
+2025-04-25 12:48:39,840 - qmt_trading.trading_executor - ERROR - 未找到可用的交易API初始化方法
+2025-04-25 12:48:39,851 - qmt_trading.trading_executor - WARNING - 未能获取账户 25105132 的信息
+2025-04-25 12:48:40,507 - qmt_trading.trading_executor - INFO - 收到委托回调: 510050.SH, 委托号: TEST_ORDER_123, 状态: 未知
+2025-04-25 12:48:40,517 - qmt_trading.trading_executor - INFO - 收到成交回调: 510050.SH, 成交价: 2.5, 成交量: 100
+2025-04-25 12:48:40,572 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 510050.SH, BUY, 价格: 2.5, 数量: 100
+2025-04-25 12:48:40,593 - qmt_trading.position_manager - INFO - 更新 510050.SH 的持仓信息成功，数量: 1300, 成本价: 2.5, 当前价: 2.5
+2025-04-25 12:48:40,600 - qmt_trading.position_manager - DEBUG - 获取到 510050.SH 的 0 条网格交易记录
