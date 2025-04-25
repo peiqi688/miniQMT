@@ -110,7 +110,10 @@ class DataManager:
             current_price REAL,
             market_value REAL,
             profit_ratio REAL,
-            last_update TIMESTAMP
+            last_update TIMESTAMP,
+            open_date TIMESTAMP,
+            profit_triggered BOOLEAN DEFAULT FALSE,
+            highest_price REAL           
         )
         ''')
         

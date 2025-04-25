@@ -6,7 +6,6 @@ import pandas as pd
 import logging
 import os
 
-
 # Create the 'logs' directory if it doesn't exist
 logs_dir = 'logs'
 if not os.path.exists(logs_dir):

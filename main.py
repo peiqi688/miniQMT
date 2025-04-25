@@ -145,7 +145,7 @@ def main():
     """主函数"""
     try:
         logger.info("=" * 50)
-        logger.info(f"QMT量化交易系统启动 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        logger.info(f"= QMT量化交易系统启动 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ")
         logger.info("=" * 50)
         
         # 设置信号处理

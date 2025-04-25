@@ -123,7 +123,7 @@ class IndicatorCalculator:
         """
         try:
             # 使用talib计算MACD
-            macd, signal, hist = talib.MACD(
+            macd, signal, hist = MACD(
                 df['close'].values,
                 fastperiod=config.MACD_FAST,
                 slowperiod=config.MACD_SLOW,
