@@ -59,7 +59,7 @@ class TradingExecutor:
                 return
             
             # 打印可用的交易API方法，便于调试
-            logger.info(f"xtquant.xttrader支持的方法: {[f for f in dir(xtt) if not f.startswith('_')]}")
+            # logger.info(f"xtquant.xttrader支持的方法: {[f for f in dir(xtt) if not f.startswith('_')]}")
             
             # 检查可能的交易API初始化方法
             if hasattr(xtt, 'create_trader'):
@@ -127,8 +127,8 @@ class TradingExecutor:
                     
                     # 注册回调函数
                     self._register_callbacks()
-                else:
-                    logger.error("未找到可用的交易API初始化方法")
+                # else:
+                #     logger.error("未找到可用的交易API初始化方法")
             
         except Exception as e:
             logger.error(f"初始化交易API出错: {str(e)}")

@@ -7,7 +7,8 @@ from datetime import datetime
 
 # ======================= 系统配置 =======================
 # 调试开关
-DEBUG = True
+DEBUG = False
+DEBUG_POSITION_MGR= True
 LOG_LEVEL = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
 LOG_FILE = "qmt_trading.log"
 LOG_MAX_SIZE = 10 * 1024 * 1024  # 10MB
@@ -30,6 +31,7 @@ UPDATE_INTERVAL = 60
 # ======================= 交易配置 =======================
 # 交易账号信息（从外部文件读取，避免敏感信息硬编码）
 ACCOUNT_CONFIG_FILE = "account_config.json"
+QMT_PATH = r'C:/光大证券金阳光QMT实盘/userdata_mini'
 
 def get_account_config():
     """从外部文件读取账号配置"""
@@ -111,6 +113,9 @@ TRADE_TIME = {
 
 def is_trade_time():
     """判断当前是否为交易时间"""
+    if DEBUG_POSITION_MGR:
+        return True
+
     now = datetime.now()
     weekday = now.weekday() + 1  # 转换为1-7表示周一至周日
     

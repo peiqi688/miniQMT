@@ -8,6 +8,7 @@ import time
 from datetime import datetime, timedelta
 import threading
 import xtquant.xtdata as xt
+import Methods
 
 import config
 from logger import get_logger
@@ -113,7 +114,8 @@ class DataManager:
             last_update TIMESTAMP,
             open_date TIMESTAMP,
             profit_triggered BOOLEAN DEFAULT FALSE,
-            highest_price REAL           
+            highest_price REAL,
+            stop_loss_price REAL                      
         )
         ''')
         
@@ -169,8 +171,87 @@ class DataManager:
                 
         except Exception as e:
             logger.error(f"初始化迅投行情接口出错: {str(e)}")
-    
+
     def download_history_data(self, stock_code, period=None, start_date=None, end_date=None):
+        """
+        下载股票历史数据 (使用Mootdx)
+        
+        参数:
+        stock_code (str): 股票代码
+        period (str): 周期，默认为日线 'day'
+        start_date (str): 开始日期，格式为'2022-01-01'
+        end_date (str): 结束日期，格式为'2022-01-01'
+        
+        返回:
+        pandas.DataFrame: 历史数据，若失败则返回None
+        """
+        try:
+            import Methods  # Import the Methods module
+
+            # Determine frequency code for Mootdx
+            if period == 'day':
+                freq = 9  # 日线
+            elif period == 'week':
+                freq = 5  # 周线
+            elif period == 'mon':
+                freq = 6  # 月线
+            elif period == '5m':
+                freq = 0  # 5分钟
+            elif period == '15m':
+                freq = 1  # 15分钟
+            elif period == '30m':
+                freq = 2  # 30分钟
+            elif period == '1h':
+                freq = 3  # 小时线
+            else:
+                freq = 9  # Default to 日线
+
+            # Adjust stock code if necessary
+            if stock_code.endswith((".SH", ".SZ")):
+                stock_code = stock_code[:-3]  # Remove suffix
+
+            # Call getStockData
+            df = Methods.getStockData(
+                code=stock_code,
+                offset = 60,
+                freq=freq,
+                adjustflag='qfq'  # 前复权
+            )
+
+            if df is None or df.empty:
+                logger.warning(f"使用Mootdx获取 {stock_code} 的历史数据为空")
+                return None
+
+            # Rename columns to match expected format
+            df = df.rename(columns={
+                'datetime': 'date',
+                'open': 'open',
+                'high': 'high',
+                'low': 'low',
+                'close': 'close',
+                'volume': 'volume',
+                'amount': 'amount'
+            })
+
+            # Ensure date column is in the correct format
+            if 'date' in df.columns:
+                df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
+
+            # Ensure 'close' column is numeric
+            df['close'] = pd.to_numeric(df['close'], errors='coerce')
+
+            # Add stock_code column
+            df['stock_code'] = stock_code
+
+            logger.info(f"成功使用Mootdx获取 {stock_code} 的历史数据, 共 {len(df)} 条记录")
+            return df
+
+        except Exception as e:
+            logger.error(f"使用Mootdx下载 {stock_code} 的历史数据时出错: {str(e)}")
+            return None
+
+
+    def download_history_xtdata(self, stock_code, period=None, start_date=None, end_date=None):
         """
         下载股票历史数据
         
@@ -280,8 +361,12 @@ class DataManager:
             
             # 准备数据
             data_df['stock_code'] = stock_code
+
+            # Ensure 'close' column is numeric
+            data_df['close'] = pd.to_numeric(data_df['close'], errors='coerce')
             
             # 保存到数据库
+            # Use 'append' and then handle duplicates
             data_df[['stock_code', 'date', 'open', 'high', 'low', 'close', 'volume', 'amount']].to_sql(
                 'stock_daily_data', 
                 self.conn, 
@@ -290,14 +375,88 @@ class DataManager:
                 method='multi'  # 使用批量插入提高性能
             )
             
+            # Handle duplicates: update existing rows
+            query = """
+            UPDATE stock_daily_data
+            SET open = excluded.open,
+                high = excluded.high,
+                low = excluded.low,
+                close = excluded.close,
+                volume = excluded.volume,
+                amount = excluded.amount
+            FROM (VALUES (?, ?, ?, ?, ?, ?, ?, ?)) AS excluded(stock_code, date, open, high, low, close, volume, amount)
+            WHERE stock_daily_data.stock_code = excluded.stock_code AND stock_daily_data.date = excluded.date;
+            """
+
+            # Delete duplicates
+            delete_query = """
+            DELETE FROM stock_daily_data
+            WHERE rowid NOT IN (
+                SELECT min(rowid)
+                FROM stock_daily_data
+                GROUP BY stock_code, date
+            );
+            """
+            self.conn.execute(delete_query)
             self.conn.commit()
+
             logger.info(f"已保存 {stock_code} 的历史数据到数据库, 共 {len(data_df)} 条记录")
             
         except Exception as e:
             logger.error(f"保存 {stock_code} 的历史数据时出错: {str(e)}")
             self.conn.rollback()
-    
+
+
     def get_latest_data(self, stock_code):
+        """
+        获取最新行情数据 (使用Mootdx)
+        
+        参数:
+        stock_code (str): 股票代码
+        
+        返回:
+        dict: 最新行情数据
+        """
+        try:
+            import Methods  # Import the Methods module
+
+            # Adjust stock code if necessary
+            if stock_code.endswith((".SH", ".SZ")):
+                stock_code = stock_code[:-3]  # Remove suffix
+
+            # Get the latest data using Mootdx (e.g., get last 1 day)
+            df = Methods.getStockData(
+                code=stock_code,
+                offset=1,  # Get only the latest data
+                freq=9,  # 日线
+                adjustflag='qfq'
+            )
+
+            if df is None or df.empty:
+                logger.warning(f"使用Mootdx获取 {stock_code} 的最新行情为空")
+                return None
+
+            # Extract the latest data
+            latest_data = df.iloc[-1].to_dict()
+
+            # Rename columns to match expected format
+            latest_data = {
+                'lastPrice': latest_data.get('close', None),
+                'volume': latest_data.get('volume', None),
+                'amount': latest_data.get('amount', None),
+                'date': latest_data.get('datetime', None)
+            }
+
+
+            logger.debug(f"Mootdx:{stock_code} 最新行情: {latest_data}")
+            return latest_data
+
+        except Exception as e:
+            logger.error(f"使用Mootdx获取 {stock_code} 的最新行情时出错: {str(e)}")
+            return None
+
+
+    def get_latest_xtdata(self, stock_code):
         """
         获取最新行情数据
         
@@ -316,39 +475,39 @@ class DataManager:
                 return None
             
             quote_data = latest_quote[stock_code]
-            logger.debug(f"{stock_code} 最新行情: {quote_data}")
+            logger.debug(f"xtdata: {stock_code} 最新行情: {quote_data}")
             
             return quote_data
             
         except Exception as e:
-            logger.error(f"获取 {stock_code} 的最新行情时出错: {str(e)}")
+            logger.error(f"xtdata: 获取 {stock_code} 的最新行情时出错: {str(e)}")
             return None
     
     def get_history_data_from_db(self, stock_code, start_date=None, end_date=None):
         """
         从数据库获取历史数据
-        
+
         参数:
         stock_code (str): 股票代码
         start_date (str): 开始日期，如 '2021-01-01'
         end_date (str): 结束日期，如 '2021-03-31'
-        
+
         返回:
         pandas.DataFrame: 历史数据
         """
         query = "SELECT * FROM stock_daily_data WHERE stock_code=?"
         params = [stock_code]
-        
+
         if start_date:
             query += " AND date>=?"
             params.append(start_date)
-            
+
         if end_date:
             query += " AND date<=?"
             params.append(end_date)
-            
+
         query += " ORDER BY date"
-        
+
         try:
             df = pd.read_sql_query(query, self.conn, params=params)
             logger.debug(f"从数据库获取 {stock_code} 的历史数据, 共 {len(df)} 条记录")
@@ -356,6 +515,7 @@ class DataManager:
         except Exception as e:
             logger.error(f"从数据库获取 {stock_code} 的历史数据时出错: {str(e)}")
             return pd.DataFrame()
+
     
     def update_all_stock_data(self):
         """更新所有股票的历史数据"""

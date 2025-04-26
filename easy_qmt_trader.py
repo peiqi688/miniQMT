@@ -83,6 +83,7 @@ class MyXtQuantTraderCallback(XtQuantTraderCallback):
         print("on_order_stock_async_response")
         print(response.account_id, response.order_id, response.seq)
         self.order_id_map[response.seq] = response.order_id
+
 class easy_qmt_trader:
     def __init__(self,path= r'D:/国金QMT交易端模拟/userdata_mini',
                   session_id = 123456,account='55009640',account_type='STOCK',

@@ -104,8 +104,8 @@ class IndicatorCalculator:
         pandas.Series: 移动平均线数据
         """
         try:
-            # 使用talib计算MA
-            ma = SMA(df['close'].values, timeperiod=period)
+            # 使用MyTT计算MA
+            ma = SMA(df['close'].values.astype(float), N=period)
             return ma
         except Exception as e:
             logger.error(f"计算MA{period}指标时出错: {str(e)}")
@@ -122,13 +122,14 @@ class IndicatorCalculator:
         pandas.DataFrame: MACD指标数据
         """
         try:
-            # 使用talib计算MACD
+            # 使用MyTT计算MACD
             macd, signal, hist = MACD(
-                df['close'].values,
-                fastperiod=config.MACD_FAST,
-                slowperiod=config.MACD_SLOW,
-                signalperiod=config.MACD_SIGNAL
+                df['close'].values.astype(float),
+                SHORT=config.MACD_FAST,
+                LONG=config.MACD_SLOW,
+                M=config.MACD_SIGNAL
             )
+
             
             # 创建结果DataFrame
             result = pd.DataFrame({
