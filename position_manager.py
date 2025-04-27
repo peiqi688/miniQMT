@@ -729,11 +729,16 @@ class PositionManager:
         if profit_triggered:
             # 动态止损
             highest_profit_ratio = (highest_price - cost_price) / cost_price
-            take_profit_coefficient = 1.0  # Default to no take-profit
+            take_profit_coefficient = 0.97  # Default to no take-profit (in case no level is met)
+
+            # Iterate through the DYNAMIC_TAKE_PROFIT levels
             for profit_level, coefficient in config.DYNAMIC_TAKE_PROFIT:
                 if highest_profit_ratio >= profit_level:
                     take_profit_coefficient = coefficient
-                    break  # Stop at the first matching level
+                    # We don't break here, because we want to find the highest applicable level
+                    # The last level that meets the condition will be used
+
+            # Calculate the dynamic stop-loss price
             dynamic_take_profit_price = highest_price * take_profit_coefficient
             return dynamic_take_profit_price
         else:
@@ -747,7 +752,7 @@ class PositionManager:
             cursor = self.conn.cursor()
             cursor.execute("UPDATE positions SET profit_triggered = ? WHERE stock_code = ?", (True, stock_code))
             self.conn.commit()
-            logger.info(f"已标记 {stock_code} 触发首次止盈")
+            logger.info(f"已在数据库中标记 {stock_code} 触发首次止盈")
         except Exception as e:
             logger.error(f"标记 {stock_code} 触发首次止盈时出错: {str(e)}")
             self.conn.rollback()
