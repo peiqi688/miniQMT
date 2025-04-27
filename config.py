@@ -139,7 +139,9 @@ DEFAULT_STOCK_POOL = [
     "000858.SZ",  # 五粮液
 ]
 
-def load_stock_pool(file_path="stock_pool.json"):
+STOCK_POOL_FILE = "stock_pool.json" 
+
+def load_stock_pool(file_path=STOCK_POOL_FILE):
     """从外部文件加载股票池"""
     try:
         with open(file_path, 'r') as f:

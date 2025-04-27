@@ -7,6 +7,8 @@ from datetime import datetime
 import time
 import threading
 import sys
+import os
+import json
 import Methods
 import config
 from logger import get_logger
@@ -23,7 +25,8 @@ class PositionManager:
         """初始化持仓管理器"""
         self.data_manager = get_data_manager()
         self.conn = self.data_manager.conn
-        
+        self.stock_positions_file = config.STOCK_POOL_FILE
+
         # 持仓监控线程
         self.monitor_thread = None
         self.stop_flag = False
@@ -115,6 +118,7 @@ class PositionManager:
             cursor = self.conn.cursor()
             cursor.execute("SELECT stock_code FROM positions")
             db_stock_codes = {row[0] for row in cursor.fetchall()}
+            current_positions = set()
 
             # 遍历实盘持仓数据
             for _, row in real_positions_df.iterrows():
@@ -144,16 +148,47 @@ class PositionManager:
                 
                 # 从数据库股票代码集合中移除已处理的股票代码
                 db_stock_codes.discard(stock_code)
+                current_positions.add(stock_code)
 
             # 处理数据库中存在但实盘已清仓的股票
             for stock_code in db_stock_codes:
                 self.remove_position(stock_code)
+
+            # Update stock_positions.json
+            self._update_stock_positions_file(current_positions)
 
             logger.info("实盘持仓数据已同步到数据库")
         except Exception as e:
             logger.error(f"同步实盘持仓数据到数据库时出错: {str(e)}")
             self.conn.rollback()
 
+    def _update_stock_positions_file(self, current_positions):
+        """
+        更新 stock_positions.json 文件，如果内容有变化则写入。
+
+        参数:
+        current_positions (set): 当前持仓的股票代码集合
+        """
+        try:
+            if os.path.exists(self.stock_positions_file):
+                with open(self.stock_positions_file, "r") as f:
+                    try:
+                        existing_positions = set(json.load(f))
+                    except json.JSONDecodeError:
+                        logger.warning(f"Error decoding JSON from {self.stock_positions_file}. Overwriting with current positions.")
+                        existing_positions = set()
+            else:
+                existing_positions = set()
+
+            if existing_positions != current_positions:
+                with open(self.stock_positions_file, "w") as f:
+                    json.dump(sorted(list(current_positions)), f, indent=4, ensure_ascii=False)  # Sort for consistency
+                logger.info(f"更新 {self.stock_positions_file} with new positions.")
+            # else:
+            #     logger.info(f"{self.stock_positions_file} is up to date.")
+
+        except Exception as e:
+            logger.error(f"更新出错 {self.stock_positions_file}: {str(e)}")
 
     def update_position(self, stock_code, volume, cost_price, current_price=None, profit_triggered=False, highest_price=None, open_date=None, stop_loss_price=None):
         """
@@ -175,13 +210,19 @@ class PositionManager:
         try:
             # 如果当前价格为None，获取最新行情
             if current_price is None:
-                latest_quote = self.data_manager.get_latest_data(stock_code)
-                if latest_quote:
-                    current_price = latest_quote.get('lastPrice')
+                # 先尝试用xtdata获取tick数据
+                latest_quote = self.data_manager.get_latest_xtdata(stock_code)
+                if latest_quote is None:
+                    # 再尝试用mootdx获取日线数据
+                    latest_data = self.data_manager.get_latest_data(stock_code)
+                    if latest_data:
+                        current_price = latest_data.get('lastPrice')
+                    else:
+                        logger.warning(f"未能获取 {stock_code} 的最新行情，使用成本价")
+                        current_price = cost_price
                 else:
-                    logger.warning(f"未能获取 {stock_code} 的最新价格，使用成本价")
-                    current_price = cost_price
-            
+                    current_price = latest_quote.get('lastPrice')
+                    
             # 计算市值和收益率
             market_value = round(volume * current_price, 2)
             profit_ratio = 100*round((current_price - cost_price) / cost_price if cost_price > 0 else 0, 4)
@@ -743,7 +784,7 @@ class PositionManager:
                     # 更新所有持仓的最新价格
                     self.update_all_positions_price()
 
-                    # 更新所有持仓的最高价
+                    # 更新所有持仓的最高价，需要open_date至今的K线
                     self.update_all_positions_highest_price()
 
                     # 获取所有持仓

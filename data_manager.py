@@ -34,7 +34,7 @@ class DataManager:
         # 已订阅的股票代码列表
         self.subscribed_stocks = []
         
-        # 初始化行情接口
+        # 初始化行情接口 
         self._init_xtquant()
         
         # 数据更新线程
@@ -365,8 +365,13 @@ class DataManager:
             # Ensure 'close' column is numeric
             data_df['close'] = pd.to_numeric(data_df['close'], errors='coerce')
             
+            # Delete existing data for the stock_code
+            cursor = self.conn.cursor()
+            cursor.execute("DELETE FROM stock_daily_data WHERE stock_code=?", (stock_code,))
+            self.conn.commit()
+            logger.info(f"已清除 {stock_code} 在 stock_daily_data 表中的原有数据")
+
             # 保存到数据库
-            # Use 'append' and then handle duplicates
             data_df[['stock_code', 'date', 'open', 'high', 'low', 'close', 'volume', 'amount']].to_sql(
                 'stock_daily_data', 
                 self.conn, 
@@ -375,29 +380,6 @@ class DataManager:
                 method='multi'  # 使用批量插入提高性能
             )
             
-            # Handle duplicates: update existing rows
-            query = """
-            UPDATE stock_daily_data
-            SET open = excluded.open,
-                high = excluded.high,
-                low = excluded.low,
-                close = excluded.close,
-                volume = excluded.volume,
-                amount = excluded.amount
-            FROM (VALUES (?, ?, ?, ?, ?, ?, ?, ?)) AS excluded(stock_code, date, open, high, low, close, volume, amount)
-            WHERE stock_daily_data.stock_code = excluded.stock_code AND stock_daily_data.date = excluded.date;
-            """
-
-            # Delete duplicates
-            delete_query = """
-            DELETE FROM stock_daily_data
-            WHERE rowid NOT IN (
-                SELECT min(rowid)
-                FROM stock_daily_data
-                GROUP BY stock_code, date
-            );
-            """
-            self.conn.execute(delete_query)
             self.conn.commit()
 
             logger.info(f"已保存 {stock_code} 的历史数据到数据库, 共 {len(data_df)} 条记录")
@@ -471,7 +453,7 @@ class DataManager:
             latest_quote = xt.get_full_tick([stock_code])
             
             if not latest_quote or stock_code not in latest_quote:
-                logger.warning(f"未获取到 {stock_code} 的最新行情")
+                logger.warning(f"xtdata:未获取到 {stock_code} 的tick行情")
                 return None
             
             quote_data = latest_quote[stock_code]

@@ -104,70 +104,6 @@ def IsMarketGoingUp():
     print("所有检查的指数的MA5都没有呈现上升趋势。")
     return False
 
-def m_v_vol(code, dfd):
-    
-    tick = Market.tick(code.replace('.', ''))
-
-    VOLUME= dfd['volume'].values.astype(float) 
-
-    # 计算虚拟成交量
-    now = datetime.datetime.now()
-    morning_start = datetime.datetime(now.year, now.month, now.day, 9, 30)
-    morning_end = datetime.datetime(now.year, now.month, now.day, 11, 30)
-    afternoon_start = datetime.datetime(now.year, now.month, now.day, 13, 0)
-    afternoon_end = datetime.datetime(now.year, now.month, now.day, 15, 0)
-
-    time0930 = datetime.datetime(now.year, now.month, now.day,  9, 30)
-    time0945 = datetime.datetime(now.year, now.month, now.day,  9, 45)
-    time1000 = datetime.datetime(now.year, now.month, now.day, 10,  0)
-    time1030 = datetime.datetime(now.year, now.month, now.day, 10, 30)
-    time1100 = datetime.datetime(now.year, now.month, now.day, 11,  0)
-    time1130 = datetime.datetime(now.year, now.month, now.day, 11, 30)
-    time1300 = datetime.datetime(now.year, now.month, now.day, 13,  0)
-    time1330 = datetime.datetime(now.year, now.month, now.day, 13, 30)
-    time1400 = datetime.datetime(now.year, now.month, now.day, 14,  0)
-    time1430 = datetime.datetime(now.year, now.month, now.day, 14, 30)
-    time1500 = datetime.datetime(now.year, now.month, now.day, 15,  0)	
-
-    if morning_start <= now <= morning_end:
-        minutes = int((now - morning_start).total_seconds() / 60)
-    elif afternoon_start <= now <= afternoon_end:
-        minutes = int((now - afternoon_start).total_seconds() / 60) + 120  # 加上上午的交易时间
-    elif now < morning_start:
-        minutes = 0  # 如果当前时间早于9:30，返回0
-    elif morning_end < now < afternoon_start:
-        minutes = 120  # 如果当前时间在中午休市期间，返回上午的交易时间
-    else:  # now > afternoon_end
-        minutes = 240  # 如果当前时间晚于15:00，返回全天的交易时间
-
-    if(minutes!=0):
-        VVOL = tick.transactions / (minutes / 240.0) 
-    else:
-        VVOL = VOLUME[-1]
-
-    if time0930 <= now < time0945:
-        V_FORECAST =  VVOL/7.0   # 3.5
-    elif time0945 <= now < time1000:
-        V_FORECAST =  VVOL/4.5   # 3.2
-    elif time1000 <= now < time1030:
-        V_FORECAST =  VVOL/4.0   # 3.2
-    elif time1030 <= now < time1100:
-        V_FORECAST =  VVOL/3.5   # 2.5
-    elif time1100 <= now <= time1130:
-        V_FORECAST =  VVOL/2.5   # 2.1
-    elif time1300 <= now < time1330:
-        V_FORECAST =  VVOL/1.7
-    elif time1330 <= now < time1400:
-        V_FORECAST =  VVOL/1.4
-    elif time1400 <= now < time1430:
-        V_FORECAST =  VVOL/1.3
-    elif time1430 <= now <= time1500:
-        V_FORECAST =  VVOL/1.2
-    else:
-        V_FORECAST = VVOL
-
-    return V_FORECAST    
-
 def calmacd(df):
     df2 = df
     if len(df2) > 33:
@@ -208,14 +144,6 @@ def sendTradeMsg(msg):
         WX_send("Stockquant："+msg)
     except Exception as e:
         print(e)
-
-# 满足建仓条件的股票列表
-def stockListGoodToLong():
-    # 60m出买点， 常规建仓为一类， 下有长中枢为另一类
-    db = getDB()
-    cursor = db.cursor()
-    cursor.execute("SELECT code,filter_box from stg_m60 where  isDel is NULL and  lastUpdatetime > '%s' and isKdayVolUp = 'y' and isKdayMA34GoUp = 'y' and priceOfHighPct >= 0.72" % backInDays(2))
-    return cursor.fetchall()
 
 
 if __name__ == '__main__':
