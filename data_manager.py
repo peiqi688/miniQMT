@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import threading
 import xtquant.xtdata as xt
 import Methods
-
+from easy_qmt_trader import easy_qmt_trader
 import config
 from logger import get_logger
 
@@ -152,6 +152,7 @@ class DataManager:
             valid_stocks = []
             for stock_code in config.STOCK_POOL:
                 try:
+                    stock_code = easy_qmt_trader.adjust_stock(stock_code)
                     # 尝试获取Tick数据验证股票代码有效性
                     tick_data = xt.get_full_tick([stock_code])
                     if tick_data and stock_code in tick_data:
@@ -400,8 +401,13 @@ class DataManager:
         dict: 最新行情数据
         """
         try:
-            import Methods  # Import the Methods module
-
+            #当前是交易时间，先尝试从xtdata接口获取tick数据
+            if config.is_trade_time():
+                latest_quote = self.get_latest_xtdata(stock_code=stock_code)
+                if latest_quote is not None:
+                    return latest_quote
+            
+            # 继续尝试从Mootdx获取数据
             # Adjust stock code if necessary
             if stock_code.endswith((".SH", ".SZ")):
                 stock_code = stock_code[:-3]  # Remove suffix
@@ -434,7 +440,7 @@ class DataManager:
             return latest_data
 
         except Exception as e:
-            logger.error(f"使用Mootdx获取 {stock_code} 的最新行情时出错: {str(e)}")
+            logger.error(f"获取 {stock_code} 的latest_data出错: {str(e)}")
             return None
 
 
@@ -448,6 +454,9 @@ class DataManager:
         返回:
         dict: 最新行情数据
         """
+
+        stock_code = easy_qmt_trader.adjust_stock(stock_code)
+
         try:
             # 测试已证明get_full_tick方法可用
             latest_quote = xt.get_full_tick([stock_code])

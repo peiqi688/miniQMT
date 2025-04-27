@@ -23,7 +23,7 @@ def backInDays(nday):
 
 # 对code列进行处理, 在调用baostock接口前添加前缀
 def add_bs_prefix(code):
-    if code.startswith('6'):
+    if code.startswith(('600', '601', '603', '688', '510', '511', '512', '513', '515', '113', '110', '118', '501')):
         return 'sh.' + code
     elif code.startswith(('0', '3')):
         return 'sz.' + code
@@ -134,16 +134,16 @@ def WX_send(msg):
         return None
 
 
-def sendTradeMsg(msg):
-    try:
-        DingTalk.markdown("python交易提醒："+msg)
-    except Exception as e:
-        print(e)
+# def sendTradeMsg(msg):
+#     try:
+#         DingTalk.markdown("python交易提醒："+msg)
+#     except Exception as e:
+#         print(e)
         
-    try:
-        WX_send("Stockquant："+msg)
-    except Exception as e:
-        print(e)
+#     try:
+#         WX_send("Stockquant："+msg)
+#     except Exception as e:
+#         print(e)
 
 
 if __name__ == '__main__':

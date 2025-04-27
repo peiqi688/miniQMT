@@ -8,7 +8,7 @@ from datetime import datetime
 # ======================= 系统配置 =======================
 # 调试开关
 DEBUG = False
-DEBUG_POSITION_MGR= True
+DEBUG_SIMU_STOCK_DATA= True
 LOG_LEVEL = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
 LOG_FILE = "qmt_trading.log"
 LOG_MAX_SIZE = 10 * 1024 * 1024  # 10MB
@@ -114,7 +114,7 @@ TRADE_TIME = {
 
 def is_trade_time():
     """判断当前是否为交易时间"""
-    if DEBUG_POSITION_MGR:
+    if DEBUG_SIMU_STOCK_DATA:
         return True
 
     now = datetime.now()

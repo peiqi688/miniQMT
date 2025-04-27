@@ -10,6 +10,7 @@ import os
 from datetime import datetime
 import argparse
 import pandas as pd
+import config
 
 
 # Create the 'logs' directory if it doesn't exist
@@ -68,7 +69,7 @@ def test_initialization():
                 
                 # 正确初始化交易API
                 # 假设路径，实际使用时需要替换为正确的路径
-                userdata_path = "C:/光大证券金阳光QMT实盘/userdata"
+                userdata_path = config.QMT_PATH
                 session_id = "test_session"
                 callback = MyCallback()
                 

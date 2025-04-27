@@ -210,18 +210,13 @@ class PositionManager:
         try:
             # 如果当前价格为None，获取最新行情
             if current_price is None:
-                # 先尝试用xtdata获取tick数据
-                latest_quote = self.data_manager.get_latest_xtdata(stock_code)
-                if latest_quote is None:
-                    # 再尝试用mootdx获取日线数据
-                    latest_data = self.data_manager.get_latest_data(stock_code)
-                    if latest_data:
-                        current_price = latest_data.get('lastPrice')
-                    else:
-                        logger.warning(f"未能获取 {stock_code} 的最新行情，使用成本价")
-                        current_price = cost_price
+                # 获取最新数据
+                latest_data = self.data_manager.get_latest_data(stock_code)
+                if latest_data:
+                    current_price = latest_data.get('lastPrice')
                 else:
-                    current_price = latest_quote.get('lastPrice')
+                    logger.warning(f"未能获取 {stock_code} 的最新行情，使用成本价")
+                    current_price = cost_price
                     
             # 计算市值和收益率
             market_value = round(volume * current_price, 2)
@@ -248,8 +243,8 @@ class PositionManager:
                     old_highest_price = current_price
                 if highest_price is None:
                     highest_price = max(old_highest_price, current_price)
-                else:
-                    highest_price = max(highest_price,old_highest_price)
+                # else:
+                #     highest_price = max(highest_price,old_highest_price)
                 # 如果没有传入止损价格，则重新计算
                 if stop_loss_price is None:
                     stop_loss_price = self.calculate_stop_loss_price(cost_price, highest_price, profit_triggered)
@@ -335,8 +330,8 @@ class PositionManager:
 
             for _, position in positions.iterrows():
                 stock_code = position['stock_code']
-
                 open_date_str = position['open_date']
+                highest_price = position['highest_price']
 
                 # Convert open_date to datetime object if it's a string
                 if isinstance(open_date_str, str):
@@ -366,24 +361,32 @@ class PositionManager:
                     continue
 
                 if history_data is not None and not history_data.empty:
-                    # 找到最高价
+                    # 找到开仓后日线数据最高价
                     highest_price = history_data['high'].astype(float).max()
-
-                    if highest_price > position['highest_price']:
-                        # 更新持仓"最高价”信息
-                        self.update_position(
-                            stock_code=stock_code,
-                            volume=position['volume'],
-                            cost_price=position['cost_price'],
-                            current_price=position['current_price'],
-                            profit_triggered=position['profit_triggered'],
-                            highest_price=highest_price,
-                            open_date=position['open_date'],
-                            stop_loss_price=position['stop_loss_price']
-                        )
-                        logger.info(f"更新 {stock_code} 的最高价为 {highest_price:.2f}")
                 else:
                     logger.warning(f"未能获取 {stock_code} 从 {open_date_formatted} 到 {today_formatted} 的历史数据，跳过更新最高价")
+
+                # 开盘时间，获取最新tick数据
+                if config.is_trade_time:
+                    latest_data = self.data_manager.get_latest_data(stock_code)
+                    if latest_data:
+                        current_price = latest_data.get('lastPrice')
+                        if current_price > highest_price:
+                            highest_price = current_price
+                
+                if highest_price > position['highest_price']:
+                    # 更新持仓"最高价”信息
+                    self.update_position(
+                        stock_code=stock_code,
+                        volume=position['volume'],
+                        cost_price=position['cost_price'],
+                        current_price=position['current_price'],
+                        profit_triggered=position['profit_triggered'],
+                        highest_price=highest_price,
+                        open_date=position['open_date'],
+                        stop_loss_price=position['stop_loss_price']
+                        )
+                    logger.info(f"更新 {stock_code} 的最高价为 {highest_price:.2f}")                    
 
         except Exception as e:
             logger.error(f"更新所有持仓的最高价时出错: {str(e)}")
@@ -404,6 +407,10 @@ class PositionManager:
                 profit_triggered = position['profit_triggered']
                 highest_price = position['highest_price']
                 open_date = position['open_date']
+
+                # 获取历史最高价
+
+
                 # 获取最新价格
                 latest_quote = self.data_manager.get_latest_data(stock_code)
                 if latest_quote:
@@ -416,7 +423,7 @@ class PositionManager:
                         # 更新持仓信息，传入最高价和止损价
                         self.update_position(stock_code, volume, cost_price, current_price, profit_triggered, highest_price, open_date, stop_loss_price)
                     else:
-                        logger.debug(f"{stock_code} 价格变化小于0.5%，跳过更新")
+                        logger.debug(f"{stock_code} 价格变化小于0.3%，跳过更新")
                 else:
                     logger.warning(f"未能获取 {stock_code} 的最新价格，跳过更新")
                 
@@ -815,10 +822,10 @@ class PositionManager:
                         
                         # 记录信号到日志，实际交易会在策略模块中执行
                         if stop_loss_triggered:
-                            logger.warning(f"{stock_code} 触发止损信号")
+                            logger.warning(f"{stock_code} 触发止损信号 $$$$$$$$$$$$$$$$$$$$----------------------------")
                         
                         if take_profit_triggered:
-                            logger.info(f"{stock_code} 触发止盈信号，类型: {take_profit_type}")
+                            logger.info(f"{stock_code} 触发止盈信号，类型: {take_profit_type} $$$$$$$$$$$$$$$$$$$$+++++")
                 
                 # 等待下一次监控
                 for _ in range(60):  # 每分钟检查一次
