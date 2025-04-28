@@ -168,8 +168,7 @@ def main():
         start_log_cleanup_thread()
         
         # 最后启动Web服务器
-        # start_web_server_thread()
-        start_web_server()
+        start_web_server_thread()
         
         # 等待退出信号
         logger.info("系统启动完成，按 Ctrl+C 退出")
