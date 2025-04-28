@@ -143,3 +143,14 @@ _is_test_environment() 方法用于判断是否在测试环境中，如果在测
 与实盘交易账户进行交互，同步持仓数据。
 与数据管理模块进行交互，获取最新行情。
 总而言之，PositionManager 类是整个量化交易系统中负责持仓管理的核心组件，它提供了完善的持仓数据管理、止损止盈策略、网格交易管理和监控功能。
+
+# 数据库的说明
+我希望在代码运行时增加一个position_manager的内存数据库，用于实时保存和更新持仓数据所有记录，内存数据库的结构与data_manager的持仓表positions保持一致，
+1. stock_code, volume, available, cost_price，market_value 以easy_qmt_trader.position方法作为权威数据来源，是从xtquant接口获得的账号实时持仓真实数据
+2. current_price, 通过data_manager的get_latest_data方法获得股票的最新价格，盘中时间用xtdata的tick数据，盘后时间用mootdx的历史数据
+3. highest_price, 通过position_manager.update_all_positions_highest_price方法获得
+3. profit_ratio,以 current_price, cost_price, volume为数据源，通过计算得到
+4. open_date, profit_triggered, highest_price, stop_loss_price需要通过sqlite数据库实现持久化，一旦数据发生变更就要将它们更新到数据库里，并在last_update里记录操作时间
+
+总而言之，内存数据库的关键持仓信息来自xtquant接口，其他需要高频次更新的数据来自data_manager，数据库里保存了需要持久化的内容。
+最简单的修改方式，是把所有对sqlite数据库进行操作的函数，修改为对内存数据库的操作，每隔一段时间(如5秒),把内存数据库里需要持久化的内容保存到sqlite数据库里。

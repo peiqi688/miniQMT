@@ -270,7 +270,7 @@ class DataManager:
             # Add stock_code column
             df['stock_code'] = stock_code
 
-            logger.info(f"成功使用Mootdx获取 {stock_code} 的历史数据, 共 {len(df)} 条记录")
+            # logger.info(f"成功使用Mootdx获取 {stock_code} 的历史数据, 共 {len(df)} 条记录")
             return df
 
         except Exception as e:
@@ -396,7 +396,7 @@ class DataManager:
             cursor = self.conn.cursor()
             cursor.execute("DELETE FROM stock_daily_data WHERE stock_code=?", (stock_code,))
             self.conn.commit()
-            logger.info(f"已清除 {stock_code} 在 stock_daily_data 表中的原有数据")
+            # logger.info(f"已清除 {stock_code} 在 stock_daily_data 表中的原有数据")
 
             # 保存到数据库
             data_df[['stock_code', 'date', 'open', 'high', 'low', 'close', 'volume', 'amount']].to_sql(

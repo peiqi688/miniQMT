@@ -107,11 +107,11 @@ class PositionManager:
                         if (db_open_date != open_date) or (db_profit_triggered != profit_triggered) or (db_highest_price != highest_price) or (db_stop_loss_price != stop_loss_price):
                             # 更新数据库
                             cursor.execute("UPDATE positions SET open_date=?, profit_triggered=?, highest_price=?, stop_loss_price=?, last_update=? WHERE stock_code=?", (open_date, profit_triggered, highest_price, stop_loss_price, now, stock_code))
-                            logger.info(f"更新 {stock_code} 在数据库中的数据")
+                            logger.info(f"更新内存数据库的 {stock_code} 到sql数据库")
                     else:
                         logger.warning(f"在数据库中未找到 {stock_code} 的记录")
                 self.conn.commit()
-                logger.info("内存数据库数据已同步到数据库")
+                # logger.info("内存数据库数据已同步到数据库")
         except Exception as e:
             logger.error(f"内存数据库数据同步到数据库时出错: {str(e)}")
             self.conn.rollback()
@@ -262,7 +262,7 @@ class PositionManager:
             # Update stock_positions.json
             self._update_stock_positions_file(current_positions)
 
-            logger.info("实盘持仓数据已同步到内存数据库")
+            # logger.info("实盘持仓数据已同步到内存数据库")
         except Exception as e:
             logger.error(f"同步实盘持仓数据到内存数据库时出错: {str(e)}")
             self.memory_conn.rollback()
@@ -327,7 +327,8 @@ class PositionManager:
                     
             # 计算市值和收益率
             market_value = round(volume * current_price, 2)
-            profit_ratio = 100*round((current_price - cost_price) / cost_price if cost_price > 0 else 0, 4)
+            # profit_ratio = 100*round((current_price - cost_price) / cost_price if cost_price > 0 else 0, 4)
+            profit_ratio = round(100 * (current_price - cost_price) / cost_price if cost_price > 0 else 0, 2)
             cost_price = round(cost_price, 2)
             current_price = round(current_price, 2)
             highest_price = round(highest_price, 2) if highest_price else None
