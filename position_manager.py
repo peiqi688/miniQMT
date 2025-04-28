@@ -40,7 +40,110 @@ class PositionManager:
         )
         self.qmt_trader.connect()
 
-    
+        # 创建内存数据库
+        self.memory_conn = sqlite3.connect(":memory:", check_same_thread=False)
+        self._create_memory_table()
+        self._sync_db_to_memory()
+
+        # 定时同步线程
+        self.sync_thread = None
+        self.sync_stop_flag = False
+        self.start_sync_thread()
+
+    def _create_memory_table(self):
+        """创建内存数据库表结构"""
+        cursor = self.memory_conn.cursor()
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS positions (
+            stock_code TEXT PRIMARY KEY,
+            volume INTEGER,
+            available REAL,           
+            cost_price REAL,
+            current_price REAL,
+            market_value REAL,
+            profit_ratio REAL,
+            last_update TIMESTAMP,
+            open_date TIMESTAMP,
+            profit_triggered BOOLEAN DEFAULT FALSE,
+            highest_price REAL,
+            stop_loss_price REAL                      
+        )
+        ''')
+        self.memory_conn.commit()
+        logger.info("内存数据库表结构已创建")
+
+    def _sync_db_to_memory(self):
+        """将数据库数据同步到内存数据库"""
+        try:
+            db_positions = pd.read_sql_query("SELECT * FROM positions", self.conn)
+            if not db_positions.empty:
+                db_positions.to_sql("positions", self.memory_conn, if_exists="replace", index=False)
+                self.memory_conn.commit()
+                logger.info("数据库数据已同步到内存数据库")
+        except Exception as e:
+            logger.error(f"数据库数据同步到内存数据库时出错: {str(e)}")
+
+    def _sync_memory_to_db(self):
+        """将内存数据库数据同步到数据库"""
+        try:
+            memory_positions = pd.read_sql_query("SELECT stock_code, open_date, profit_triggered, highest_price, stop_loss_price FROM positions", self.memory_conn)
+            if not memory_positions.empty:
+                now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                for _, row in memory_positions.iterrows():
+                    stock_code = row['stock_code']
+                    open_date = row['open_date']
+                    profit_triggered = row['profit_triggered']
+                    highest_price = row['highest_price']
+                    stop_loss_price = row['stop_loss_price']
+                    
+                    # 查询数据库中的对应记录
+                    cursor = self.conn.cursor()
+                    cursor.execute("SELECT open_date, profit_triggered, highest_price, stop_loss_price FROM positions WHERE stock_code=?", (stock_code,))
+                    db_row = cursor.fetchone()
+
+                    if db_row:
+                        db_open_date, db_profit_triggered, db_highest_price, db_stop_loss_price = db_row
+                        # 比较字段是否不同
+                        if (db_open_date != open_date) or (db_profit_triggered != profit_triggered) or (db_highest_price != highest_price) or (db_stop_loss_price != stop_loss_price):
+                            # 更新数据库
+                            cursor.execute("UPDATE positions SET open_date=?, profit_triggered=?, highest_price=?, stop_loss_price=?, last_update=? WHERE stock_code=?", (open_date, profit_triggered, highest_price, stop_loss_price, now, stock_code))
+                            logger.info(f"更新 {stock_code} 在数据库中的数据")
+                    else:
+                        logger.warning(f"在数据库中未找到 {stock_code} 的记录")
+                self.conn.commit()
+                logger.info("内存数据库数据已同步到数据库")
+        except Exception as e:
+            logger.error(f"内存数据库数据同步到数据库时出错: {str(e)}")
+            self.conn.rollback()
+
+    def start_sync_thread(self):
+        """启动定时同步线程"""
+        self.sync_stop_flag = False
+        self.sync_thread = threading.Thread(target=self._sync_loop)
+        self.sync_thread.daemon = True
+        self.sync_thread.start()
+        logger.info("定时同步线程已启动")
+
+    def stop_sync_thread(self):
+        """停止定时同步线程"""
+        if self.sync_thread and self.sync_thread.is_alive():
+            self.sync_stop_flag = True
+            self.sync_thread.join(timeout=5)
+            logger.info("定时同步线程已停止")
+
+    def _sync_loop(self):
+        """定时同步循环"""
+        while not self.sync_stop_flag:
+            try:
+                self._sync_memory_to_db()
+                for _ in range(5):
+                    if self.sync_stop_flag:
+                        break
+                    time.sleep(1)
+            except Exception as e:
+                logger.error(f"定时同步循环出错: {str(e)}")
+                time.sleep(60)  # 出错后等待一分钟再继续
+
     def get_all_positions(self):
         """
         获取所有持仓
@@ -54,12 +157,12 @@ class PositionManager:
                 # 获取实盘持仓数据
                 real_positions_df = self.qmt_trader.position()
                 
-                # 同步实盘持仓数据到数据库
+                # 同步实盘持仓数据到内存数据库
                 if not real_positions_df.empty:
-                    self._sync_real_positions_to_db(real_positions_df)
+                    self._sync_real_positions_to_memory(real_positions_df)
 
             query = "SELECT * FROM positions"
-            df = pd.read_sql_query(query, self.conn)
+            df = pd.read_sql_query(query, self.memory_conn)
             logger.debug(f"获取到 {len(df)} 条持仓记录")
             return df
         except Exception as e:
@@ -82,12 +185,12 @@ class PositionManager:
                 # 获取实盘持仓数据
                 real_positions_df = self.qmt_trader.position()
                 
-                # 同步实盘持仓数据到数据库
+                # 同步实盘持仓数据到内存数据库
                 if not real_positions_df.empty:
-                    self._sync_real_positions_to_db(real_positions_df)
+                    self._sync_real_positions_to_memory(real_positions_df)
 
             query = "SELECT * FROM positions WHERE stock_code=?"
-            df = pd.read_sql_query(query, self.conn, params=(stock_code,))
+            df = pd.read_sql_query(query, self.memory_conn, params=(stock_code,))
             
             if df.empty:
                 logger.debug(f"未找到 {stock_code} 的持仓信息")
@@ -106,18 +209,18 @@ class PositionManager:
         return 'unittest' in sys.modules
 
     
-    def _sync_real_positions_to_db(self, real_positions_df):
+    def _sync_real_positions_to_memory(self, real_positions_df):
         """
-        将实盘持仓数据同步到数据库
+        将实盘持仓数据同步到内存数据库
         
         参数:
         real_positions_df (pandas.DataFrame): 实盘持仓数据
         """
         try:
-            # 获取数据库中所有持仓的股票代码
-            cursor = self.conn.cursor()
+            # 获取内存数据库中所有持仓的股票代码
+            cursor = self.memory_conn.cursor()
             cursor.execute("SELECT stock_code FROM positions")
-            db_stock_codes = {row[0] for row in cursor.fetchall()}
+            memory_stock_codes = {row[0] for row in cursor.fetchall()}
             current_positions = set()
 
             # 遍历实盘持仓数据
@@ -136,33 +239,33 @@ class PositionManager:
                     logger.warning(f"未能获取 {stock_code} 的最新价格，使用成本价")
                     current_price = cost_price
                 
-                # 查询数据库中是否已存在该股票的持仓记录
-                cursor.execute("SELECT profit_triggered, open_date, highest_price FROM positions WHERE stock_code=?", (stock_code,))
+                # 查询内存数据库中是否已存在该股票的持仓记录
+                cursor.execute("SELECT profit_triggered, open_date, highest_price, stop_loss_price FROM positions WHERE stock_code=?", (stock_code,))
                 result = cursor.fetchone()
                 
                 if result:
                     # 如果存在，则更新持仓信息，但不修改open_date
-                    profit_triggered, open_date, highest_price = result
-                    self.update_position(stock_code, volume, cost_price, available, market_value, current_price, profit_triggered, highest_price, open_date)
+                    profit_triggered, open_date, highest_price, stop_loss_price = result
+                    self.update_position(stock_code, volume, cost_price, available, market_value, current_price, profit_triggered, highest_price, open_date, stop_loss_price)
                 else:
                     # 如果不存在，则新增持仓记录
                     self.update_position(stock_code, volume, cost_price, available, market_value, current_price)
                 
-                # 从数据库股票代码集合中移除已处理的股票代码
-                db_stock_codes.discard(stock_code)
+                # 从内存数据库股票代码集合中移除已处理的股票代码
+                memory_stock_codes.discard(stock_code)
                 current_positions.add(stock_code)
 
-            # 处理数据库中存在但实盘已清仓的股票
-            for stock_code in db_stock_codes:
+            # 处理内存数据库中存在但实盘已清仓的股票
+            for stock_code in memory_stock_codes:
                 self.remove_position(stock_code)
 
             # Update stock_positions.json
             self._update_stock_positions_file(current_positions)
 
-            logger.info("实盘持仓数据已同步到数据库")
+            logger.info("实盘持仓数据已同步到内存数据库")
         except Exception as e:
-            logger.error(f"同步实盘持仓数据到数据库时出错: {str(e)}")
-            self.conn.rollback()
+            logger.error(f"同步实盘持仓数据到内存数据库时出错: {str(e)}")
+            self.memory_conn.rollback()
 
     def _update_stock_positions_file(self, current_positions):
         """
@@ -234,7 +337,7 @@ class PositionManager:
             now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
             # 检查是否已有持仓记录
-            cursor = self.conn.cursor()
+            cursor = self.memory_conn.cursor()
             cursor.execute("SELECT open_date, profit_triggered, highest_price, stop_loss_price FROM positions WHERE stock_code=?", (stock_code,))
             result = cursor.fetchone()
             
@@ -259,10 +362,10 @@ class PositionManager:
 
                 cursor.execute("""
                     UPDATE positions 
-                    SET volume=?, cost_price=?, current_price=?, market_value=?, 
-                        profit_ratio=?, last_update=?, highest_price=?, stop_loss_price=?
+                    SET volume=?, cost_price=?, current_price=?, market_value=?, available=?,
+                        profit_ratio=?, last_update=?, highest_price=?, stop_loss_price=?, profit_triggered=?
                     WHERE stock_code=?
-                """, (volume, cost_price, current_price, market_value, profit_ratio, now, highest_price, stop_loss_price, stock_code))
+                """, (volume, cost_price, current_price, market_value, available, profit_ratio, now, highest_price, stop_loss_price, profit_triggered, stock_code))
 
                 if profit_triggered != result[1]:
                     logger.info(f"更新 {stock_code} 持仓: 首次止盈触发: 从 {result[1]} 到 {profit_triggered}")
@@ -283,17 +386,17 @@ class PositionManager:
                 stop_loss_price = round(stop_loss_price, 2)
                 cursor.execute("""
                     INSERT INTO positions 
-                    (stock_code, volume, cost_price, current_price, market_value, profit_ratio, last_update, open_date, profit_triggered, highest_price, stop_loss_price)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (stock_code, volume, cost_price, current_price, market_value, profit_ratio, now, open_date, profit_triggered, highest_price, stop_loss_price))
+                    (stock_code, volume, cost_price, current_price, market_value, available, profit_ratio, last_update, open_date, profit_triggered, highest_price, stop_loss_price)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (stock_code, volume, cost_price, current_price, market_value, available, profit_ratio, now, open_date, profit_triggered, highest_price, stop_loss_price))
                 logger.info(f"新增 {stock_code} 持仓: 数量: {volume}, 成本价: {cost_price}, 当前价: {current_price}, 首次止盈触发: {profit_triggered}, 最高价: {highest_price}, 止损价: {stop_loss_price}")
             
-            self.conn.commit()
+            self.memory_conn.commit()
             return True
             
         except Exception as e:
             logger.error(f"更新 {stock_code} 持仓Error: {str(e)}")
-            self.conn.rollback()
+            self.memory_conn.rollback()
             return False
 
 
@@ -308,9 +411,9 @@ class PositionManager:
         bool: 是否删除成功
         """
         try:
-            cursor = self.conn.cursor()
+            cursor = self.memory_conn.cursor()
             cursor.execute("DELETE FROM positions WHERE stock_code=?", (stock_code,))
-            self.conn.commit()
+            self.memory_conn.commit()
             
             if cursor.rowcount > 0:
                 logger.info(f"已删除 {stock_code} 的持仓记录")
@@ -321,7 +424,7 @@ class PositionManager:
                 
         except Exception as e:
             logger.error(f"删除 {stock_code} 的持仓记录时出错: {str(e)}")
-            self.conn.rollback()
+            self.memory_conn.rollback()
             return False
 
     def update_all_positions_highest_price(self):
@@ -425,7 +528,7 @@ class PositionManager:
                         # 计算止损价格
                         stop_loss_price = self.calculate_stop_loss_price(cost_price, highest_price, profit_triggered)
                         # 更新持仓信息，传入最高价和止损价
-                        self.update_position(stock_code, volume, cost_price, current_price, profit_triggered, highest_price, open_date, stop_loss_price)
+                        self.update_position(stock_code, volume, cost_price, position['available'], position['market_value'], current_price, profit_triggered, highest_price, open_date, stop_loss_price)
                     else:
                         logger.debug(f"{stock_code} 价格变化小于0.3%，跳过更新")
                 else:
@@ -433,7 +536,6 @@ class PositionManager:
                 
         except Exception as e:
             logger.error(f"更新所有持仓价格时出错: {str(e)}")
-
 
     
     def get_grid_trades(self, stock_code, status=None):
@@ -655,7 +757,6 @@ class PositionManager:
         except Exception as e:
             logger.error(f"检查 {stock_code} 的止损条件时出错: {str(e)}")
             return False
-
     
     def check_dynamic_take_profit(self, stock_code):
         """
@@ -790,7 +891,23 @@ class PositionManager:
             self.stop_flag = True
             self.monitor_thread.join(timeout=5)
             logger.info("持仓监控线程已停止")
-    
+
+    def get_all_positions_with_all_fields(self):
+        """
+        获取所有持仓的所有字段（包括内存数据库中的所有字段）
+        
+        返回:
+        pandas.DataFrame: 所有持仓数据
+        """
+        try:
+            query = "SELECT * FROM positions"
+            df = pd.read_sql_query(query, self.memory_conn)
+            logger.debug(f"获取到 {len(df)} 条持仓记录（所有字段）")
+            return df
+        except Exception as e:
+            logger.error(f"获取所有持仓信息（所有字段）时出错: {str(e)}")
+            return pd.DataFrame()    
+        
     def _position_monitor_loop(self):
         """持仓监控循环"""
         while not self.stop_flag:
