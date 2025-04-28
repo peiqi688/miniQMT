@@ -145,3 +145,5 @@ __pycache__/data_manager.cpython-310.pyc
 __pycache__/trading_executor.cpython-38.pyc
 __pycache__/trading_executor.cpython-310.pyc
 __pycache__/web_server.cpython-310.pyc
+__pycache__/Methods.cpython-39.pyc
+logs/qmt_trading.log
