@@ -106,6 +106,7 @@ class DataManager:
         CREATE TABLE IF NOT EXISTS positions (
             stock_code TEXT PRIMARY KEY,
             volume INTEGER,
+            available REAL,           
             cost_price REAL,
             current_price REAL,
             market_value REAL,
@@ -151,7 +152,8 @@ class DataManager:
             valid_stocks = []
             for stock_code in config.STOCK_POOL:
                 try:
-                    stock_code = easy_qmt_trader.adjust_stock(stock_code)
+                    stock_code = self._adjust_stock(stock_code)
+                    # 尝试adjust_stock(stock_code)
                     # 尝试获取Tick数据验证股票代码有效性
                     tick_data = xt.get_full_tick([stock_code])
                     if tick_data and stock_code in tick_data:

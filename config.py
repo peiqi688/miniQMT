@@ -56,7 +56,7 @@ BUY_GRID_LEVELS = [1.0, 0.93, 0.86]  # 建仓价格网格（第一个是初次�
 BUY_AMOUNT_RATIO = [0.4, 0.3, 0.3]  # 每次买入金额占单元的比例
 
 # 卖出和止损策略
-STOP_LOSS_RATIO = -0.095  # 止损比例（总成本亏损比例）
+STOP_LOSS_RATIO = -0.07  # 止损比例（总成本亏损比例）
 INITIAL_TAKE_PROFIT_RATIO = 0.05  # 首次止盈比例（首次盈利5%时卖出半仓）
 INITIAL_TAKE_PROFIT_RATIO_PERCENTAGE = 0.5  # 首次止盈卖出比例（半仓）
 

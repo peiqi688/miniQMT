@@ -124,7 +124,9 @@ class PositionManager:
             for _, row in real_positions_df.iterrows():
                 stock_code = row['证券代码']
                 volume = row['股票余额']
+                available = row['可用余额']
                 cost_price = row['成本价']
+                market_value = row['市值']
                 
                 # 获取当前价格
                 latest_quote = self.data_manager.get_latest_data(stock_code)
@@ -141,10 +143,10 @@ class PositionManager:
                 if result:
                     # 如果存在，则更新持仓信息，但不修改open_date
                     profit_triggered, open_date, highest_price = result
-                    self.update_position(stock_code, volume, cost_price, current_price, profit_triggered, highest_price, open_date)
+                    self.update_position(stock_code, volume, cost_price, available, market_value, current_price, profit_triggered, highest_price, open_date)
                 else:
                     # 如果不存在，则新增持仓记录
-                    self.update_position(stock_code, volume, cost_price, current_price)
+                    self.update_position(stock_code, volume, cost_price, available, market_value, current_price)
                 
                 # 从数据库股票代码集合中移除已处理的股票代码
                 db_stock_codes.discard(stock_code)
@@ -190,7 +192,7 @@ class PositionManager:
         except Exception as e:
             logger.error(f"更新出错 {self.stock_positions_file}: {str(e)}")
 
-    def update_position(self, stock_code, volume, cost_price, current_price=None, profit_triggered=False, highest_price=None, open_date=None, stop_loss_price=None):
+    def update_position(self, stock_code, volume, cost_price, available=None, market_value=None, current_price=None, profit_triggered=False, highest_price=None, open_date=None, stop_loss_price=None):
         """
         更新持仓信息
         
@@ -198,6 +200,8 @@ class PositionManager:
         stock_code (str): 股票代码
         volume (int): 持仓数量
         cost_price (float): 成本价
+        available (int): 可用数量
+        market_value (float): 市值，如果为None，会获取最新行情
         current_price (float): 当前价格，如果为None，会获取最新行情
         profit_triggered (bool): 是否已经触发首次止盈
         highest_price (float): 历史最高价
