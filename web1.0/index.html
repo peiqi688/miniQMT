@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交易监控面板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Add minor custom styles if needed */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        /* Ensure textarea scrolls */
+        #orderLog {
+             white-space: pre-wrap; /* Ensures line breaks are respected */
+             overflow-wrap: break-word; /* Breaks long words */
+        }
+        /* Style for loading/error messages */
+        .status-message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .loading { background-color: #e0f2fe; color: #0c4a6e; border: 1px solid #7dd3fc;}
+        .error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .success { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="container mx-auto bg-white shadow-md rounded-lg p-5">
+
+        <div id="messageArea"></div>
+
+        <section class="mb-6 border rounded p-4 bg-gray-50">
+            <h2 class="text-xl font-semibold mb-3 text-blue-700">1. 参数设置</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 items-center">
+                <div class="flex items-center space-x-2">
+                    <label for="singleBuyAmount" class="text-sm whitespace-nowrap">单只单次买入金额:</label>
+                    <input type="number" id="singleBuyAmount" class="border rounded px-2 py-1 w-full" value="35000">
+                </div>
+                 <div class="flex items-center space-x-2">
+                    <label for="firstProfitSell" class="text-sm whitespace-nowrap">平仓盈利超过:</label>
+                    <input type="number" id="firstProfitSell" class="border rounded px-2 py-1 w-20" value="5.00">
+                    <input type="checkbox" id="firstProfitSellEnabled" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                    <label for="firstProfitSellEnabled" class="text-sm">%</label>
+                 </div>
+                 <div class="flex items-center space-x-2">
+                    <label for="stockGainSellPencent" class="text-sm whitespace-nowrap">首次盈利平仓卖出:</label>
+                    <input type="number" id="stockGainSellPencent" class="border rounded px-2 py-1 w-20" value="60.00">
+					<input type="checkbox" id="firstProfitSellPencent" class="form-checkbox h-5 w-5 text-blue-600" checked>
+					<label for="firstProfitSellPencent" class="text-sm">%</label>
+                </div>
+                 <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="allowBuy" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                    <label for="allowBuy" class="text-sm">允许买</label>
+                    <input type="checkbox" id="allowSell" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                    <label for="allowSell" class="text-sm">允许卖</label>
+                 </div>				
+				<div class="flex items-center space-x-2">
+                    <label for="stopLossBuy" class="text-sm whitespace-nowrap">补仓跌幅超过:</label>
+                    <input type="number" id="stopLossBuy" class="border rounded px-2 py-1 w-20" value="5.00" >
+                    <input type="checkbox" id="stopLossBuyEnabled" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                    <label for="stopLossBuyEnabled" class="text-sm">%</label>
+                </div>				
+                <div class="flex items-center space-x-2">
+                    <label for="stockStopLoss" class="text-sm whitespace-nowrap">平仓止损超过:</label>
+                    <input type="number" id="stockStopLoss" class="border rounded px-2 py-1 w-20" value="7.00">
+					<input type="checkbox" id="StopLossEnabled" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                    <label for="StopLossEnabled" class="text-sm">%</label>
+                </div>
+				<div class="flex items-center space-x-2">
+                    <label for="singleStockMaxPosition" class="text-sm whitespace-nowrap">单只股票最大持仓:</label>
+                    <input type="number" id="singleStockMaxPosition" class="border rounded px-2 py-1 w-full" value="70000">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label for="totalMaxPosition" class="text-sm whitespace-nowrap">最大总持仓:</label>
+                    <input type="number" id="totalMaxPosition" class="border rounded px-2 py-1 w-full" value="400000">
+                </div>
+				<div class="flex items-center space-x-2">
+                    <label for="totalAccounts" class="text-sm whitespace-nowrap">连接IP:</label>
+                    <input type="text" id="totalAccounts" class="border rounded px-2 py-1 w-full" value="127.0.0.1">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label for="connectPort" class="text-sm whitespace-nowrap">端口号:</label>
+                    <input type="number" id="connectPort" class="border rounded px-2 py-1 w-full" value="5000">
+				</div>
+				<div></div>
+                <div class="flex items-center space-x-2">
+					<input type="checkbox" id="globalAllowBuySell" class="form-checkbox h-8 w-8 text-blue-600" checked>
+					<label for="globalAllowBuySell" class="text-sm">全局监控总开关</label>
+				</div>
+            </div>
+
+            <div class="mt-4 flex justify-between items-center">
+                 <div id="accountInfo" class="text-sm text-gray-700">
+                    账号 <span id="accountId" class="font-bold">--</span>:
+                    可用金额: <span id="availableBalance" class="font-bold text-green-600">--</span>
+                    最高持股: <span id="maxHoldingValue" class="font-bold">--</span>
+                    总资产: <span id="totalAssets" class="font-bold">--</span>
+                 </div>
+                <div id="statusIndicator" class="text-lg font-bold text-red-600">
+                    未运行
+                </div>
+            </div>
+
+             <div class="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
+                <button id="toggleMonitorBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                    开始执行监控
+                </button>
+                <button id="saveConfigBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                    保存当前数据
+                </button>
+                 <button id="clearLogBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                    清空日志
+                 </button>
+                 <button id="clearCurrentDataBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                    清空当前数据
+                 </button>
+                 <button id="clearBuySellDataBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                    清空买入/卖出数据
+                 </button>
+                 <button id="importDataBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                    导入保存数据
+                 </button>
+                 <button id="initHoldingsBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                    初始化持仓数据
+                 </button>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div class="lg:col-span-2 flex flex-col space-y-4">
+                <div class="flex items-center space-x-2 border rounded p-3 bg-gray-50">
+                    <label for="buyStrategy" class="text-sm font-medium whitespace-nowrap">1. 选股买入设置:</label>
+                    <select id="buyStrategy" class="border rounded px-2 py-1 text-sm">
+                        <option value="random_pool">从备选池随机买入</option>
+                        </select>
+                    <input type="number" id="buyQuantity" class="border rounded px-2 py-1 w-20 text-sm" placeholder="数量" value="1">
+                    <label for="buyQuantity" class="text-sm">只</label>
+                    <button id="executeBuyBtn" class="bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-bold py-1 px-3 rounded transition duration-150 ease-in-out whitespace-nowrap">
+                        按备选池入选设置一键买入
+                    </button>
+                </div>
+
+                <div class="flex-grow border rounded p-3 bg-white overflow-x-auto">
+                     <h3 class="text-lg font-semibold mb-2 text-blue-700">2. 当前持仓列表</h3>
+                     <div class="overflow-y-auto max-h-96"> <table class="w-full text-sm text-left border-collapse">
+                            <thead class="bg-gray-200 sticky top-0"> <tr>
+                                    <th class="border p-2"><input type="checkbox" id="selectAllHoldings"></th>
+                                    <th class="border p-2">代码</th>
+                                    <th class="border p-2">名称</th>
+                                    <th class="border p-2">涨跌幅</th>
+                                    <th class="border p-2">价格</th>									
+                                    <th class="border p-2">成本价</th>
+                                    <th class="border p-2">盈亏率</th>									
+                                    <th class="border p-2">持仓</th>
+                                    <th class="border p-2">可用数</th>
+                                    <th class="border p-2">总数</th>
+                                    <th class="border p-2">已止盈</th>
+                                    <th class="border p-2">建仓后最高价</th>
+                                    <th class="border p-2">动态止损价</th>
+                                    <th class="border p-2">建仓时间</th>
+                                    <th class="border p-2">基准成本价</th>
+                                </tr>
+                            </thead>
+                            <tbody id="holdingsTableBody">
+                                </tbody>
+                        </table>
+                     </div>
+                    <div id="holdingsLoading" class="text-center p-4 text-gray-500 hidden">加载持仓数据中...</div>
+                    <div id="holdingsError" class="text-center p-4 text-red-500 hidden">无法加载持仓数据。</div>
+                </div>
+            </div>
+
+            <div class="border rounded p-3 bg-gray-50 flex flex-col">
+                <h3 class="text-lg font-semibold mb-2 text-blue-700">3. 下单日志</h3>
+                <textarea id="orderLog" class="flex-grow border rounded p-2 text-xs bg-white resize-none" readonly rows="20"></textarea>
+                <div id="logLoading" class="text-center p-4 text-gray-500 hidden">加载日志中...</div>
+                 <div id="logError" class="text-center p-4 text-red-500 hidden">无法加载日志。</div>
+            </div>
+        </section>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
