@@ -208,21 +208,22 @@ document.addEventListener('DOMContentLoaded', () => {
             row.innerHTML = `
                 <td class="border p-2"><input type="checkbox" class="holding-checkbox" data-id="${stock.id || stock.stock_code}"></td>
                 <td class="border p-2">${stock.stock_code || '--'}</td>
-                <td class="border p-2">${stock.name || '--'}</td>
-                <td class="border p-2 ${parseFloat(stock.change_percent || 0) >= 0 ? 'text-green-600' : 'text-red-600'}">${parseFloat(stock.change_percent || 0).toFixed(2)}%</td>
+                <td class="border p-2">${stock.name || '--'}</td>                
+                <td class="border p-2 ${parseFloat(stock.change_percent || 0) >= 0 ? 'text-red-600' : 'text-green-600'}">${parseFloat(stock.change_percent || 0).toFixed(2)}%</td>
                 <td class="border p-2">${parseFloat(stock.current_price || 0).toFixed(2)}</td>
                 <td class="border p-2">${parseFloat(stock.cost_price || 0).toFixed(2)}</td>
-                <td class="border p-2 ${parseFloat(stock.profit_ratio || 0) >= 0 ? 'text-green-600' : 'text-red-600'}">${parseFloat(stock.profit_ratio || 0).toFixed(2)}%</td>
-                <td class="border p-2">${stock.volume || 0}</td>
-                <td class="border p-2">${stock.available || 0}</td>
-                <td class="border p-2">${stock.total || stock.volume || 0}</td>
-                <td class="border p-2">${stock.profit_triggered ? '是' : '否'}</td>
+                <td class="border p-2 ${parseFloat(stock.profit_ratio || 0) >= 0 ? 'text-red-600' : 'text-green-600'}">${parseFloat(stock.profit_ratio || 0).toFixed(2)}%</td>
+                <td class="border p-2">${stock.market_value || '--'}</td>
+                <td class="border p-2">${stock.available || 0}</td>       
+                <td class="border p-2">${stock.volume || 0}</td>         
+                <td class="border p-2 text-center"><input type="checkbox" ${stock.profit_triggered ? 'checked' : ''} disabled></td>
                 <td class="border p-2">${parseFloat(stock.highest_price || 0).toFixed(2)}</td>
                 <td class="border p-2">${parseFloat(stock.stop_loss_price || 0).toFixed(2)}</td>
-                <td class="border p-2 whitespace-nowrap">${stock.open_date || '--'}</td>
+                <td class="border p-2 whitespace-nowrap">${(stock.open_date || '--').split(' ')[0]}</td>
                 <td class="border p-2">${parseFloat(stock.base_cost_price || stock.cost_price || 0).toFixed(2)}</td>
             `;
             elements.holdingsTableBody.appendChild(row);
+
         });
 
         // 添加复选框监听器
