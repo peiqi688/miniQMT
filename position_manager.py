@@ -98,18 +98,34 @@ class PositionManager:
                     
                     # 查询数据库中的对应记录
                     cursor = self.conn.cursor()
-                    cursor.execute("SELECT open_date, profit_triggered, highest_price, stop_loss_price FROM positions WHERE stock_code=?", (stock_code,))
+                    cursor.execute("SELECT open_date, profit_triggered, highest_price, stop_loss_price FROM positions WHERE stock_code=?", (stock_code,))  # 确保查询所有需要持久化的字段
                     db_row = cursor.fetchone()
 
                     if db_row:
                         db_open_date, db_profit_triggered, db_highest_price, db_stop_loss_price = db_row
                         # 比较字段是否不同
                         if (db_open_date != open_date) or (db_profit_triggered != profit_triggered) or (db_highest_price != highest_price) or (db_stop_loss_price != stop_loss_price):
-                            # 更新数据库
+                            # 如果内存数据库中的 open_date 与 SQLite 数据库中的不一致，则使用 SQLite 数据库中的值
+                            if db_open_date != open_date:
+                                open_date = db_open_date
+                                row['open_date'] = open_date  # 更新内存数据库中的 open_date
+                            # 更新数据库，确保所有字段都得到更新
                             cursor.execute("UPDATE positions SET open_date=?, profit_triggered=?, highest_price=?, stop_loss_price=?, last_update=? WHERE stock_code=?", (open_date, profit_triggered, highest_price, stop_loss_price, now, stock_code))
                             logger.info(f"更新内存数据库的 {stock_code} 到sql数据库")
                     else:
+                        # 插入新记录，使用当前日期作为 open_date
+                        current_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        cursor.execute("""
+                            INSERT INTO positions (stock_code, open_date, profit_triggered, highest_price, stop_loss_price, last_update) 
+                            VALUES (?, ?, ?, ?, ?, ?)
+                        """, (stock_code, current_date, profit_triggered, highest_price, stop_loss_price, now))
+                        # 插入新记录后，立即从数据库读取 open_date，以确保内存数据库与数据库一致
+                        cursor.execute("SELECT open_date FROM positions WHERE stock_code=?", (stock_code,))
+                        open_date = cursor.fetchone()[0]
+                        row['open_date'] = open_date  # 更新内存数据库中的 open_date
                         logger.warning(f"在数据库中未找到 {stock_code} 的记录")
+                        logger.info(f"在数据库中插入新的 {stock_code} 记录，使用当前日期 {current_date} 作为 open_date")
+
                 self.conn.commit()
                 # logger.info("内存数据库数据已同步到数据库")
         except Exception as e:
@@ -249,15 +265,16 @@ class PositionManager:
                     self.update_position(stock_code, volume, cost_price, available, market_value, current_price, profit_triggered, highest_price, open_date, stop_loss_price)
                 else:
                     # 如果不存在，则新增持仓记录
-                    self.update_position(stock_code, volume, cost_price, available, market_value, current_price)
+                    self.update_position(stock_code, volume, cost_price, available, market_value, current_price, open_date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                 
                 # 从内存数据库股票代码集合中移除已处理的股票代码
                 memory_stock_codes.discard(stock_code)
                 current_positions.add(stock_code)
 
             # 处理内存数据库中存在但实盘已清仓的股票
-            for stock_code in memory_stock_codes:
-                self.remove_position(stock_code)
+            if not real_positions_df.empty:  # 只有当实盘数据不为空时才执行删除
+                for stock_code in memory_stock_codes - current_positions:
+                    self.remove_position(stock_code)
 
             # Update stock_positions.json
             self._update_stock_positions_file(current_positions)
@@ -526,10 +543,11 @@ class PositionManager:
                     # Only update if the price has changed significantly
                     old_price = position['current_price']
                     if abs(current_price - old_price) / old_price > 0.003:  # 0.3% threshold
-                        # 计算止损价格
-                        stop_loss_price = self.calculate_stop_loss_price(cost_price, highest_price, profit_triggered)
-                        # 更新持仓信息，传入最高价和止损价
-                        self.update_position(stock_code, volume, cost_price, position['available'], position['market_value'], current_price, profit_triggered, highest_price, open_date, stop_loss_price)
+                        # 更新持仓信息，传入所有字段
+                        self.update_position(stock_code, volume, cost_price, position['available'], position['market_value'], current_price, profit_triggered, highest_price, open_date, position['stop_loss_price'])
+                        logger.info(f"更新 {stock_code} 的最新价格为 {current_price:.2f}")
+                    elif current_price != old_price:
+                        logger.info(f"{stock_code} 价格变化小于0.3%，但仍更新价格为 {current_price:.2f}")
                     else:
                         logger.debug(f"{stock_code} 价格变化小于0.3%，跳过更新")
                 else:
@@ -749,7 +767,7 @@ class PositionManager:
             stop_loss_price = position['stop_loss_price']
             
             # 检查是否达到止损条件
-            if current_price <= stop_loss_price:
+            if current_price is not None and stop_loss_price is not None and current_price <= stop_loss_price:
                 logger.warning(f"{stock_code} 触发止损条件，当前价格: {current_price:.2f}, 止损价格: {stop_loss_price:.2f}")
                 return True
             
@@ -786,7 +804,7 @@ class PositionManager:
             # 检查是否已经触发过首次止盈
             if config.ENABLE_DYNAMIC_STOP_PROFIT:
                 if profit_triggered == False:
-                    if profit_ratio >= config.INITIAL_TAKE_PROFIT_RATIO:
+                    if profit_ratio is not None and profit_ratio >= config.INITIAL_TAKE_PROFIT_RATIO:
                         logger.info(f"{stock_code} 触发初次止盈，当前盈利: {profit_ratio:.2%}, 初次止盈阈值: {config.INITIAL_TAKE_PROFIT_RATIO:.2%}")
                         # 计算止损价格
                         stop_loss_price = self.calculate_stop_loss_price(cost_price, highest_price, True)
@@ -795,8 +813,9 @@ class PositionManager:
                 
                 # 检查动态止盈
                 if profit_triggered:
-                    # 计算最高价相对持仓成本价的涨幅
-                    highest_profit_ratio = (highest_price - cost_price) / cost_price
+                    # 计算最高价相对持仓成本价的涨幅, 确保 highest_price 不为 None
+                    if highest_price is not None:
+                        highest_profit_ratio = (highest_price - cost_price) / cost_price
                     
                     # 确定止盈位系数
                     take_profit_coefficient = 1.0  # Default to no take-profit
@@ -809,7 +828,7 @@ class PositionManager:
                     dynamic_take_profit_price = highest_price * take_profit_coefficient
                     
                     # 如果当前价格小于动态止盈位，触发止盈
-                    if current_price < dynamic_take_profit_price:
+                    if current_price is not None and current_price < dynamic_take_profit_price:
                         logger.info(f"{stock_code} 触发动态止盈，当前价格: {current_price:.2f}, 动态止盈位: {dynamic_take_profit_price:.2f}, 最高价: {highest_price:.2f}")
                         # 清仓
                         stop_loss_price = self.calculate_stop_loss_price(cost_price, highest_price, True)
