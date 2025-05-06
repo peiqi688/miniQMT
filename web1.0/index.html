@@ -25,9 +25,24 @@
         .loading { background-color: #e0f2fe; color: #0c4a6e; border: 1px solid #7dd3fc;}
         .error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
         .success { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; }
+        
+        /* 添加API连接状态指示器 */
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        .connected { background-color: #dcfce7; color: #166534; }
+        .disconnected { background-color: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body class="bg-gray-100 p-4">
+    <div id="connectionStatus" class="connection-status disconnected">API未连接</div>
     <div class="container mx-auto bg-white shadow-md rounded-lg p-5">
 
         <div id="messageArea"></div>
@@ -151,10 +166,10 @@
                                     <th class="border p-2">代码</th>
                                     <th class="border p-2">名称</th>
                                     <th class="border p-2">涨跌幅</th>
-                                    <th class="border p-2">价格</th>									
+                                    <th class="border p-2">价格</th>
                                     <th class="border p-2">成本价</th>
-                                    <th class="border p-2">盈亏率</th>									
-                                    <th class="border p-2">持仓</th>
+                                    <th class="border p-2">盈亏率</th>
+                                    <th class="border p-2">持仓数</th>
                                     <th class="border p-2">可用数</th>
                                     <th class="border p-2">总数</th>
                                     <th class="border p-2">已止盈</th>
@@ -165,7 +180,8 @@
                                 </tr>
                             </thead>
                             <tbody id="holdingsTableBody">
-                                </tbody>
+                                <!-- 持仓数据将在这里插入 -->
+                            </tbody>
                         </table>
                      </div>
                     <div id="holdingsLoading" class="text-center p-4 text-gray-500 hidden">加载持仓数据中...</div>

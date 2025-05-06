@@ -23,9 +23,10 @@ import utils
 
 # 获取logger
 logger = get_logger("web_server")
+webpage_dir = 'web1.0'
 
 # 创建Flask应用
-app = Flask(__name__, static_folder='web', static_url_path='')
+app = Flask(__name__, static_folder=webpage_dir, static_url_path='')
 
 # 允许跨域请求
 CORS(app)
@@ -53,12 +54,12 @@ stop_push_flag = False
 @app.route('/')
 def index():
     """Serve the index.html file"""
-    return send_from_directory(os.path.join(os.path.dirname(__file__), 'web'), 'index.html')
+    return send_from_directory(os.path.join(os.path.dirname(__file__), webpage_dir), 'index.html')
 
 @app.route('/<path:filename>')
 def serve_static(filename):
     """Serve static files from the 'web' directory"""
-    return send_from_directory(os.path.join(os.path.dirname(__file__), 'web'), filename)
+    return send_from_directory(os.path.join(os.path.dirname(__file__), webpage_dir), filename)
 
 
 @app.route('/api/positions', methods=['GET'])
@@ -171,4 +172,5 @@ def start_web_server():
     start_push_thread()
     app.run(host=config.WEB_SERVER_HOST, port=config.WEB_SERVER_PORT, debug=config.WEB_SERVER_DEBUG, use_reloader=False)
 
-# ... (rest of the code)
+if __name__ == '__main__':
+     start_web_server()
