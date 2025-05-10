@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="border p-2"><input type="checkbox" class="holding-checkbox" data-id="${stock.id || stock.stock_code}"></td>
                 <td class="border p-2">${stock.stock_code || '--'}</td>
                 <td class="border p-2">${stock.name || '--'}</td>                
-                <td class="border p-2 ${parseFloat(stock.change_percent || 0) >= 0 ? 'text-red-600' : 'text-green-600'}">${parseFloat(stock.change_percent || 0).toFixed(2)}%</td>
+                <td class="border p-2 ${parseFloat(stock.change_percentage || 0) >= 0 ? 'text-red-600' : 'text-green-600'}">${parseFloat(stock.change_percentage || 0).toFixed(2)}%</td>
                 <td class="border p-2">${parseFloat(stock.current_price || 0).toFixed(2)}</td>
                 <td class="border p-2">${parseFloat(stock.cost_price || 0).toFixed(2)}</td>
                 <td class="border p-2 ${parseFloat(stock.profit_ratio || 0) >= 0 ? 'text-red-600' : 'text-green-600'}">${parseFloat(stock.profit_ratio || 0).toFixed(2)}%</td>

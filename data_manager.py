@@ -455,9 +455,9 @@ class DataManager:
 
             # Rename columns to match expected format
             latest_data = {
-                'lastPrice': latest_data.get('close', None),
-                'volume': latest_data.get('volume', None),
-                'amount': latest_data.get('amount', None),
+                'lastPrice': float(latest_data.get('close', 0)),
+                'volume': float(latest_data.get('volume', 0)),
+                'amount': float(latest_data.get('amount', 0)),
                 'date': latest_data.get('datetime', None)
             }
 

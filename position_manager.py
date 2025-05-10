@@ -213,7 +213,16 @@ class PositionManager:
                 return None
             
             # 转换为字典
-            position = df.iloc[0].to_dict()
+            position = df.iloc[0].to_dict()  
+            # 确保数值字段转换为浮点数
+            numeric_fields = ['volume', 'available', 'cost_price', 'current_price', 'market_value', 'profit_ratio', 'highest_price', 'stop_loss_price']
+            for field in numeric_fields:
+                if field in position and position[field] is not None:
+                    try:
+                        position[field] = float(position[field])
+                    except ValueError:
+                        logger.warning(f"无法将字段 '{field}' 的值 '{position[field]}' 转换为浮点数，使用默认值 0.0")
+                        position[field] = 0.0  # 或者根据实际情况设置其他默认值
             return position
         except Exception as e:
             logger.error(f"获取 {stock_code} 的持仓信息时出错: {str(e)}")
@@ -527,10 +536,10 @@ class PositionManager:
             
             for _, position in positions.iterrows():
                 stock_code = position['stock_code']
-                volume = position['volume']
-                cost_price = position['cost_price']
+                volume = int(position['volume'])
+                cost_price = float(position['cost_price'])
                 profit_triggered = position['profit_triggered']
-                highest_price = position['highest_price']
+                highest_price = float(position['highest_price'])
                 open_date = position['open_date']
 
                 # 获取历史最高价
@@ -541,15 +550,15 @@ class PositionManager:
                 if latest_quote:
                     current_price = latest_quote.get('lastPrice')
                     # Only update if the price has changed significantly
-                    old_price = position['current_price']
+                    old_price = float(position['current_price'])
                     if abs(current_price - old_price) / old_price > 0.003:  # 0.3% threshold
                         # 更新持仓信息，传入所有字段
-                        self.update_position(stock_code, volume, cost_price, position['available'], position['market_value'], current_price, profit_triggered, highest_price, open_date, position['stop_loss_price'])
+                        self.update_position(stock_code, volume, cost_price, float(position['available']), float(position['market_value']), current_price, profit_triggered, highest_price, open_date, float(position['stop_loss_price']))
                         logger.info(f"更新 {stock_code} 的最新价格为 {current_price:.2f}")
-                    elif current_price != old_price:
-                        logger.info(f"{stock_code} 价格变化小于0.3%，但仍更新价格为 {current_price:.2f}")
-                    else:
-                        logger.debug(f"{stock_code} 价格变化小于0.3%，跳过更新")
+                    # elif current_price != old_price:
+                    #     logger.info(f"{stock_code} 价格变化小于0.3%，但仍更新价格为 {current_price:.2f}")
+                    # else:
+                    #     logger.debug(f"{stock_code} 价格变化小于0.3%，跳过更新")
                 else:
                     logger.warning(f"未能获取 {stock_code} 的最新价格，跳过更新")
                 
@@ -922,11 +931,27 @@ class PositionManager:
         try:
             query = "SELECT * FROM positions"
             df = pd.read_sql_query(query, self.memory_conn)
-            logger.debug(f"获取到 {len(df)} 条持仓记录（所有字段）")
+            
+            # 获取每只股票的最新行情并计算涨跌幅
+            change_percentages = {}
+            for stock_code in df['stock_code']:
+                latest_data = self.data_manager.get_latest_xtdata(stock_code)
+                lastPrice = latest_data.get('lastPrice')
+                lastClose = latest_data.get('lastClose')
+                if latest_data and lastClose != 0:
+                    change_percentage = round((lastPrice - lastClose) / lastClose * 100, 2)
+                    change_percentages[stock_code] = change_percentage
+                else:
+                    change_percentages[stock_code] = 0.0  # 无法获取或上一日收盘价为0，则设为0
+            
+            # 将涨跌幅添加到 DataFrame 中
+            df['change_percentage'] = df['stock_code'].map(change_percentages)
+            
+            logger.debug(f"获取到 {len(df)} 条持仓记录（所有字段），并计算了涨跌幅")
             return df
         except Exception as e:
             logger.error(f"获取所有持仓信息（所有字段）时出错: {str(e)}")
-            return pd.DataFrame()    
+            return pd.DataFrame() 
         
     def _position_monitor_loop(self):
         """持仓监控循环"""
