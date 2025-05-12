@@ -690,7 +690,7 @@ class easy_qmt_trader:
                 return pd.DataFrame(columns=columns)
                     
         except Exception as e:
-            logger.error(f"获取持仓信息时出错: {str(e)}")
+            print(f"获取持仓信息时出错: {str(e)}")
             columns = ['账号类型', '资金账号', '证券代码', '股票余额', '可用余额', 
                     '成本价', '市值', '选择', '持股天数', '交易状态', '明细',
                     '证券名称', '冻结数量', '市价', '盈亏', '盈亏比(%)', 

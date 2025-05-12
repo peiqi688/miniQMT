@@ -70,6 +70,54 @@ def connection_status():
         'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     })
 
+@app.route('/api/status', methods=['GET'])
+def get_status():
+    """获取系统状态"""
+    try:
+        # 获取账户信息
+        account_info = trading_executor.get_account_info() or {}
+        
+        # 如果没有账户信息，使用默认值
+        if not account_info:
+            account_info = {
+                'account_id': '--',
+                'available': 0.0,
+                'balance': 0.0,
+                'market_value': 0.0
+            }
+            
+        # 格式化为前端期望的结构
+        account_data = {
+            'id': account_info.get('account_id', '--'),
+            'availableBalance': account_info.get('available', 0.0),
+            'maxHoldingValue': account_info.get('market_value', 0.0),
+            'totalAssets': account_info.get('balance', 0.0)
+        }
+        
+        # 判断监控状态
+        strategy_monitoring = (
+            trading_strategy.strategy_thread is not None and 
+            trading_strategy.strategy_thread.is_alive()
+        )
+        position_monitoring = (
+            position_manager.monitor_thread is not None and
+            position_manager.monitor_thread.is_alive()
+        )
+        is_monitoring = strategy_monitoring or position_monitoring
+
+        return jsonify({
+            'status': 'success',
+            'isMonitoring': is_monitoring,
+            'account': account_data,
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+    except Exception as e:
+        logger.error(f"获取系统状态时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"获取系统状态时出错: {str(e)}"
+        }), 500
+
 @app.route('/api/positions', methods=['GET'])
 def get_positions():
     """获取持仓信息"""

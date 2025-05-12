@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         availableBalance: document.getElementById('availableBalance'),
         maxHoldingValue: document.getElementById('maxHoldingValue'),
         totalAssets: document.getElementById('totalAssets'),
+        lastUpdateTimestamp: document.getElementById('last-update-timestamp'),
         statusIndicator: document.getElementById('statusIndicator'),
         // 按钮
         toggleMonitorBtn: document.getElementById('toggleMonitorBtn'),
@@ -170,7 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.availableBalance.textContent = statusData.account?.availableBalance?.toFixed(2) ?? '--';
         elements.maxHoldingValue.textContent = statusData.account?.maxHoldingValue?.toFixed(2) ?? '--';
         elements.totalAssets.textContent = statusData.account?.totalAssets?.toFixed(2) ?? '--';
-        
+        elements.lastUpdateTimestamp.textContent = new Date().toLocaleString('zh-CN');
+
         // 监控状态
         isMonitoring = statusData.isMonitoring ?? false;
         if (isMonitoring) {
@@ -576,14 +578,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showRefreshStatus() {
+        // 如果已经存在刷新状态元素，则移除它
+        const existingStatus = document.getElementById('refreshStatus');
+        if (existingStatus) {
+            existingStatus.remove();
+        }
+        
+        // 创建新的刷新状态元素
         const statusElement = document.createElement('div');
         statusElement.id = 'refreshStatus';
         statusElement.className = 'fixed bottom-2 right-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs';
         statusElement.innerHTML = '数据刷新中...';
         document.body.appendChild(statusElement);
         
+        // 0.5秒后淡出
         setTimeout(() => {
-            statusElement.style.display = 'none';
+            statusElement.style.animation = 'fadeOut 0.5s ease-in-out';
+            setTimeout(() => {
+                if (statusElement.parentNode) {
+                    statusElement.parentNode.removeChild(statusElement);
+                }
+            }, 500);
         }, 500);
     }
 
@@ -710,6 +725,12 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchLogs()
         ]);
         showMessage("数据加载完成", 'success', 2000);
+
+        // 如果监控已开启，自动启动轮询
+        if (isMonitoring) {
+            startPolling();
+        }
+        
         // If monitoring is active, polling will start automatically
         setTimeout(checkApiConnection, 1000); // Add a 1-second delay
     }
