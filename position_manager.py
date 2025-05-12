@@ -533,8 +533,9 @@ class PositionManager:
                     latest_data = self.data_manager.get_latest_data(stock_code)
                     if latest_data:
                         current_price = latest_data.get('lastPrice')
-                        if current_price > highest_price:
-                            highest_price = current_price
+                        current_high_price = latest_data.get('high')
+                        if current_high_price > highest_price:
+                            highest_price = current_high_price
                 
                 if highest_price > position['highest_price']:
                     # 更新持仓"最高价”信息
