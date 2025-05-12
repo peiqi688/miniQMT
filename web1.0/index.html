@@ -26,6 +26,17 @@
         .error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
         .success { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; }
         
+        /* 添加刷新状态指示器样式 */
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        #refreshStatus {
+            animation: fadeOut 0.5s ease-in-out;
+            z-index: 1000;
+        }
+
         /* 添加API连接状态指示器 */
         .connection-status {
             position: fixed;
@@ -113,6 +124,7 @@
                     可用金额: <span id="availableBalance" class="font-bold text-green-600">--</span>
                     最高持股: <span id="maxHoldingValue" class="font-bold">--</span>
                     总资产: <span id="totalAssets" class="font-bold">--</span>
+                    数据更新时间: <span id="last-update-timestamp">--</span>
                  </div>
                 <div id="statusIndicator" class="text-lg font-bold text-red-600">
                     未运行

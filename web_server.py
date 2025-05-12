@@ -61,6 +61,14 @@ def serve_static(filename):
     """Serve static files from the 'web' directory"""
     return send_from_directory(os.path.join(os.path.dirname(__file__), webpage_dir), filename)
 
+@app.route('/api/connection/status', methods=['GET'])
+def connection_status():
+    """返回API连接状态"""
+    return jsonify({
+        'status': 'success',
+        'connected': True,
+        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    })
 
 @app.route('/api/positions', methods=['GET'])
 def get_positions():
@@ -180,10 +188,12 @@ def push_realtime_data():
             # print(f"realtime_data['positions_all'] in push_realtime_data: {realtime_data['positions_all']}") # Add this line
             
             # 休眠一段时间
-            time.sleep(5)
+            time.sleep(3)
         except Exception as e:
             logger.error(f"推送实时数据时出错: {str(e)}")
-            time.sleep(5)
+            time.sleep(3)
+
+
 
 
 def start_push_thread():

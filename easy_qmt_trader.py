@@ -631,7 +631,7 @@ class easy_qmt_trader:
         查询账户所有的持仓
         '''
         positions = self.xt_trader.query_stock_positions(self.acc)
-        print("持仓数量:", len(positions))
+        print("query_stock_positions()-持仓数量:", len(positions))
         data=pd.DataFrame()
         if len(positions) != 0:
             for i in range(len(positions)):
@@ -657,54 +657,46 @@ class easy_qmt_trader:
             df['平均建仓成本']=[None]
             df['市值']=[None]
             return df
+        
     def position(self):
-        '''
-        对接同花顺
-        持股
-        '''
+        '''对接同花顺持股'''
         try:
             positions = self.xt_trader.query_stock_positions(self.acc)
-            print("持仓数量:", len(positions))
-            data=pd.DataFrame()
-            if len(positions) != 0:
-                for i in range(len(positions)):
-                    df=pd.DataFrame()
-                    df['账号类型']=[positions[i].account_type]
-                    df['资金账号']=[positions[i].account_id]
-                    df['证券代码']=[positions[i].stock_code]
-                    df['证券代码']=df['证券代码'].apply(lambda x:str(x)[:6])
-                    df['股票余额']=[positions[i].volume]
-                    df['可用余额']=[positions[i].can_use_volume]
-                    df['成本价']=[positions[i].open_price]
-                    df['参考成本价']=[positions[i].open_price]
-                    df['市值']=[positions[i].market_value]
-                    data=pd.concat([data,df],ignore_index=True)
-                return data
-            else:
-                df=pd.DataFrame()
-                df['账号类型']=None
-                df['资金账号']=None
-                df['证券代码']=None
-                df['股票余额']=None
-                df['可用余额']=None
-                df['成本价']=None
-                df['市值']=None
-                df['选择']=None
-                df['持股天数']=None
-                df['交易状态']=None
-                df['明细']=None
-                df['证券名称']=None
-                df['冻结数量']=None
-                df['市价']=None
-                df['盈亏']=None
-                df['盈亏比(%)']=None
-                df['当日买入']=None	
-                df['当日卖出']=None
-                return df
+            print("easy_qmt_trader.position-持仓数量:", len(positions))
+            
+            # 一次性构建数据列表，再创建DataFrame
+            if len(positions) > 0:
+                data_list = []
+                for pos in positions:
+                    data_list.append({
+                        '账号类型': pos.account_type,
+                        '资金账号': pos.account_id,
+                        '证券代码': str(pos.stock_code)[:6],
+                        '股票余额': pos.volume,
+                        '可用余额': pos.can_use_volume,
+                        '成本价': pos.open_price,
+                        '参考成本价': pos.open_price,
+                        '市值': pos.market_value
+                    })
                 
-        except:
-            df=pd.DataFrame()
-            return df
+                # 一次性创建DataFrame
+                return pd.DataFrame(data_list)
+            else:
+                # 预定义列名，创建空DataFrame
+                columns = ['账号类型', '资金账号', '证券代码', '股票余额', '可用余额', 
+                        '成本价', '市值', '选择', '持股天数', '交易状态', '明细',
+                        '证券名称', '冻结数量', '市价', '盈亏', '盈亏比(%)', 
+                        '当日买入', '当日卖出']
+                return pd.DataFrame(columns=columns)
+                    
+        except Exception as e:
+            logger.error(f"获取持仓信息时出错: {str(e)}")
+            columns = ['账号类型', '资金账号', '证券代码', '股票余额', '可用余额', 
+                    '成本价', '市值', '选择', '持股天数', '交易状态', '明细',
+                    '证券名称', '冻结数量', '市价', '盈亏', '盈亏比(%)', 
+                    '当日买入', '当日卖出']
+            return pd.DataFrame(columns=columns)
+    
     def run_forever(self):
         '''
         阻塞线程，接收交易推送

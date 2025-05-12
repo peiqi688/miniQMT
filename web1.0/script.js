@@ -575,6 +575,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }
 
+    function showRefreshStatus() {
+        const statusElement = document.createElement('div');
+        statusElement.id = 'refreshStatus';
+        statusElement.className = 'fixed bottom-2 right-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs';
+        statusElement.innerHTML = '数据刷新中...';
+        document.body.appendChild(statusElement);
+        
+        setTimeout(() => {
+            statusElement.style.display = 'none';
+        }, 500);
+    }
+
     // --- 轮询机制 ---
     function startPolling() {
         if (pollingIntervalId) return; // 已在轮询中
@@ -593,6 +605,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function pollData() {
         console.log("Polling for data updates...");
+
+        // 显示刷新状态
+        showRefreshStatus();
+
         // 并行获取所需的数据
         await Promise.allSettled([
             fetchStatus(), // 包含账户信息的状态
@@ -602,6 +618,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log("Polling cycle finished.");
     }
+
+    // 在HTML中添加状态指示器元素
+    function addConnectionStatusIndicator() {
+        const statusDiv = document.createElement('div');
+        statusDiv.id = 'connectionStatus';
+        statusDiv.className = 'connection-status disconnected';
+        statusDiv.textContent = 'API未连接';
+        document.body.appendChild(statusDiv);
+    }
+
+    // 添加API连接检查函数
+    async function checkApiConnection() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/connection/status`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            updateConnectionStatus(data.connected);
+        } catch (error) {
+            console.error("Error checking API connection:", error);
+            updateConnectionStatus(false);
+        } finally {
+            setTimeout(checkApiConnection, 5000);
+        }
+    }
+
+    function updateConnectionStatus(isConnected) {
+        const statusElement = document.getElementById('connectionStatus');
+        if (isConnected) {
+            statusElement.textContent = "API已连接";
+            statusElement.classList.remove('disconnected');
+            statusElement.classList.add('connected');
+        } else {
+            statusElement.textContent = "API未连接";
+            statusElement.classList.remove('connected');
+            statusElement.classList.add('disconnected');
+        }
+    }
+
+    // 添加连接状态指示器
+    addConnectionStatusIndicator();
+    
+    // 启动连接检查
+    setTimeout(checkApiConnection, 1000);
 
     // --- 事件监听器 ---
     elements.toggleMonitorBtn.addEventListener('click', handleToggleMonitor);
