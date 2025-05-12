@@ -98,6 +98,39 @@ def get_positions():
             'message': f"获取持仓信息时出错: {str(e)}"
         }), 500
 
+@app.route('/api/trade-records', methods=['GET'])
+def get_trade_records():
+    """获取交易记录"""
+    try:
+        # 从交易执行器获取交易记录
+        trades_df = trading_executor.get_trades()
+        
+        # 如果没有交易记录，返回空列表
+        if trades_df.empty:
+            return jsonify({'status': 'success', 'data': []})
+        
+        # Format 'trade_time' to 'YYYY-MM-DD'
+        if 'trade_time' in trades_df.columns:
+            trades_df['trade_time'] = pd.to_datetime(trades_df['trade_time']).dt.strftime('%Y-%m-%d')
+        
+        # Replace NaN with None (which will become null in JSON)
+        trades_df = trades_df.replace({pd.NA: None, float('nan'): None})
+        
+        # 将 DataFrame 转换为 JSON 格式
+        trade_records = trades_df.to_dict(orient='records')
+        
+        response = make_response(jsonify({
+
+            'status': 'success',
+            'data': trade_records
+        }))        
+        response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        return response
+    except Exception as e:
+        logger.error(f"获取交易记录时出错: {str(e)}")
+        return jsonify({'status': 'error', 'message': f"获取交易记录时出错: {str(e)}"}), 500
+
+
 @app.route('/api/positions-all', methods=['GET'])
 def get_positions_all():
     """获取所有持仓信息（包括所有字段）"""

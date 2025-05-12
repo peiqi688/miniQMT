@@ -489,7 +489,7 @@ class DataManager:
             
             if not latest_quote or stock_code not in latest_quote:
                 logger.warning(f"xtdata:未获取到 {stock_code} 的tick行情")
-                return None
+                return {}  # Return an empty dictionary instead of None
             
             quote_data = latest_quote[stock_code]
             logger.debug(f"xtdata: {stock_code} 最新行情: {quote_data}")

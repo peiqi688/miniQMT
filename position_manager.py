@@ -261,7 +261,7 @@ class PositionManager:
                 if latest_quote:
                     current_price = latest_quote.get('lastPrice')
                 else:
-                    logger.warning(f"未能获取 {stock_code} 的最新价格，使用成本价")
+                    logger.warning(f"未能获取 {stock_code} 的最新价格，使用成本价, latest_quote: {latest_quote}")
                     current_price = cost_price
                 
                 # 查询内存数据库中是否已存在该股票的持仓记录
@@ -340,25 +340,53 @@ class PositionManager:
         返回:
         bool: 是否更新成功
         """
+        # Convert inputs to appropriate numeric types at the beginning
+        try:
+            # volume is typically int, but float conversion is safer for general arithmetic
+            p_volume = float(volume) if volume is not None else 0.0
+            p_cost_price = float(cost_price) if cost_price is not None else 0.0
+
+            # current_price can be None if it needs to be fetched
+            p_current_price = float(current_price) if current_price is not None else None
+
+            # available defaults to volume if not provided
+            p_available = float(available) if available is not None else p_volume
+            
+            # highest_price and stop_loss_price can be None
+            p_highest_price = float(highest_price) if highest_price is not None else None
+            p_stop_loss_price = float(stop_loss_price) if stop_loss_price is not None else None
+
+        except (ValueError, TypeError) as e:
+            logger.error(f"Error converting inputs for {stock_code} to float: {e}. volume='{volume}', cost_price='{cost_price}', current_price='{current_price}'")
+            self.memory_conn.rollback() # Ensure rollback on early error
+            return False
+
+
         try:
             # 如果当前价格为None，获取最新行情
-            if current_price is None:
+            if p_current_price is None:
                 # 获取最新数据
                 latest_data = self.data_manager.get_latest_data(stock_code)
                 if latest_data:
                     current_price = latest_data.get('lastPrice')
                 else:
-                    logger.warning(f"未能获取 {stock_code} 的最新行情，使用成本价")
-                    current_price = cost_price
+                    logger.warning(f"未能获取 {stock_code} 的最新行情，使用成本价, latest_data: {latest_data}")
+                    p_current_price = p_cost_price # p_cost_price is already float
+            
+            # Ensure p_current_price is a float, default to 0.0 if it's still None
+            if p_current_price is None: p_current_price = 0.0
                     
             # 计算市值和收益率
-            market_value = round(volume * current_price, 2)
+            # Use the converted variables (p_volume, p_current_price, p_cost_price)
+            p_market_value = round(p_volume * p_current_price, 2)
             # profit_ratio = 100*round((current_price - cost_price) / cost_price if cost_price > 0 else 0, 4)
-            profit_ratio = round(100 * (current_price - cost_price) / cost_price if cost_price > 0 else 0, 2)
-            cost_price = round(cost_price, 2)
-            current_price = round(current_price, 2)
-            highest_price = round(highest_price, 2) if highest_price else None
-            stop_loss_price = round(stop_loss_price, 2) if stop_loss_price else None
+            p_profit_ratio = round(100 * (p_current_price - p_cost_price) / p_cost_price if p_cost_price > 0 else 0, 2)
+            
+            # Round the final values before storing or using in DB operations
+            final_cost_price = round(p_cost_price, 2)
+            final_current_price = round(p_current_price, 2)
+            final_highest_price = round(p_highest_price, 2) if p_highest_price is not None else None
+            final_stop_loss_price = round(p_stop_loss_price, 2) if p_stop_loss_price is not None else None
             
             # 获取当前时间
             now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -372,51 +400,51 @@ class PositionManager:
                 # 更新持仓
                 if open_date is None:
                     open_date = result[0]  # 获取已有的open_date
-                old_highest_price = result[2]
-                if old_highest_price is None:
-                    old_highest_price = current_price
-                if highest_price is None:
-                    highest_price = max(old_highest_price, current_price)
+                old_db_highest_price = float(result[2]) if result[2] is not None else None # from DB
+                if final_highest_price is None: # if not passed or calculated yet
+                    final_highest_price = max(old_db_highest_price, final_current_price) if old_db_highest_price is not None else final_current_price
                 # else:
                 #     highest_price = max(highest_price,old_highest_price)
                 # 如果没有传入止损价格，则重新计算
-                if stop_loss_price is None:
-                    stop_loss_price = self.calculate_stop_loss_price(cost_price, highest_price, profit_triggered)
-                    stop_loss_price = round(stop_loss_price, 2)
+                if final_stop_loss_price is None:
+                    calculated_slp = self.calculate_stop_loss_price(final_cost_price, final_highest_price, profit_triggered)
+                    final_stop_loss_price = round(calculated_slp, 2) if calculated_slp is not None else None
                 else:
-                    stop_loss_price = min(stop_loss_price, self.calculate_stop_loss_price(cost_price, highest_price, profit_triggered))
-                    stop_loss_price = round(stop_loss_price, 2)
+                    calculated_slp = self.calculate_stop_loss_price(final_cost_price, final_highest_price, profit_triggered)
+                    if calculated_slp is not None:
+                        final_stop_loss_price = min(final_stop_loss_price, calculated_slp)
+                        final_stop_loss_price = round(final_stop_loss_price, 2)
 
                 cursor.execute("""
                     UPDATE positions 
                     SET volume=?, cost_price=?, current_price=?, market_value=?, available=?,
                         profit_ratio=?, last_update=?, highest_price=?, stop_loss_price=?, profit_triggered=?
                     WHERE stock_code=?
-                """, (volume, cost_price, current_price, market_value, available, profit_ratio, now, highest_price, stop_loss_price, profit_triggered, stock_code))
+                """, (int(p_volume), final_cost_price, final_current_price, p_market_value, int(p_available), p_profit_ratio, now, final_highest_price, final_stop_loss_price, profit_triggered, stock_code))
 
                 if profit_triggered != result[1]:
                     logger.info(f"更新 {stock_code} 持仓: 首次止盈触发: 从 {result[1]} 到 {profit_triggered}")
-                elif highest_price != result[2]:
-                    logger.info(f"更新 {stock_code} 持仓: 最高价: 从 {result[2]} 到 {highest_price}") 
-                elif stop_loss_price != result[3]:
-                    logger.info(f"更新 {stock_code} 持仓: 止损价: 从 {result[3]} 到 {stop_loss_price}")
+                elif final_highest_price != (float(result[2]) if result[2] is not None else None):
+                    logger.info(f"更新 {stock_code} 持仓: 最高价: 从 {result[2]} 到 {final_highest_price}")
+                elif final_stop_loss_price != (float(result[3]) if result[3] is not None else None):
+                    logger.info(f"更新 {stock_code} 持仓: 止损价: 从 {result[3]} 到 {final_stop_loss_price}")
 
             else:
                 # 新增持仓
                 if open_date is None:
                     open_date = now  # 新建仓时记录当前时间为open_date
                 profit_triggered = False
-                if highest_price is None:
-                    highest_price = current_price
+                if final_highest_price is None:
+                    final_highest_price = final_current_price
                 # 计算止损价格
-                stop_loss_price = self.calculate_stop_loss_price(cost_price, highest_price, profit_triggered)
-                stop_loss_price = round(stop_loss_price, 2)
+                calculated_slp = self.calculate_stop_loss_price(final_cost_price, final_highest_price, profit_triggered)
+                final_stop_loss_price = round(calculated_slp, 2) if calculated_slp is not None else None
                 cursor.execute("""
                     INSERT INTO positions 
                     (stock_code, volume, cost_price, current_price, market_value, available, profit_ratio, last_update, open_date, profit_triggered, highest_price, stop_loss_price)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (stock_code, volume, cost_price, current_price, market_value, available, profit_ratio, now, open_date, profit_triggered, highest_price, stop_loss_price))
-                logger.info(f"新增 {stock_code} 持仓: 数量: {volume}, 成本价: {cost_price}, 当前价: {current_price}, 首次止盈触发: {profit_triggered}, 最高价: {highest_price}, 止损价: {stop_loss_price}")
+                """, (stock_code, int(p_volume), final_cost_price, final_current_price, p_market_value, int(p_available), p_profit_ratio, now, open_date, profit_triggered, final_highest_price, final_stop_loss_price))
+                logger.info(f"新增 {stock_code} 持仓: 数量: {int(p_volume)}, 成本价: {final_cost_price}, 当前价: {final_current_price}, 首次止盈触发: {profit_triggered}, 最高价: {final_highest_price}, 止损价: {final_stop_loss_price}")
             
             self.memory_conn.commit()
             return True

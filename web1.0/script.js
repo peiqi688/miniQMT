@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         getPositionsAll: `/api/positions-all`, // 新增：获取所有持仓数据
         // --- POST Endpoints ---
         saveConfig: `/api/config/save`,
+        checkConnection: '/api/connection/status',
         startMonitor: `/api/monitor/start`,
         stopMonitor: `/api/monitor/stop`,
         clearLogs: `/api/logs/clear`,
@@ -73,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 订单日志
         orderLog: document.getElementById('orderLog'),
         logLoading: document.getElementById('logLoading'),
+
         logError: document.getElementById('logError'),
     };
 
@@ -168,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.availableBalance.textContent = statusData.account?.availableBalance?.toFixed(2) ?? '--';
         elements.maxHoldingValue.textContent = statusData.account?.maxHoldingValue?.toFixed(2) ?? '--';
         elements.totalAssets.textContent = statusData.account?.totalAssets?.toFixed(2) ?? '--';
-
+        
         // 监控状态
         isMonitoring = statusData.isMonitoring ?? false;
         if (isMonitoring) {
@@ -186,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.toggleMonitorBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
             stopPolling(); // 停止轮询数据
         }
+
     }
 
     // 更新持仓表格 - 适配新的字段对应关系
@@ -208,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.innerHTML = `
                 <td class="border p-2"><input type="checkbox" class="holding-checkbox" data-id="${stock.id || stock.stock_code}"></td>
                 <td class="border p-2">${stock.stock_code || '--'}</td>
-                <td class="border p-2">${stock.name || '--'}</td>                
+                <td class="border p-2">${stock.stock_name || stock.name || '--'}</td>                
                 <td class="border p-2 ${parseFloat(stock.change_percentage || 0) >= 0 ? 'text-red-600' : 'text-green-600'}">${parseFloat(stock.change_percentage || 0).toFixed(2)}%</td>
                 <td class="border p-2">${parseFloat(stock.current_price || 0).toFixed(2)}</td>
                 <td class="border p-2">${parseFloat(stock.cost_price || 0).toFixed(2)}</td>
@@ -216,12 +219,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="border p-2">${stock.market_value || '--'}</td>
                 <td class="border p-2">${stock.available || 0}</td>       
                 <td class="border p-2">${stock.volume || 0}</td>         
-                <td class="border p-2 text-center"><input type="checkbox" ${stock.profit_triggered ? 'checked' : ''} disabled></td>
-                <td class="border p-2">${parseFloat(stock.highest_price || 0).toFixed(2)}</td>
-                <td class="border p-2">${parseFloat(stock.stop_loss_price || 0).toFixed(2)}</td>
-                <td class="border p-2 whitespace-nowrap">${(stock.open_date || '--').split(' ')[0]}</td>
+                <td class="border p-2 text-center"><input type="checkbox" ${stock.is_profit_triggered ? 'checked' : ''} disabled></td>
+                <td class="border p-2">${parseFloat(stock.today_highest_price || stock.highest_price || 0).toFixed(2)}</td>                
+                <td class="border p-2">${parseFloat(stock.stop_loss_price || 0).toFixed(2)}</td> 
+                <td class="border p-2 whitespace-nowrap">${(stock.open_date || '').split(' ')[0]}</td>                               
                 <td class="border p-2">${parseFloat(stock.base_cost_price || stock.cost_price || 0).toFixed(2)}</td>
+
             `;
+
             elements.holdingsTableBody.appendChild(row);
 
         });
@@ -247,13 +252,28 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.logError.classList.add('hidden');
 
         if (typeof logEntries === 'string') {
-            // 后端返回单个字符串块
             elements.orderLog.value = logEntries;
         } else if (Array.isArray(logEntries)) {
-            // 后端返回日志行数组
-            elements.orderLog.value = logEntries.join('\n');
+            // 假设每个 logEntry 是一个对象，我们需要将其转换为字符串
+            const formattedLogs = logEntries.map(entry => {
+                // 根据你的交易记录对象结构调整格式化方式
+                if (typeof entry === 'object' && entry !== null) {
+                    // 使用 entry.trade_time, entry.trade_type,  而不是  entry.time, entry.action
+                    //  并且没有 stock_name,  trade_type  需要转换一下
+                    const action = entry.trade_type === 'BUY' ? '买入' : (entry.trade_type === 'SELL' ? '卖出' : entry.trade_type);
+                    return `时间: ${entry.trade_time || ''}, 代码: ${entry.stock_code || ''}, 名称: , 操作: ${action || ''}, 价格: ${entry.price || ''}, 数量: ${entry.volume || ''}, 状态: `;
+
+                    //  如果后端返回了 stock_name  字段，  把上面 return 语句中的  名称: ,  改成  名称: ${entry.stock_name || ''},
+
+                } else {
+                    return String(entry); // 如果不是对象，直接转换为字符串
+                }
+            });
+            elements.orderLog.value = formattedLogs.join('\n');
         } else {
-            elements.orderLog.value = "无法识别的日志格式";
+            elements.orderLog.value = "无法识别的日志格式，请检查数据类型";
+            console.error("未知的日志数据格式:", logEntries);
+            elements.logError.textContent = "未知的日志数据格式，请检查控制台错误信息";
         }
         // 自动滚动到底部
         elements.orderLog.scrollTop = elements.orderLog.scrollHeight;
@@ -285,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.holdingsError.classList.add('hidden');
         elements.holdingsTableBody.innerHTML = ''; // 加载时清空
         
-        try {
+        try {            
             // 使用positions-all接口获取所有持仓数据
             const response = await fetch(`${API_BASE_URL}/api/positions-all`);
             
@@ -293,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            const data = await response.json();
+            const data = await response.json();            
             console.log('Data received from /api/positions-all:', data);
             
             if (data.status === 'success' && Array.isArray(data.data)) {
@@ -306,21 +326,36 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.holdingsError.classList.remove('hidden');
             elements.holdingsError.textContent = `加载持仓数据失败: ${error.message}`;
             showMessage("加载持仓数据失败", 'error');
+
         }
     }
 
-    async function fetchLogs() {
+    // 修改 fetchLogs 函数以获取交易记录
+    async function fetchLogs() {  
         elements.logLoading.classList.remove('hidden');
         elements.logError.classList.add('hidden');
         elements.orderLog.value = ''; // 加载时清空
         try {
-            const data = await apiRequest(API_ENDPOINTS.getLogs);
-            updateLogs(data.logs || data || '');
+            // 使用正确的 API 端点获取交易记录
+            const response = await fetch(`${API_BASE_URL}/api/trade-records`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.status === 'success' && Array.isArray(data.data)) {
+                // 使用交易记录更新 UI
+                updateLogs(data.data);
+            } else {
+                throw new Error(data.message || '数据格式错误');
+            }
         } catch (error) {
             elements.logLoading.classList.add('hidden');
             elements.logError.classList.remove('hidden');
-            elements.logError.textContent = `加载日志失败: ${error.message}`;
-            showMessage("加载日志失败", 'error');
+            elements.logError.textContent = `加载交易记录失败: ${error.message}`;
+            showMessage("加载交易记录失败", 'error');
         }
     }
 
@@ -336,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const configData = getConfigData();
             
             const data = await apiRequest(endpoint, { 
-                method: 'POST',
+                method: 'POST',                
                 body: JSON.stringify(configData)
             });
             
@@ -350,6 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.toggleMonitorBtn.disabled = false;
             elements.messageArea.innerHTML = '';
         }
+
     }
 
     // 获取所有配置表单的值
@@ -370,7 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
             totalMaxPosition: parseFloat(elements.totalMaxPosition.value) || 400000,
             connectPort: elements.connectPort.value || '5000',
             totalAccounts: elements.totalAccounts.value || '127.0.0.1',
-            globalAllowBuySell: elements.globalAllowBuySell.checked
+            globalAllowBuySell: elements.globalAllowBuySell.checked            
         };
     }
 
@@ -382,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const data = await apiRequest(API_ENDPOINTS.saveConfig, {
-                method: 'POST',
+                method: 'POST',                
                 body: JSON.stringify(configData),
             });
             showMessage(data.message || "配置已保存", 'success');
@@ -392,6 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.saveConfigBtn.disabled = false;
             elements.messageArea.innerHTML = '';
         }
+
     }
 
     async function handleClearLogs() {
@@ -408,6 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.clearLogBtn.disabled = false;
             elements.messageArea.innerHTML = '';
         }
+
     }
 
     // 初始化持仓数据 - 特殊处理，需要更新API地址
@@ -424,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const configData = getConfigData();
-            const data = await apiRequest(API_ENDPOINTS.initHoldings, {
+            const data = await apiRequest(API_ENDPOINTS.initHoldings, {                
                 method: 'POST',
                 body: JSON.stringify(configData),
             });
@@ -438,6 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.initHoldingsBtn.textContent = originalText;
             elements.messageArea.innerHTML = '';
         }
+
     }
 
     // 通用操作处理
@@ -450,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showMessage("正在执行操作...", 'loading', 0);
 
         try {
-            const data = await apiRequest(endpoint, { method: 'POST' });
+            const data = await apiRequest(endpoint, { method: 'POST' });            
             showMessage(data.message || "操作成功", 'success');
             // 根据操作类型刷新相关数据
             if (endpoint === API_ENDPOINTS.clearCurrentData || endpoint === API_ENDPOINTS.clearBuySellData) {
@@ -465,8 +504,42 @@ document.addEventListener('DOMContentLoaded', () => {
             button.disabled = false;
             button.textContent = originalText;
             elements.messageArea.innerHTML = '';
+
         }
     }
+
+    async function checkApiConnection() {
+        try {
+            console.log("Checking API connection at:", `${API_BASE_URL}${API_ENDPOINTS.checkConnection}`); // Log the URL
+            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.checkConnection}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log("Connection check response:", data);
+            updateConnectionStatus(data.connected);
+        } catch (error) {
+            console.error("Error checking API connection:", error);
+            updateConnectionStatus(false);
+        } finally {
+            setTimeout(checkApiConnection, 5000);
+        }
+    }
+    
+    function updateConnectionStatus(isConnected) {
+        const statusElement = elements.connectionStatus;
+        console.log("Updating connection status to:", isConnected); // Log the status
+        if (isConnected) {
+            statusElement.textContent = "API已连接";
+            statusElement.classList.remove('disconnected');
+            statusElement.classList.add('connected');
+        } else {
+            statusElement.textContent = "API未连接";
+            statusElement.classList.remove('connected');
+            statusElement.classList.add('disconnected');
+        }
+    }
+    
 
     async function handleExecuteBuy() {
         const buyData = {
@@ -485,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const data = await apiRequest(API_ENDPOINTS.executeBuy, {
-                method: 'POST',
+                method: 'POST',                
                 body: JSON.stringify(buyData),
             });
             showMessage(data.message || "买入指令已发送", 'success');
@@ -499,6 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.executeBuyBtn.disabled = false;
             elements.messageArea.innerHTML = '';
         }
+
     }
 
     // --- 轮询机制 ---
@@ -525,6 +599,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchHoldings(), // 持仓数据
             fetchLogs() // 日志数据
         ]);
+
         console.log("Polling cycle finished.");
     }
 
@@ -574,11 +649,13 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchLogs()
         ]);
         showMessage("数据加载完成", 'success', 2000);
-        // 如果监控已激活，轮询会自动启动
+        // If monitoring is active, polling will start automatically
+        setTimeout(checkApiConnection, 1000); // Add a 1-second delay
     }
 
     console.log("Adding event listeners and fetching initial data...");
     fetchAllData(); // 脚本运行时加载初始数据
+
 });
 
 console.log("Script loaded");

@@ -82,7 +82,7 @@ class TradingExecutor:
                 
                 if not is_connected:
                     logger.warning(f"交易账户 {self.account_id} 连接状态未确认")
-                    
+
             elif hasattr(xtt, 'connect'):
                 # 尝试直接连接
                 result = xtt.connect()
@@ -130,6 +130,23 @@ class TradingExecutor:
                 # else:
                 #     logger.error("未找到可用的交易API初始化方法")
             
+            # Retry logic if initial connection fails
+            if not (self.trader and hasattr(self.trader, 'is_connected') and self.trader.is_connected()) and hasattr(xtt, 'connect'):
+                max_retries = 3
+                retry_delay = 5  # seconds
+                for attempt in range(max_retries):
+                    logger.info(f"尝试重新连接交易API (尝试 {attempt + 1}/{max_retries})")
+                    result = xtt.connect()
+                    if result == 0:
+                        logger.info("重新连接成功")
+                        if hasattr(xtt, 'add_account'):
+                            xtt.add_account(self.account_type, self.account_id)
+                            self._register_callbacks()
+                        break
+                    else:
+                        logger.warning(f"重新连接失败，{retry_delay}秒后重试")
+                        time.sleep(retry_delay)
+
         except Exception as e:
             logger.error(f"初始化交易API出错: {str(e)}")
     
@@ -573,7 +590,7 @@ class TradingExecutor:
                     if not latest_quote:
                         logger.error(f"未能获取 {stock_code} 的最新行情，无法下单")
                         return None
-                    price = latest_quote.get('lastPrice')
+                    price = latest_quote.get('lastPrice') or 0  # Use 0 as a fallback price
                 
                 # 如果指定了金额而不是数量，计算数量
                 if volume is None and amount is not None:
@@ -653,7 +670,7 @@ class TradingExecutor:
                     if not latest_quote:
                         logger.error(f"未能获取 {stock_code} 的最新行情，无法下单")
                         return None
-                    price = latest_quote.get('lastPrice')
+                    price = latest_quote.get('lastPrice') or 0  # Use 0 as a fallback price
                 
                 # 如果指定了比例而不是数量，计算数量
                 if volume is None and ratio is not None:
