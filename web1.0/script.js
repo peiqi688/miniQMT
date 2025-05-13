@@ -171,8 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.availableBalance.textContent = statusData.account?.availableBalance?.toFixed(2) ?? '--';
         elements.maxHoldingValue.textContent = statusData.account?.maxHoldingValue?.toFixed(2) ?? '--';
         elements.totalAssets.textContent = statusData.account?.totalAssets?.toFixed(2) ?? '--';
-        elements.lastUpdateTimestamp.textContent = new Date().toLocaleString('zh-CN');
-
+        elements.lastUpdateTimestamp.textContent = statusData.account?.timestamp ?? new Date().toLocaleString('zh-CN');
+    
         // 监控状态
         isMonitoring = statusData.isMonitoring ?? false;
         if (isMonitoring) {
@@ -510,39 +510,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function checkApiConnection() {
-        try {
-            console.log("Checking API connection at:", `${API_BASE_URL}${API_ENDPOINTS.checkConnection}`); // Log the URL
-            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.checkConnection}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            console.log("Connection check response:", data);
-            updateConnectionStatus(data.connected);
-        } catch (error) {
-            console.error("Error checking API connection:", error);
-            updateConnectionStatus(false);
-        } finally {
-            setTimeout(checkApiConnection, 5000);
-        }
-    }
-    
-    function updateConnectionStatus(isConnected) {
-        const statusElement = elements.connectionStatus;
-        console.log("Updating connection status to:", isConnected); // Log the status
-        if (isConnected) {
-            statusElement.textContent = "API已连接";
-            statusElement.classList.remove('disconnected');
-            statusElement.classList.add('connected');
-        } else {
-            statusElement.textContent = "API未连接";
-            statusElement.classList.remove('connected');
-            statusElement.classList.add('disconnected');
-        }
-    }
-    
-
     async function handleExecuteBuy() {
         const buyData = {
             strategy: elements.buyStrategy.value,
@@ -646,11 +613,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 添加API连接检查函数
     async function checkApiConnection() {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/connection/status`);
+            console.log("Checking API connection at:", `${API_BASE_URL}${API_ENDPOINTS.checkConnection}`);
+            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.checkConnection}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
+            console.log("Connection check response:", data);
             updateConnectionStatus(data.connected);
         } catch (error) {
             console.error("Error checking API connection:", error);
@@ -730,7 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isMonitoring) {
             startPolling();
         }
-        
+
         // If monitoring is active, polling will start automatically
         setTimeout(checkApiConnection, 1000); // Add a 1-second delay
     }

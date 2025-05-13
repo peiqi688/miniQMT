@@ -585,6 +585,29 @@ class PositionManager:
         except Exception as e:
             logger.error(f"更新所有持仓价格时出错: {str(e)}")
 
+    def get_account_info(self):
+        """获取账户信息"""
+        try:
+            # 使用qmt_trader获取账户信息
+            account_df = self.qmt_trader.balance()
+            
+            if account_df.empty:
+                return None
+            
+            # 转换为字典格式
+            account_info = {
+                'account_id': account_df['资金账户'].iloc[0] if '资金账户' in account_df.columns and not account_df['资金账户'].empty else '--',
+                'account_type': account_df['账号类型'].iloc[0] if '账号类型' in account_df.columns and not account_df['账号类型'].empty else '--',
+                'available': float(account_df['可用金额'].iloc[0]) if '可用金额' in account_df.columns and not account_df['可用金额'].empty else 0.0,
+                'frozen_cash': float(account_df['冻结金额'].iloc[0]) if '冻结金额' in account_df.columns and not account_df['冻结金额'].empty else 0.0,
+                'market_value': float(account_df['持仓市值'].iloc[0]) if '持仓市值' in account_df.columns and not account_df['持仓市值'].empty else 0.0,
+                'total_asset': float(account_df['总资产'].iloc[0]) if '总资产' in account_df.columns and not account_df['总资产'].empty else 0.0,
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
+            return account_info
+        except Exception as e:
+            logger.error(f"获取账户信息时出错: {str(e)}")
+            return None
     
     def get_grid_trades(self, stock_code, status=None):
         """
