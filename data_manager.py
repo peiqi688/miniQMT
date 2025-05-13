@@ -498,7 +498,7 @@ class DataManager:
             
         except Exception as e:
             logger.error(f"xtdata: 获取 {stock_code} 的最新行情时出错: {str(e)}")
-            return None
+            return {}
     
     def get_history_data_from_db(self, stock_code, start_date=None, end_date=None):
         """

@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="border p-2">${stock.market_value || '--'}</td>
                 <td class="border p-2">${stock.available || 0}</td>       
                 <td class="border p-2">${stock.volume || 0}</td>         
-                <td class="border p-2 text-center"><input type="checkbox" ${stock.is_profit_triggered ? 'checked' : ''} disabled></td>
+                <td class="border p-2 text-center"><input type="checkbox" ${stock.profit_triggered ? 'checked' : ''} disabled></td>
                 <td class="border p-2">${parseFloat(stock.today_highest_price || stock.highest_price || 0).toFixed(2)}</td>                
                 <td class="border p-2">${parseFloat(stock.stop_loss_price || 0).toFixed(2)}</td> 
                 <td class="border p-2 whitespace-nowrap">${(stock.open_date || '').split(' ')[0]}</td>                               
@@ -308,15 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.holdingsTableBody.innerHTML = ''; // 加载时清空
         
         try {            
-            // 使用positions-all接口获取所有持仓数据
-            const response = await fetch(`${API_BASE_URL}/api/positions-all`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();            
-            console.log('Data received from /api/positions-all:', data);
+            const data = await apiRequest(API_ENDPOINTS.getPositionsAll);
+            console.log('Data received from positions-all:', data);
             
             if (data.status === 'success' && Array.isArray(data.data)) {
                 updateHoldingsTable(data.data);
@@ -328,7 +321,6 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.holdingsError.classList.remove('hidden');
             elements.holdingsError.textContent = `加载持仓数据失败: ${error.message}`;
             showMessage("加载持仓数据失败", 'error');
-
         }
     }
 
@@ -613,8 +605,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 添加API连接检查函数
     async function checkApiConnection() {
         try {
-            console.log("Checking API connection at:", `${API_BASE_URL}${API_ENDPOINTS.checkConnection}`);
-            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.checkConnection}`);
+            console.log("Checking API connection at:", API_ENDPOINTS.checkConnection);
+            const response = await fetch(API_ENDPOINTS.checkConnection);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
