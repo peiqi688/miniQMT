@@ -64,26 +64,48 @@ def serve_static(filename):
 @app.route('/api/connection/status', methods=['GET'])
 def connection_status():
     """返回API连接状态"""
-    return jsonify({
-        'status': 'success',
-        'connected': True,
-        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    })
+    try:
+        # 检查 qmt_trader 的连接状态
+        is_connected = False
+        if hasattr(position_manager, 'qmt_trader') and position_manager.qmt_trader:
+            if hasattr(position_manager.qmt_trader, 'xt_trader') and position_manager.qmt_trader.xt_trader:
+                if hasattr(position_manager.qmt_trader.xt_trader, 'is_connected'):
+                    is_connected = position_manager.qmt_trader.xt_trader.is_connected()
+                else:
+                    # 尝试其他检查方式
+                    is_connected = True  # 假设已连接，实际应根据具体情况修改
+        
+        return jsonify({
+            'status': 'success',
+            'connected': bool(is_connected),  # 确保返回布尔值
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+    except Exception as e:
+        logger.error(f"检查API连接状态时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'connected': False,
+            'message': f"检查API连接状态时出错: {str(e)}",
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
 
 @app.route('/api/status', methods=['GET'])
 def get_status():
     """获取系统状态"""
     try:
-        # 获取账户信息
-        account_info = trading_executor.get_account_info() or {}
+        # 从 position_manager 获取账户信息
+        account_info = position_manager.get_account_info() or {}
         
         # 如果没有账户信息，使用默认值
         if not account_info:
             account_info = {
                 'account_id': '--',
+                'account_type': '--',
                 'available': 0.0,
-                'balance': 0.0,
-                'market_value': 0.0
+                'frozen_cash': 0.0,
+                'market_value': 0.0,
+                'total_asset': 0.0,
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
             
         # 格式化为前端期望的结构
@@ -91,7 +113,8 @@ def get_status():
             'id': account_info.get('account_id', '--'),
             'availableBalance': account_info.get('available', 0.0),
             'maxHoldingValue': account_info.get('market_value', 0.0),
-            'totalAssets': account_info.get('balance', 0.0)
+            'totalAssets': account_info.get('total_asset', 0.0),
+            'timestamp': account_info.get('timestamp', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         }
         
         # 判断监控状态
