@@ -42,6 +42,23 @@ document.addEventListener('DOMContentLoaded', () => {
         logs: 0,
         status: 0
     };
+    
+    // 请求锁定状态 - 防止重复请求
+    let requestLocks = {
+        status: false,
+        holdings: false,
+        logs: false
+    };
+    
+    // 最近一次显示刷新状态的时间戳
+    let lastRefreshStatusShown = 0;
+    
+    // 最近数据更新时间戳
+    let lastDataUpdateTimestamps = {
+        status: 0,
+        holdings: 0,
+        logs: 0
+    };
 
     // --- DOM Element References ---
     const elements = {
@@ -103,6 +120,47 @@ document.addEventListener('DOMContentLoaded', () => {
             startPolling();
         }
     });
+    
+    // --- 节流函数 ---
+    function throttle(func, limit) {
+        let lastFunc;
+        let lastRan;
+        return function() {
+            const context = this;
+            const args = arguments;
+            if (!lastRan) {
+                func.apply(context, args);
+                lastRan = Date.now();
+            } else {
+                clearTimeout(lastFunc);
+                lastFunc = setTimeout(function() {
+                    if ((Date.now() - lastRan) >= limit) {
+                        func.apply(context, args);
+                        lastRan = Date.now();
+                    }
+                }, limit - (Date.now() - lastRan));
+            }
+        }
+    }
+    
+    // 判断两个数据是否基本相同（避免不必要的UI更新）
+    function areDataEqual(oldData, newData, ignoreFields = []) {
+        if (!oldData || !newData) return false;
+        
+        // 对于简单对象，比较关键字段
+        for (const key in newData) {
+            if (ignoreFields.includes(key)) continue;
+            
+            if (typeof newData[key] === 'number' && typeof oldData[key] === 'number') {
+                // 对于数值，考虑舍入误差
+                if (Math.abs(newData[key] - oldData[key]) > 0.001) return false;
+            } else if (newData[key] !== oldData[key]) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
 
     // --- 工具函数 ---
     function showMessage(text, type = 'info', duration = 5000) {
@@ -121,8 +179,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 显示刷新状态
+    // 显示刷新状态 - 添加节流
     function showRefreshStatus() {
+        // 限制刷新状态显示频率 - 最少间隔3秒
+        const now = Date.now();
+        if (now - lastRefreshStatusShown < 3000) {
+            return;
+        }
+        lastRefreshStatusShown = now;
+        
         // 如果已经存在刷新状态元素，则移除它
         const existingStatus = document.getElementById('refreshStatus');
         if (existingStatus) {
@@ -149,6 +214,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 显示更新指示器
     function showUpdatedIndicator() {
+        // 检查最近是否已经显示过更新指示器
+        const now = Date.now();
+        if (now - lastRefreshStatusShown < 2000) {
+            return; // 如果2秒内已显示过刷新状态，则不显示更新指示器
+        }
+        
         const indicator = document.createElement('div');
         indicator.className = 'fixed top-2 left-2 bg-green-100 text-green-800 px-2 py-1 rounded text-xs z-50';
         indicator.textContent = '数据已更新';
@@ -178,9 +249,13 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("API Base URL updated:", API_BASE_URL);
     }
 
-    // API请求函数
+    // API请求函数 - 添加节流
     async function apiRequest(url, options = {}) {
-        console.log(`API Request: ${options.method || 'GET'} ${url}`, options.body ? JSON.parse(options.body) : '');
+        // 提取URL中的关键部分用于日志
+        const urlParts = url.split('/');
+        const endpoint = urlParts[urlParts.length - 1].split('?')[0]; // 获取API路径的最后一部分
+        
+        console.log(`API Request: ${options.method || 'GET'} ${endpoint}`, options.body ? JSON.parse(options.body) : '');
         try {
             const response = await fetch(url, {
                 headers: {
@@ -201,10 +276,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
-            console.log(`API Response: ${options.method || 'GET'} ${url}`, data);
+            console.log(`API Response: ${options.method || 'GET'} ${endpoint}`, data.status || 'success');
             return data;
         } catch (error) {
-            console.error(`API Error: ${options.method || 'GET'} ${url}`, error);
+            console.error(`API Error: ${options.method || 'GET'} ${endpoint}`, error);
             showMessage(`请求失败: ${error.message}`, 'error');
             throw error;
         }
@@ -233,7 +308,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateStatusDisplay(statusData) {
-        console.log("Updating status display:", statusData);
+        // 检查数据是否实际变化
+        const lastStatusData = window._lastStatusData || {};
+        const isDataChanged = !areDataEqual(lastStatusData, statusData, ['timestamp']);
+        
+        if (!isDataChanged && window._lastStatusData) {
+            console.log("Status data unchanged, skipping update");
+            return;
+        }
+        
+        window._lastStatusData = {...statusData};
+        console.log("Updating status display - data changed");
+
         if (!statusData) return;
 
         // 账户信息
@@ -366,7 +452,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 更新持仓表格（增量更新版本）
     function updateHoldingsTable(holdings) {
-        console.log("Updating holdings table:", holdings);
+        // 检查数据是否实际发生变化
+        const holdingsStr = JSON.stringify(holdings);
+        if (window._lastHoldingsStr === holdingsStr) {
+            console.log("Holdings data unchanged, skipping update");
+            return;
+        }
+        window._lastHoldingsStr = holdingsStr;
+        
+        console.log("Updating holdings table - data changed");
         elements.holdingsLoading.classList.add('hidden');
         elements.holdingsError.classList.add('hidden');
 
@@ -387,6 +481,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 记录处理过的股票代码
         const processedStocks = new Set();
+        
+        // 数据变化标记
+        let hasChanges = false;
 
         holdings.forEach(stock => {
             processedStocks.add(stock.stock_code);
@@ -399,6 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 检查是否需要更新
                 if (shouldUpdateRow(oldData, stock)) {
                     updateExistingRow(existingRows[stock.stock_code], stock);
+                    hasChanges = true;
                 }
                 
                 // 更新存储的数据
@@ -409,21 +507,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 存储数据引用
                 row.data = {...stock};
                 fragment.appendChild(row);
+                hasChanges = true;
             }
         });
 
         // 添加新行
-        elements.holdingsTableBody.appendChild(fragment);
+        if (fragment.childNodes.length > 0) {
+            elements.holdingsTableBody.appendChild(fragment);
+        }
         
         // 移除不再存在的行
+        let hasRemovals = false;
         existingRowElements.forEach(row => {
             if (!processedStocks.has(row.dataset.stockCode)) {
                 row.remove();
+                hasRemovals = true;
             }
         });
 
-        // 添加复选框监听器
-        addHoldingCheckboxListeners();
+        // 只有发生变化时才添加复选框监听器
+        if (hasChanges || hasRemovals) {
+            addHoldingCheckboxListeners();
+        }
     }
 
     function addHoldingCheckboxListeners() {
@@ -438,6 +543,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateLogs(logEntries) {
+        // 检查数据是否实际发生变化
+        const logsStr = JSON.stringify(logEntries);
+        if (window._lastLogsStr === logsStr) {
+            console.log("Logs data unchanged, skipping update");
+            return;
+        }
+        window._lastLogsStr = logsStr;
+        
         // 记住当前滚动位置和是否在底部
         const isAtBottom = elements.orderLog.scrollTop + elements.orderLog.clientHeight >= elements.orderLog.scrollHeight - 10;
         const currentScrollTop = elements.orderLog.scrollTop;
@@ -463,6 +576,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             elements.orderLog.value = formattedLogs.join('\n');
+            
+            // 标记数据已更新
+            console.log("Logs updated with new data");
         } else {
             elements.orderLog.value = "无可识别的日志数据";
             console.error("未知的日志数据格式:", logEntries);
@@ -492,16 +608,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchStatus() {
+        // 如果已经有请求在进行中，则跳过
+        if (requestLocks.status) {
+            console.log('Status request already in progress, skipping');
+            return;
+        }
+        
+        // 最小刷新间隔检查 - 3秒
+        const now = Date.now();
+        if (now - lastDataUpdateTimestamps.status < 3000) {
+            console.log('Status data recently updated, skipping');
+            return;
+        }
+        
+        // 标记请求开始
+        requestLocks.status = true;
+        
         try {
             const data = await apiRequest(API_ENDPOINTS.getStatus);
             updateStatusDisplay(data);
+            lastDataUpdateTimestamps.status = Date.now();
         } catch (error) {
             showMessage("加载状态信息失败", 'error');
             updateStatusDisplay({ isMonitoring: false, account: {} });
+        } finally {
+            // 释放请求锁定，添加小延迟避免立即重复请求
+            setTimeout(() => {
+                requestLocks.status = false;
+            }, 1000);
         }
     }
 
     async function fetchHoldings() {
+        // 如果已经有请求在进行中，则跳过
+        if (requestLocks.holdings) {
+            console.log('Holdings request already in progress, skipping');
+            return;
+        }
+        
+        // 最小刷新间隔检查 - 3秒
+        const now = Date.now();
+        if (now - lastDataUpdateTimestamps.holdings < 3000) {
+            console.log('Holdings data recently updated, skipping');
+            return;
+        }
+        
+        // 标记请求开始
+        requestLocks.holdings = true;
+        
         // 使用延迟显示加载状态，避免短暂操作造成闪烁
         let loadingTimer = null;
         
@@ -521,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // 检查版本是否变化
             if (data.data_version && data.data_version <= currentDataVersions.holdings) {
-                console.log('Holdings data not changed, skipping update');
+                console.log('Holdings data version unchanged, skipping update');
                 elements.holdingsLoading.classList.add('hidden');
                 elements.holdingsLoading.classList.remove('shown');
                 return;
@@ -534,15 +688,16 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (data.status === 'success' && Array.isArray(data.data)) {
                 updateHoldingsTable(data.data);
+                lastDataUpdateTimestamps.holdings = Date.now();
             } else {
                 throw new Error(data.message || '数据格式错误');
             }
             
-            // 2秒后隐藏加载提示，给用户足够的视觉反馈
+            // 短暂延迟后隐藏加载提示
             setTimeout(() => {
                 elements.holdingsLoading.classList.add('hidden');
                 elements.holdingsLoading.classList.remove('shown');
-            }, 2000);
+            }, 300);
         } catch (error) {
             // 取消加载提示定时器
             if (loadingTimer) clearTimeout(loadingTimer);
@@ -560,10 +715,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 5000);
             
             showMessage("加载持仓数据失败", 'error');
+        } finally {
+            // 释放请求锁定，添加小延迟避免立即重复请求
+            setTimeout(() => {
+                requestLocks.holdings = false;
+            }, 1000);
         }
     }
 
     async function fetchLogs() {  
+        // 如果已经有请求在进行中，则跳过
+        if (requestLocks.logs) {
+            console.log('Logs request already in progress, skipping');
+            return;
+        }
+        
+        // 最小刷新间隔检查 - 3秒
+        const now = Date.now();
+        if (now - lastDataUpdateTimestamps.logs < 3000) {
+            console.log('Logs data recently updated, skipping');
+            return;
+        }
+        
+        // 标记请求开始
+        requestLocks.logs = true;
+        
         // 使用延迟显示加载状态
         let loadingTimer = null;
         
@@ -584,15 +760,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.status === 'success' && Array.isArray(data.data)) {
                 // 更新日志内容
                 updateLogs(data.data);
+                lastDataUpdateTimestamps.logs = Date.now();
             } else {
                 throw new Error(data.message || '数据格式错误');
             }
             
-            // 2秒后隐藏加载提示
+            // 短暂延迟后隐藏加载提示
             setTimeout(() => {
                 elements.logLoading.classList.add('hidden');
                 elements.logLoading.classList.remove('shown');
-            }, 2000);
+            }, 300);
         } catch (error) {
             // 取消加载提示定时器
             if (loadingTimer) clearTimeout(loadingTimer);
@@ -610,6 +787,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 5000);
             
             showMessage("加载交易记录失败", 'error');
+        } finally {
+            // 释放请求锁定，添加小延迟避免立即重复请求
+            setTimeout(() => {
+                requestLocks.logs = false;
+            }, 1000);
         }
     }
 
@@ -627,7 +809,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function checkApiConnection() {
+    // 添加节流的API连接检测
+    const throttledCheckApiConnection = throttle(async function() {
         try {
             console.log("Checking API connection at:", API_ENDPOINTS.checkConnection);
             const response = await fetch(API_ENDPOINTS.checkConnection);
@@ -641,9 +824,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error checking API connection:", error);
             updateConnectionStatus(false);
         } finally {
-            setTimeout(checkApiConnection, 5000);
+            setTimeout(throttledCheckApiConnection, 5000);
         }
-    }
+    }, 5000);
 
     // --- 操作处理函数 ---
     async function handleToggleMonitor() {
@@ -750,8 +933,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(configData),
             });
             showMessage(data.message || "持仓数据初始化成功", 'success');
-            await fetchHoldings(); // 刷新持仓数据
-            await fetchStatus(); // 刷新账户状态
+            
+            // 重置请求锁定状态
+            requestLocks.holdings = false;
+            
+            // 强制刷新持仓数据和账户状态
+            await fetchHoldings(); 
+            await fetchStatus();
         } catch (error) {
             // 错误已由apiRequest处理
         } finally {
@@ -773,6 +961,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await apiRequest(endpoint, { method: 'POST' });            
             showMessage(data.message || "操作成功", 'success');
+            
+            // 重置请求锁定状态
+            requestLocks.holdings = false;
+            requestLocks.logs = false;
+            
             // 根据操作类型刷新相关数据
             if (endpoint === API_ENDPOINTS.clearCurrentData || endpoint === API_ENDPOINTS.clearBuySellData) {
                 await fetchHoldings(); // 刷新持仓数据
@@ -810,6 +1003,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(buyData),
             });
             showMessage(data.message || "买入指令已发送", 'success');
+            
+            // 重置请求锁定状态
+            requestLocks.holdings = false;
+            requestLocks.logs = false;
+            
             // 刷新相关数据
             await fetchHoldings();
             await fetchLogs();
@@ -825,17 +1023,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 轮询机制 ---
     function startPolling() {
         if (pollingIntervalId) {
+            console.log("已存在轮询，停止旧轮询");
             clearInterval(pollingIntervalId);
+            pollingIntervalId = null;
         }
         
         // 设置适当的轮询间隔
         POLLING_INTERVAL = isPageActive ? ACTIVE_POLLING_INTERVAL : INACTIVE_POLLING_INTERVAL;
         
-        console.log(`Starting data polling with interval: ${POLLING_INTERVAL}ms`);
+        // 确保轮询间隔至少为3秒
+        const actualInterval = Math.max(POLLING_INTERVAL, 3000);
+        
+        console.log(`Starting data polling with interval: ${actualInterval}ms`);
         
         // 先立即轮询一次
         pollData();
-        pollingIntervalId = setInterval(pollData, POLLING_INTERVAL);
+        
+        pollingIntervalId = setInterval(pollData, actualInterval);
+        
+        console.log(`Polling started with interval: ${actualInterval}ms`);
     }
 
     function stopPolling() {
@@ -848,23 +1054,38 @@ document.addEventListener('DOMContentLoaded', () => {
     async function pollData() {
         console.log("Polling for data updates...");
         
+        // 如果所有请求都在进行中，则跳过本次轮询
+        if (requestLocks.status && requestLocks.holdings && requestLocks.logs) {
+            console.log("All requests in progress, skipping poll cycle");
+            return;
+        }
+        
         // 添加微妙的刷新指示，而不是明显的加载提示
         document.body.classList.add('api-refreshing');
         
-        // 不再显示闪烁的加载提示
-        // elements.holdingsLoading.classList.remove('hidden');
-        // elements.logLoading.classList.remove('hidden');
-        
-        // 显示刷新状态
-        showRefreshStatus();
+        // 根据条件决定是否显示刷新状态
+        const now = Date.now();
+        const allRecentlyUpdated = 
+            (now - lastDataUpdateTimestamps.status < 3000) &&
+            (now - lastDataUpdateTimestamps.holdings < 3000) &&
+            (now - lastDataUpdateTimestamps.logs < 3000);
+            
+        if (!allRecentlyUpdated) {
+            showRefreshStatus();
+        }
 
         try {
-            // 并行获取数据
-            await Promise.allSettled([
-                fetchStatus(), // 包含账户信息的状态
-                fetchHoldings(), // 持仓数据
-                fetchLogs() // 日志数据
-            ]);
+            // 顺序执行请求，而非并行，以减少服务器负担
+            if (!requestLocks.status) await fetchStatus();
+            // 短暂延迟，避免请求过于集中
+            await new Promise(r => setTimeout(r, 200));
+            
+            if (!requestLocks.holdings) await fetchHoldings();
+            await new Promise(r => setTimeout(r, 200));
+            
+            if (!requestLocks.logs) await fetchLogs();
+        } catch (error) {
+            console.error("Poll cycle error:", error);
         } finally {
             // 移除刷新状态
             document.body.classList.remove('api-refreshing');
@@ -921,18 +1142,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const sseURL = `${API_BASE_URL}/api/sse`;
         sseConnection = new EventSource(sseURL);
         
+        // SSE节流相关
+        let lastSseUpdateTime = 0;
+        
         sseConnection.onmessage = function(event) {
             try {
                 const data = JSON.parse(event.data);
                 console.log('SSE update received:', data);
+                
+                // 确保SSE更新之间至少有3秒间隔
+                const now = Date.now();
+                if (now - lastSseUpdateTime < 3000) {
+                    console.log('SSE updates too frequent, throttling');
+                    return;
+                }
+                lastSseUpdateTime = now;
                 
                 // 更新关键UI元素而不刷新整个页面
                 if (data.account_info) {
                     updateQuickAccountInfo(data.account_info);
                 }
                 
-                // 显示轻微的更新提示
-                showUpdatedIndicator();
+                // 显示轻微的更新提示（但不频繁显示）
+                if (now - lastRefreshStatusShown > 5000) {
+                    showUpdatedIndicator();
+                }
             } catch (e) {
                 console.error('SSE data parse error:', e);
             }
@@ -986,27 +1220,40 @@ document.addEventListener('DOMContentLoaded', () => {
         updateApiBaseUrl();
         
         showMessage("正在加载初始数据...", 'loading', 0);
-        await Promise.allSettled([
-            fetchConfig(),
-            fetchStatus(), // 获取状态和账户信息
-            fetchHoldings(),
-            fetchLogs()
-        ]);
-        showMessage("数据加载完成", 'success', 2000);
+        
+        try {
+            // 顺序加载而非并行，避免过多并发请求
+            await fetchConfig();
+            await new Promise(r => setTimeout(r, 200));
+            
+            await fetchStatus();
+            await new Promise(r => setTimeout(r, 200));
+            
+            await fetchHoldings();
+            await new Promise(r => setTimeout(r, 200));
+            
+            await fetchLogs();
+            
+            showMessage("数据加载完成", 'success', 2000);
+        } catch (error) {
+            showMessage("部分数据加载失败", 'error', 3000);
+        }
 
-        // 如果监控已开启，自动启动轮询
+        // 如果监控已开启，自动启动轮询 (确保只有一个轮询实例)
         if (isMonitoring) {
             startPolling();
         }
 
         // 启动SSE
-        initSSE();
+        setTimeout(() => {
+            initSSE();
+        }, 1000);
         
         // 检测浏览器性能
         setTimeout(checkBrowserPerformance, 5000);
         
         // 开始API连接检查
-        setTimeout(checkApiConnection, 1000);
+        setTimeout(throttledCheckApiConnection, 2000);
     }
 
     console.log("Adding event listeners and fetching initial data...");
