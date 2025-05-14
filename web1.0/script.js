@@ -249,14 +249,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateLogs(logEntries) {
+    
         // 记住当前滚动位置和是否在底部
         const isAtBottom = elements.orderLog.scrollTop + elements.orderLog.clientHeight >= elements.orderLog.scrollHeight - 10;
         const currentScrollTop = elements.orderLog.scrollTop;
         
         elements.logLoading.classList.add('hidden');
         elements.logError.classList.add('hidden');
-    
-        // 格式化日志内容...（保持原有代码）
+        console.log("Updating logs:", logEntries);
+
+        if (typeof logEntries === 'string') {
+            elements.orderLog.value = logEntries;
+        } else if (Array.isArray(logEntries)) {
+            // 假设每个 logEntry 是一个对象，我们需要将其转换为字符串
+            const formattedLogs = logEntries.map(entry => {
+                // 根据你的交易记录对象结构调整格式化方式
+                if (typeof entry === 'object' && entry !== null) {
+                    // 使用 entry.trade_time, entry.trade_type,  而不是  entry.time, entry.action
+                    //  并且没有 stock_name,  trade_type  需要转换一下
+                    const action = entry.trade_type === 'BUY' ? '买入' : (entry.trade_type === 'SELL' ? '卖出' : entry.trade_type);
+                    return `时间: ${entry.trade_time || ''}, 代码: ${entry.stock_code || ''}, 名称: , 操作: ${action || ''}, 价格: ${entry.price || ''}, 数量: ${entry.volume || ''}, 状态: `;
+
+                    //  如果后端返回了 stock_name  字段，  把上面 return 语句中的  名称: ,  改成  名称: ${entry.stock_name || ''},
+
+                } else {
+                    return String(entry); // 如果不是对象，直接转换为字符串
+                }
+            });
+            elements.orderLog.value = formattedLogs.join('\n');
+        } else {
+            elements.orderLog.value = "无法识别的日志格式，请检查数据类型";
+            console.error("未知的日志数据格式:", logEntries);
+            elements.logError.textContent = "未知的日志数据格式，请检查控制台错误信息";
+        }
         
         // 只有当之前在底部时，才自动滚动到底部
         if (isAtBottom) {
@@ -586,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Promise.allSettled([/* 原有异步操作 */]).finally(() => {
             elements.orderLog.classList.remove('refreshing');
         });
-        
+
         console.log("Polling cycle finished.");
     }
 
