@@ -62,17 +62,6 @@
         #orderLog::-webkit-scrollbar {
             width: 8px;
         }
-
-        #logLoading, #logError {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 4px;
-            padding: 8px 16px;
-            z-index: 10;
-        }
         
         /* 状态消息样式 */
         .status-message {
@@ -110,6 +99,35 @@
             100% { opacity: 0.6; }
         }
 
+        /* 加载图标淡入淡出 */
+        #holdingsLoading, #logLoading {
+            transition: opacity 0.3s ease;
+        }
+
+        #holdingsLoading.shown, #logLoading.shown {
+            opacity: 1;
+        }
+
+        #holdingsLoading:not(.shown), #logLoading:not(.shown) {
+            opacity: 0;
+            transition-delay: 1s;
+        }
+
+        .api-refreshing .text-blue-700 {
+            position: relative;
+        }
+
+        .api-refreshing .text-blue-700::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.5), rgba(96, 165, 250, 0.1));
+            animation: pulse 2s infinite;
+        }
+
         .refreshing {
             position: relative;
         }
@@ -125,21 +143,6 @@
             pointer-events: none;
             animation: pulse 1s infinite;
             z-index: 5;
-        }
-
-        #refreshStatus {
-            animation: fadeOut 0.5s ease-in-out;
-            z-index: 1000;
-        }
-        
-        /* 数据更新高亮效果 */
-        .highlight-update {
-            animation: highlight 1s ease-out;
-        }
-        
-        @keyframes highlight {
-            0% { background-color: rgba(16, 185, 129, 0.2); }
-            100% { background-color: transparent; }
         }
         
         /* 低性能模式 */
@@ -268,8 +271,19 @@
                 </div>
 
                 <div class="flex-grow border rounded p-3 bg-white overflow-x-auto">
-                     <h3 class="text-lg font-semibold mb-2 text-blue-700">2. 当前持仓列表</h3>
-                     <div class="overflow-y-auto max-h-96"> <table class="w-full text-sm text-left border-collapse">
+                    <h3 class="text-lg font-semibold mb-2 text-blue-700 flex items-center">
+                        2. 当前持仓列表
+                        <span id="holdingsLoading" class="ml-2 text-xs text-gray-500 hidden">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-500 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            更新中
+                        </span>
+                        <span id="holdingsError" class="ml-2 text-xs text-red-500 hidden">加载失败</span>
+                    </h3>
+                     <div class="overflow-y-auto max-h-96"> 
+                         <table class="w-full text-sm text-left border-collapse">
                             <thead class="bg-gray-200 sticky top-0"> <tr>
                                     <th class="border p-2"><input type="checkbox" id="selectAllHoldings"></th>
                                     <th class="border p-2">代码</th>
@@ -293,17 +307,23 @@
                             </tbody>
                         </table>
                      </div>
-                    <div id="holdingsLoading" class="text-center p-4 text-gray-500 hidden">加载持仓数据中...</div>
-                    <div id="holdingsError" class="text-center p-4 text-red-500 hidden">无法加载持仓数据。</div>
                 </div>
             </div>
 
             <div class="border rounded p-3 bg-gray-50 flex flex-col relative" style="height: 460px;">
-                <h3 class="text-lg font-semibold mb-2 text-blue-700">3. 下单日志</h3>
+                <h3 class="text-lg font-semibold mb-2 text-blue-700 flex items-center">
+                    3. 下单日志
+                    <span id="logLoading" class="ml-2 text-xs text-gray-500 hidden">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-500 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        更新中
+                    </span>
+                    <span id="logError" class="ml-2 text-xs text-red-500 hidden">加载失败</span>
+                </h3>
                 <div class="flex-grow relative">
                     <textarea id="orderLog" class="w-full h-full border rounded p-2 text-xs bg-white resize-none" readonly></textarea>
-                    <div id="logLoading" class="text-center p-4 text-gray-500 hidden">加载日志中...</div>
-                    <div id="logError" class="text-center p-4 text-red-500 hidden">无法加载日志。</div>
                 </div>
             </div>
         </section>

@@ -464,9 +464,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             elements.orderLog.value = formattedLogs.join('\n');
         } else {
-            elements.orderLog.value = "无法识别的日志格式，请检查数据类型";
+            elements.orderLog.value = "无可识别的日志数据";
             console.error("未知的日志数据格式:", logEntries);
-            elements.logError.textContent = "未知的日志数据格式，请检查控制台错误信息";
         }
         
         // 只有当之前在底部时，才自动滚动到底部
@@ -503,17 +502,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchHoldings() {
-        elements.holdingsLoading.classList.remove('hidden');
-        elements.holdingsError.classList.add('hidden');
+        // 使用延迟显示加载状态，避免短暂操作造成闪烁
+        let loadingTimer = null;
+        
+        // 仅在加载时间超过300ms时才显示加载提示
+        if (!elements.holdingsLoading.classList.contains('shown')) {
+            loadingTimer = setTimeout(() => {
+                elements.holdingsLoading.classList.remove('hidden');
+                elements.holdingsLoading.classList.add('shown');
+            }, 300);
+        }
         
         try {            
             const data = await apiRequest(API_ENDPOINTS.getPositionsAll);
-            console.log('Data received from positions-all:', data);
+            
+            // 取消加载提示定时器
+            if (loadingTimer) clearTimeout(loadingTimer);
             
             // 检查版本是否变化
             if (data.data_version && data.data_version <= currentDataVersions.holdings) {
                 console.log('Holdings data not changed, skipping update');
                 elements.holdingsLoading.classList.add('hidden');
+                elements.holdingsLoading.classList.remove('shown');
                 return;
             }
             
@@ -527,31 +537,78 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 throw new Error(data.message || '数据格式错误');
             }
+            
+            // 2秒后隐藏加载提示，给用户足够的视觉反馈
+            setTimeout(() => {
+                elements.holdingsLoading.classList.add('hidden');
+                elements.holdingsLoading.classList.remove('shown');
+            }, 2000);
         } catch (error) {
+            // 取消加载提示定时器
+            if (loadingTimer) clearTimeout(loadingTimer);
+            
             elements.holdingsLoading.classList.add('hidden');
+            elements.holdingsLoading.classList.remove('shown');
+            
+            // 显示错误信息
             elements.holdingsError.classList.remove('hidden');
-            elements.holdingsError.textContent = `加载持仓数据失败: ${error.message}`;
+            elements.holdingsError.textContent = `加载失败: ${error.message}`;
+            
+            // 5秒后自动隐藏错误信息
+            setTimeout(() => {
+                elements.holdingsError.classList.add('hidden');
+            }, 5000);
+            
             showMessage("加载持仓数据失败", 'error');
         }
     }
 
     async function fetchLogs() {  
-        elements.logLoading.classList.remove('hidden');
-        elements.logError.classList.add('hidden');
-        elements.orderLog.value = ''; // 加载时清空
+        // 使用延迟显示加载状态
+        let loadingTimer = null;
+        
+        // 仅在加载时间超过300ms时才显示加载提示
+        if (!elements.logLoading.classList.contains('shown')) {
+            loadingTimer = setTimeout(() => {
+                elements.logLoading.classList.remove('hidden');
+                elements.logLoading.classList.add('shown');
+            }, 300);
+        }
+        
         try {
             const data = await apiRequest(API_ENDPOINTS.getTradeRecords);
             
+            // 取消加载提示定时器
+            if (loadingTimer) clearTimeout(loadingTimer);
+            
             if (data.status === 'success' && Array.isArray(data.data)) {
-                // 使用交易记录更新 UI
+                // 更新日志内容
                 updateLogs(data.data);
             } else {
                 throw new Error(data.message || '数据格式错误');
             }
+            
+            // 2秒后隐藏加载提示
+            setTimeout(() => {
+                elements.logLoading.classList.add('hidden');
+                elements.logLoading.classList.remove('shown');
+            }, 2000);
         } catch (error) {
+            // 取消加载提示定时器
+            if (loadingTimer) clearTimeout(loadingTimer);
+            
             elements.logLoading.classList.add('hidden');
+            elements.logLoading.classList.remove('shown');
+            
+            // 显示错误信息
             elements.logError.classList.remove('hidden');
-            elements.logError.textContent = `加载交易记录失败: ${error.message}`;
+            elements.logError.textContent = `加载失败: ${error.message}`;
+            
+            // 5秒后自动隐藏错误信息
+            setTimeout(() => {
+                elements.logError.classList.add('hidden');
+            }, 5000);
+            
             showMessage("加载交易记录失败", 'error');
         }
     }
@@ -791,10 +848,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function pollData() {
         console.log("Polling for data updates...");
         
-        // 添加刷新状态
+        // 添加微妙的刷新指示，而不是明显的加载提示
         document.body.classList.add('api-refreshing');
-        elements.holdingsTableBody.parentElement.classList.add('refreshing');
-        elements.orderLog.classList.add('refreshing');
+        
+        // 不再显示闪烁的加载提示
+        // elements.holdingsLoading.classList.remove('hidden');
+        // elements.logLoading.classList.remove('hidden');
         
         // 显示刷新状态
         showRefreshStatus();
@@ -809,8 +868,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             // 移除刷新状态
             document.body.classList.remove('api-refreshing');
-            elements.holdingsTableBody.parentElement.classList.remove('refreshing');
-            elements.orderLog.classList.remove('refreshing');
         }
         
         console.log("Polling cycle finished.");
