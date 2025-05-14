@@ -6,7 +6,7 @@
     <title>交易监控面板</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Add minor custom styles if needed */
+        /* 基础样式 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
@@ -14,28 +14,27 @@
         .main-container {
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 40px); /* 减去页面边距 */
-            min-height: 768px; /* 设置最小高度 */
+            height: calc(100vh - 40px);
+            min-height: 768px;
         }
 
         .content-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* 防止内容溢出导致整体页面出现滚动条 */
+            overflow: hidden;
         }
 
         #orderLog {
-            height: 400px; /* 根据实际需求调整高度 */
+            height: 400px;
             min-height: 400px;
             max-height: 400px;
-            overflow-y: scroll; /* 始终显示垂直滚动条 */
-            overflow-y: overlay; /* 在支持的浏览器中使用overlay模式 */
+            overflow-y: scroll;
+            overflow-y: overlay;
             white-space: pre-wrap;
             overflow-wrap: break-word;
         }
 
-        /* 确保滚动条始终显示，避免布局跳动 */
         #orderLog::-webkit-scrollbar {
             width: 8px;
         }
@@ -49,8 +48,9 @@
             border-radius: 4px;
             padding: 8px 16px;
             z-index: 10;
-        }        
-        /* Style for loading/error messages */
+        }
+        
+        /* 状态消息样式 */
         .status-message {
             padding: 10px;
             margin-bottom: 10px;
@@ -61,7 +61,21 @@
         .error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
         .success { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; }
         
-        /* 添加刷新状态指示器样式 */
+        /* API连接状态指示器 */
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        .connected { background-color: #dcfce7; color: #166534; }
+        .disconnected { background-color: #fee2e2; color: #991b1b; }
+        
+        /* 刷新状态动画 */
         @keyframes fadeOut {
             from { opacity: 1; }
             to { opacity: 0; }
@@ -93,20 +107,22 @@
             animation: fadeOut 0.5s ease-in-out;
             z-index: 1000;
         }
-
-        /* 添加API连接状态指示器 */
-        .connection-status {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 1000;
+        
+        /* 数据更新高亮效果 */
+        .highlight-update {
+            animation: highlight 1s ease-out;
         }
-        .connected { background-color: #dcfce7; color: #166534; }
-        .disconnected { background-color: #fee2e2; color: #991b1b; }
+        
+        @keyframes highlight {
+            0% { background-color: rgba(16, 185, 129, 0.2); }
+            100% { background-color: transparent; }
+        }
+        
+        /* 低性能模式 */
+        .low-performance-mode .refreshing::after {
+            animation: none;
+            opacity: 0.1;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4">

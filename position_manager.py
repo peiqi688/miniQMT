@@ -1080,36 +1080,46 @@ class PositionManager:
             logger.info("持仓监控线程已停止")
 
     def get_all_positions_with_all_fields(self):
-        """
-        获取所有持仓的所有字段（包括内存数据库中的所有字段）
-        
-        返回:
-        pandas.DataFrame: 所有持仓数据
-        """
+        """获取所有持仓的所有字段（包括内存数据库中的所有字段）"""
         try:
             query = "SELECT * FROM positions"
             df = pd.read_sql_query(query, self.memory_conn)
             
-            # 获取每只股票的最新行情并计算涨跌幅
-            change_percentages = {}
-            for stock_code in df['stock_code']:
-                latest_data = self.data_manager.get_latest_xtdata(stock_code)
-                lastPrice = latest_data.get('lastPrice')
-                lastClose = latest_data.get('lastClose')
-                if latest_data and lastClose != 0:
-                    change_percentage = round((lastPrice - lastClose) / lastClose * 100, 2)
-                    change_percentages[stock_code] = change_percentage
-                else:
-                    change_percentages[stock_code] = 0.0  # 无法获取或上一日收盘价为0，则设为0
-            
-            # 将涨跌幅添加到 DataFrame 中
-            df['change_percentage'] = df['stock_code'].map(change_percentages)
+            # 批量获取所有股票的行情
+            if not df.empty:
+                stock_codes = df['stock_code'].tolist()
+                all_latest_data = {}
+                
+                # 批量获取所有股票的最新行情（如果交易时间）
+                if config.is_trade_time():
+                    for stock_code in stock_codes:
+                        latest_data = self.data_manager.get_latest_xtdata(stock_code)
+                        if latest_data:
+                            all_latest_data[stock_code] = latest_data
+                
+                # 计算涨跌幅
+                change_percentages = {}
+                for stock_code in df['stock_code']:
+                    latest_data = all_latest_data.get(stock_code)
+                    if latest_data:
+                        lastPrice = latest_data.get('lastPrice')
+                        lastClose = latest_data.get('lastClose')
+                        if lastPrice is not None and lastClose is not None and lastClose != 0:
+                            change_percentage = round((lastPrice - lastClose) / lastClose * 100, 2)
+                            change_percentages[stock_code] = change_percentage
+                        else:
+                            change_percentages[stock_code] = 0.0
+                    else:
+                        change_percentages[stock_code] = 0.0
+                
+                # 将涨跌幅添加到 DataFrame 中
+                df['change_percentage'] = df['stock_code'].map(change_percentages)
             
             logger.debug(f"获取到 {len(df)} 条持仓记录（所有字段），并计算了涨跌幅")
             return df
         except Exception as e:
             logger.error(f"获取所有持仓信息（所有字段）时出错: {str(e)}")
-            return pd.DataFrame() 
+            return pd.DataFrame()
         
     def _position_monitor_loop(self):
         """持仓监控循环"""

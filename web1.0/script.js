@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
         getStatus: `/api/status`,
         getHoldings: `/api/holdings`,
         getLogs: `/api/logs`,
-        getPositionsAll: `/api/positions-all`, // 新增：获取所有持仓数据
+        getPositionsAll: `/api/positions-all`, // 获取所有持仓数据
+        getTradeRecords: `/api/trade-records`, // 获取交易记录
         // --- POST Endpoints ---
         saveConfig: `/api/config/save`,
         checkConnection: '/api/connection/status',
@@ -24,9 +25,23 @@ document.addEventListener('DOMContentLoaded', () => {
         updateHoldingParams: `/api/holdings/update`
     };
 
-    const POLLING_INTERVAL = 5000; // 每2秒更新一次数据
+    // 轮询设置
+    let POLLING_INTERVAL = 5000; // 默认5秒
+    const ACTIVE_POLLING_INTERVAL = 5000; // 活跃状态：5秒
+    const INACTIVE_POLLING_INTERVAL = 15000; // 非活跃状态：15秒
     let pollingIntervalId = null;
     let isMonitoring = false; // 监控状态
+    let isPageActive = true; // 页面活跃状态
+    
+    // SSE连接
+    let sseConnection = null;
+    
+    // 数据版本号跟踪
+    let currentDataVersions = {
+        holdings: 0,
+        logs: 0,
+        status: 0
+    };
 
     // --- DOM Element References ---
     const elements = {
@@ -75,9 +90,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // 订单日志
         orderLog: document.getElementById('orderLog'),
         logLoading: document.getElementById('logLoading'),
-
         logError: document.getElementById('logError'),
     };
+
+    // --- 监听页面可见性变化 ---
+    document.addEventListener('visibilitychange', () => {
+        isPageActive = !document.hidden;
+        
+        // 如果轮询已启动，重新调整轮询间隔
+        if (pollingIntervalId) {
+            stopPolling();
+            startPolling();
+        }
+    });
 
     // --- 工具函数 ---
     function showMessage(text, type = 'info', duration = 5000) {
@@ -96,6 +121,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 显示刷新状态
+    function showRefreshStatus() {
+        // 如果已经存在刷新状态元素，则移除它
+        const existingStatus = document.getElementById('refreshStatus');
+        if (existingStatus) {
+            existingStatus.remove();
+        }
+        
+        // 创建新的刷新状态元素
+        const statusElement = document.createElement('div');
+        statusElement.id = 'refreshStatus';
+        statusElement.className = 'fixed bottom-2 right-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs';
+        statusElement.innerHTML = '数据刷新中...';
+        document.body.appendChild(statusElement);
+        
+        // 0.5秒后淡出
+        setTimeout(() => {
+            statusElement.style.animation = 'fadeOut 0.5s ease-in-out';
+            setTimeout(() => {
+                if (statusElement.parentNode) {
+                    statusElement.parentNode.removeChild(statusElement);
+                }
+            }, 500);
+        }, 500);
+    }
+
+    // 显示更新指示器
+    function showUpdatedIndicator() {
+        const indicator = document.createElement('div');
+        indicator.className = 'fixed top-2 left-2 bg-green-100 text-green-800 px-2 py-1 rounded text-xs z-50';
+        indicator.textContent = '数据已更新';
+        document.body.appendChild(indicator);
+        
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            indicator.style.transition = 'opacity 0.5s';
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.parentNode.removeChild(indicator);
+                }
+            }, 500);
+        }, 1000);
+    }
+
     // 更新API基础URL
     function updateApiBaseUrl() {
         const ip = elements.totalAccounts.value || '127.0.0.1';
@@ -109,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("API Base URL updated:", API_BASE_URL);
     }
 
+    // API请求函数
     async function apiRequest(url, options = {}) {
         console.log(`API Request: ${options.method || 'GET'} ${url}`, options.body ? JSON.parse(options.body) : '');
         try {
@@ -190,13 +260,113 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.toggleMonitorBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
             stopPolling(); // 停止轮询数据
         }
-
     }
 
-    // 更新持仓表格 - 适配新的字段对应关系
+    // 轻量级账户信息更新，用于SSE
+    function updateQuickAccountInfo(accountInfo) {
+        if (accountInfo.available !== undefined) {
+            elements.availableBalance.textContent = parseFloat(accountInfo.available).toFixed(2);
+            // 添加闪烁效果
+            elements.availableBalance.classList.add('highlight-update');
+            setTimeout(() => {
+                elements.availableBalance.classList.remove('highlight-update');
+            }, 1000);
+        }
+    }
+
+    // 判断持仓数据是否需要更新
+    function shouldUpdateRow(oldData, newData) {
+        // 检查关键字段是否有变化
+        const keysToCheck = ['current_price', 'market_value', 'profit_ratio', 'available', 'volume'];
+        return keysToCheck.some(key => {
+            // 对于数值，考虑舍入误差
+            if (typeof oldData[key] === 'number' && typeof newData[key] === 'number') {
+                return Math.abs(oldData[key] - newData[key]) > 0.001;
+            }
+            return oldData[key] !== newData[key];
+        });
+    }
+
+    // 更新现有持仓行
+    function updateExistingRow(row, stock) {
+        // 更新各个单元格的值
+        const cells = row.querySelectorAll('td');
+        
+        // 确保保留复选框
+        
+        // 更新基本信息
+        cells[1].textContent = stock.stock_code || '--';
+        cells[2].textContent = stock.stock_name || stock.name || '--';
+        
+        // 更新涨跌幅，包括类名
+        const changePercentage = parseFloat(stock.change_percentage || 0);
+        cells[3].textContent = `${changePercentage.toFixed(2)}%`;
+        cells[3].className = `border p-2 ${changePercentage >= 0 ? 'text-red-600' : 'text-green-600'}`;
+        
+        // 更新价格、成本和盈亏
+        cells[4].textContent = parseFloat(stock.current_price || 0).toFixed(2);
+        cells[5].textContent = parseFloat(stock.cost_price || 0).toFixed(2);
+        
+        const profitRatio = parseFloat(stock.profit_ratio || 0);
+        cells[6].textContent = `${profitRatio.toFixed(2)}%`;
+        cells[6].className = `border p-2 ${profitRatio >= 0 ? 'text-red-600' : 'text-green-600'}`;
+        
+        // 更新持仓信息
+        cells[7].textContent = stock.market_value || '--';
+        cells[8].textContent = stock.available || 0;
+        cells[9].textContent = stock.volume || 0;
+        
+        // 更新止盈标志
+        cells[10].innerHTML = `<input type="checkbox" ${stock.profit_triggered ? 'checked' : ''} disabled>`;
+        
+        // 更新其他数据
+        cells[11].textContent = parseFloat(stock.highest_price || 0).toFixed(2);
+        cells[12].textContent = parseFloat(stock.stop_loss_price || 0).toFixed(2);
+        cells[13].textContent = (stock.open_date || '').split(' ')[0];
+        cells[14].textContent = parseFloat(stock.base_cost_price || stock.cost_price || 0).toFixed(2);
+        
+        // 高亮闪烁更新的单元格
+        cells[4].classList.add('highlight-update');
+        setTimeout(() => {
+            cells[4].classList.remove('highlight-update');
+        }, 1000);
+    }
+
+    // 创建新的持仓行
+    function createStockRow(stock) {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50 even:bg-gray-100';
+        row.dataset.stockCode = stock.stock_code; // 添加标识属性
+        
+        // 计算关键值
+        const changePercentage = parseFloat(stock.change_percentage || 0);
+        const profitRatio = parseFloat(stock.profit_ratio || 0);
+        
+        // 构建行内容
+        row.innerHTML = `
+            <td class="border p-2"><input type="checkbox" class="holding-checkbox" data-id="${stock.id || stock.stock_code}"></td>
+            <td class="border p-2">${stock.stock_code || '--'}</td>
+            <td class="border p-2">${stock.stock_name || stock.name || '--'}</td>                
+            <td class="border p-2 ${changePercentage >= 0 ? 'text-red-600' : 'text-green-600'}">${changePercentage.toFixed(2)}%</td>
+            <td class="border p-2">${parseFloat(stock.current_price || 0).toFixed(2)}</td>
+            <td class="border p-2">${parseFloat(stock.cost_price || 0).toFixed(2)}</td>
+            <td class="border p-2 ${profitRatio >= 0 ? 'text-red-600' : 'text-green-600'}">${profitRatio.toFixed(2)}%</td>
+            <td class="border p-2">${stock.market_value || '--'}</td>
+            <td class="border p-2">${stock.available || 0}</td>       
+            <td class="border p-2">${stock.volume || 0}</td>         
+            <td class="border p-2 text-center"><input type="checkbox" ${stock.profit_triggered ? 'checked' : ''} disabled></td>
+            <td class="border p-2">${parseFloat(stock.highest_price || 0).toFixed(2)}</td>                
+            <td class="border p-2">${parseFloat(stock.stop_loss_price || 0).toFixed(2)}</td> 
+            <td class="border p-2 whitespace-nowrap">${(stock.open_date || '').split(' ')[0]}</td>                               
+            <td class="border p-2">${parseFloat(stock.base_cost_price || stock.cost_price || 0).toFixed(2)}</td>
+        `;
+        
+        return row;
+    }
+
+    // 更新持仓表格（增量更新版本）
     function updateHoldingsTable(holdings) {
         console.log("Updating holdings table:", holdings);
-        elements.holdingsTableBody.innerHTML = ''; // 清空现有行
         elements.holdingsLoading.classList.add('hidden');
         elements.holdingsError.classList.add('hidden');
 
@@ -205,32 +375,51 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // 获取现有行
+        const existingRows = {};
+        const existingRowElements = elements.holdingsTableBody.querySelectorAll('tr[data-stock-code]');
+        existingRowElements.forEach(row => {
+            existingRows[row.dataset.stockCode] = row;
+        });
+
+        // 临时文档片段，减少DOM重绘
+        const fragment = document.createDocumentFragment();
+        
+        // 记录处理过的股票代码
+        const processedStocks = new Set();
+
         holdings.forEach(stock => {
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-gray-50 even:bg-gray-100';
+            processedStocks.add(stock.stock_code);
             
-            // 根据新的字段对应关系创建表格行
-            row.innerHTML = `
-                <td class="border p-2"><input type="checkbox" class="holding-checkbox" data-id="${stock.id || stock.stock_code}"></td>
-                <td class="border p-2">${stock.stock_code || '--'}</td>
-                <td class="border p-2">${stock.stock_name || stock.name || '--'}</td>                
-                <td class="border p-2 ${parseFloat(stock.change_percentage || 0) >= 0 ? 'text-red-600' : 'text-green-600'}">${parseFloat(stock.change_percentage || 0).toFixed(2)}%</td>
-                <td class="border p-2">${parseFloat(stock.current_price || 0).toFixed(2)}</td>
-                <td class="border p-2">${parseFloat(stock.cost_price || 0).toFixed(2)}</td>
-                <td class="border p-2 ${parseFloat(stock.profit_ratio || 0) >= 0 ? 'text-red-600' : 'text-green-600'}">${parseFloat(stock.profit_ratio || 0).toFixed(2)}%</td>
-                <td class="border p-2">${stock.market_value || '--'}</td>
-                <td class="border p-2">${stock.available || 0}</td>       
-                <td class="border p-2">${stock.volume || 0}</td>         
-                <td class="border p-2 text-center"><input type="checkbox" ${stock.profit_triggered ? 'checked' : ''} disabled></td>
-                <td class="border p-2">${parseFloat(stock.today_highest_price || stock.highest_price || 0).toFixed(2)}</td>                
-                <td class="border p-2">${parseFloat(stock.stop_loss_price || 0).toFixed(2)}</td> 
-                <td class="border p-2 whitespace-nowrap">${(stock.open_date || '').split(' ')[0]}</td>                               
-                <td class="border p-2">${parseFloat(stock.base_cost_price || stock.cost_price || 0).toFixed(2)}</td>
+            // 检查是否已存在此股票行
+            if (existingRows[stock.stock_code]) {
+                // 获取现有数据
+                const oldData = existingRows[stock.stock_code].data || {};
+                
+                // 检查是否需要更新
+                if (shouldUpdateRow(oldData, stock)) {
+                    updateExistingRow(existingRows[stock.stock_code], stock);
+                }
+                
+                // 更新存储的数据
+                existingRows[stock.stock_code].data = {...stock};
+            } else {
+                // 创建新行
+                const row = createStockRow(stock);
+                // 存储数据引用
+                row.data = {...stock};
+                fragment.appendChild(row);
+            }
+        });
 
-            `;
-
-            elements.holdingsTableBody.appendChild(row);
-
+        // 添加新行
+        elements.holdingsTableBody.appendChild(fragment);
+        
+        // 移除不再存在的行
+        existingRowElements.forEach(row => {
+            if (!processedStocks.has(row.dataset.stockCode)) {
+                row.remove();
+            }
         });
 
         // 添加复选框监听器
@@ -249,18 +438,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateLogs(logEntries) {
-    
         // 记住当前滚动位置和是否在底部
         const isAtBottom = elements.orderLog.scrollTop + elements.orderLog.clientHeight >= elements.orderLog.scrollHeight - 10;
         const currentScrollTop = elements.orderLog.scrollTop;
         
         elements.logLoading.classList.add('hidden');
         elements.logError.classList.add('hidden');
-        console.log("Updating logs:", logEntries);
-
-        if (typeof logEntries === 'string') {
-            elements.orderLog.value = logEntries;
-        } else if (Array.isArray(logEntries)) {
+    
+        // 格式化日志内容
+        if (Array.isArray(logEntries)) {
             // 假设每个 logEntry 是一个对象，我们需要将其转换为字符串
             const formattedLogs = logEntries.map(entry => {
                 // 根据你的交易记录对象结构调整格式化方式
@@ -316,15 +502,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 获取持仓数据 - 使用positions-all接口
     async function fetchHoldings() {
         elements.holdingsLoading.classList.remove('hidden');
         elements.holdingsError.classList.add('hidden');
-        elements.holdingsTableBody.innerHTML = ''; // 加载时清空
         
         try {            
             const data = await apiRequest(API_ENDPOINTS.getPositionsAll);
             console.log('Data received from positions-all:', data);
+            
+            // 检查版本是否变化
+            if (data.data_version && data.data_version <= currentDataVersions.holdings) {
+                console.log('Holdings data not changed, skipping update');
+                elements.holdingsLoading.classList.add('hidden');
+                return;
+            }
+            
+            // 更新版本号
+            if (data.data_version) {
+                currentDataVersions.holdings = data.data_version;
+            }
             
             if (data.status === 'success' && Array.isArray(data.data)) {
                 updateHoldingsTable(data.data);
@@ -339,20 +535,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 修改 fetchLogs 函数以获取交易记录
     async function fetchLogs() {  
         elements.logLoading.classList.remove('hidden');
         elements.logError.classList.add('hidden');
         elements.orderLog.value = ''; // 加载时清空
         try {
-            // 使用正确的 API 端点获取交易记录
-            const response = await fetch(`${API_BASE_URL}/api/trade-records`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiRequest(API_ENDPOINTS.getTradeRecords);
             
             if (data.status === 'success' && Array.isArray(data.data)) {
                 // 使用交易记录更新 UI
@@ -365,6 +553,38 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.logError.classList.remove('hidden');
             elements.logError.textContent = `加载交易记录失败: ${error.message}`;
             showMessage("加载交易记录失败", 'error');
+        }
+    }
+
+    // --- 连接状态检测 ---
+    function updateConnectionStatus(isConnected) {
+        const statusElement = document.getElementById('connectionStatus');
+        if (isConnected) {
+            statusElement.textContent = "API已连接";
+            statusElement.classList.remove('disconnected');
+            statusElement.classList.add('connected');
+        } else {
+            statusElement.textContent = "API未连接";
+            statusElement.classList.remove('connected');
+            statusElement.classList.add('disconnected');
+        }
+    }
+
+    async function checkApiConnection() {
+        try {
+            console.log("Checking API connection at:", API_ENDPOINTS.checkConnection);
+            const response = await fetch(API_ENDPOINTS.checkConnection);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log("Connection check response:", data);
+            updateConnectionStatus(data.connected);
+        } catch (error) {
+            console.error("Error checking API connection:", error);
+            updateConnectionStatus(false);
+        } finally {
+            setTimeout(checkApiConnection, 5000);
         }
     }
 
@@ -394,7 +614,6 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.toggleMonitorBtn.disabled = false;
             elements.messageArea.innerHTML = '';
         }
-
     }
 
     // 获取所有配置表单的值
@@ -437,7 +656,6 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.saveConfigBtn.disabled = false;
             elements.messageArea.innerHTML = '';
         }
-
     }
 
     async function handleClearLogs() {
@@ -454,10 +672,9 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.clearLogBtn.disabled = false;
             elements.messageArea.innerHTML = '';
         }
-
     }
 
-    // 初始化持仓数据 - 特殊处理，需要更新API地址
+    // 初始化持仓数据函数
     async function handleInitHoldings() {
         if (!confirm("确定要初始化持仓数据吗？")) return;
         
@@ -485,7 +702,6 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.initHoldingsBtn.textContent = originalText;
             elements.messageArea.innerHTML = '';
         }
-
     }
 
     // 通用操作处理
@@ -513,7 +729,6 @@ document.addEventListener('DOMContentLoaded', () => {
             button.disabled = false;
             button.textContent = originalText;
             elements.messageArea.innerHTML = '';
-
         }
     }
 
@@ -548,38 +763,19 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.executeBuyBtn.disabled = false;
             elements.messageArea.innerHTML = '';
         }
-
-    }
-
-    function showRefreshStatus() {
-        // 如果已经存在刷新状态元素，则移除它
-        const existingStatus = document.getElementById('refreshStatus');
-        if (existingStatus) {
-            existingStatus.remove();
-        }
-        
-        // 创建新的刷新状态元素
-        const statusElement = document.createElement('div');
-        statusElement.id = 'refreshStatus';
-        statusElement.className = 'fixed bottom-2 right-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs';
-        statusElement.innerHTML = '数据刷新中...';
-        document.body.appendChild(statusElement);
-        
-        // 0.5秒后淡出
-        setTimeout(() => {
-            statusElement.style.animation = 'fadeOut 0.5s ease-in-out';
-            setTimeout(() => {
-                if (statusElement.parentNode) {
-                    statusElement.parentNode.removeChild(statusElement);
-                }
-            }, 500);
-        }, 500);
     }
 
     // --- 轮询机制 ---
     function startPolling() {
-        if (pollingIntervalId) return; // 已在轮询中
-        console.log("Starting data polling...");
+        if (pollingIntervalId) {
+            clearInterval(pollingIntervalId);
+        }
+        
+        // 设置适当的轮询间隔
+        POLLING_INTERVAL = isPageActive ? ACTIVE_POLLING_INTERVAL : INACTIVE_POLLING_INTERVAL;
+        
+        console.log(`Starting data polling with interval: ${POLLING_INTERVAL}ms`);
+        
         // 先立即轮询一次
         pollData();
         pollingIntervalId = setInterval(pollData, POLLING_INTERVAL);
@@ -594,73 +790,105 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function pollData() {
         console.log("Polling for data updates...");
+        
         // 添加刷新状态
+        document.body.classList.add('api-refreshing');
+        elements.holdingsTableBody.parentElement.classList.add('refreshing');
         elements.orderLog.classList.add('refreshing');
-
+        
         // 显示刷新状态
         showRefreshStatus();
 
-        // 并行获取所需的数据
-        await Promise.allSettled([
-            fetchStatus(), // 包含账户信息的状态
-            fetchHoldings(), // 持仓数据
-            fetchLogs() // 日志数据
-        ]);
-
-        // 刷新完成后移除状态
-        Promise.allSettled([/* 原有异步操作 */]).finally(() => {
+        try {
+            // 并行获取数据
+            await Promise.allSettled([
+                fetchStatus(), // 包含账户信息的状态
+                fetchHoldings(), // 持仓数据
+                fetchLogs() // 日志数据
+            ]);
+        } finally {
+            // 移除刷新状态
+            document.body.classList.remove('api-refreshing');
+            elements.holdingsTableBody.parentElement.classList.remove('refreshing');
             elements.orderLog.classList.remove('refreshing');
-        });
-
+        }
+        
         console.log("Polling cycle finished.");
     }
 
-    // 在HTML中添加状态指示器元素
-    function addConnectionStatusIndicator() {
-        const statusDiv = document.createElement('div');
-        statusDiv.id = 'connectionStatus';
-        statusDiv.className = 'connection-status disconnected';
-        statusDiv.textContent = 'API未连接';
-        document.body.appendChild(statusDiv);
-    }
-
-    // 添加API连接检查函数
-    async function checkApiConnection() {
-        try {
-            console.log("Checking API connection at:", API_ENDPOINTS.checkConnection);
-            const response = await fetch(API_ENDPOINTS.checkConnection);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    // --- 浏览器性能检测 ---
+    function checkBrowserPerformance() {
+        // 检测帧率
+        let lastTime = performance.now();
+        let frames = 0;
+        let fps = 0;
+        
+        function checkFrame() {
+            frames++;
+            const time = performance.now();
+            
+            if (time > lastTime + 1000) {
+                fps = Math.round((frames * 1000) / (time - lastTime));
+                console.log(`Current FPS: ${fps}`);
+                
+                // 根据帧率调整UI更新策略
+                if (fps < 30) {
+                    // 低性能模式
+                    document.body.classList.add('low-performance-mode');
+                    // 减少动画和视觉效果
+                    POLLING_INTERVAL = Math.max(POLLING_INTERVAL, 10000); // 降低轮询频率
+                    if (pollingIntervalId) {
+                        stopPolling();
+                        startPolling();
+                    }
+                } else {
+                    document.body.classList.remove('low-performance-mode');
+                }
+                
+                frames = 0;
+                lastTime = time;
             }
-            const data = await response.json();
-            console.log("Connection check response:", data);
-            updateConnectionStatus(data.connected);
-        } catch (error) {
-            console.error("Error checking API connection:", error);
-            updateConnectionStatus(false);
-        } finally {
-            setTimeout(checkApiConnection, 5000);
+            
+            requestAnimationFrame(checkFrame);
         }
+        
+        requestAnimationFrame(checkFrame);
     }
 
-    function updateConnectionStatus(isConnected) {
-        const statusElement = document.getElementById('connectionStatus');
-        if (isConnected) {
-            statusElement.textContent = "API已连接";
-            statusElement.classList.remove('disconnected');
-            statusElement.classList.add('connected');
-        } else {
-            statusElement.textContent = "API未连接";
-            statusElement.classList.remove('connected');
-            statusElement.classList.add('disconnected');
+    // --- SSE连接 ---
+    function initSSE() {
+        if (sseConnection) {
+            sseConnection.close();
         }
+        
+        const sseURL = `${API_BASE_URL}/api/sse`;
+        sseConnection = new EventSource(sseURL);
+        
+        sseConnection.onmessage = function(event) {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('SSE update received:', data);
+                
+                // 更新关键UI元素而不刷新整个页面
+                if (data.account_info) {
+                    updateQuickAccountInfo(data.account_info);
+                }
+                
+                // 显示轻微的更新提示
+                showUpdatedIndicator();
+            } catch (e) {
+                console.error('SSE data parse error:', e);
+            }
+        };
+        
+        sseConnection.onerror = function(error) {
+            console.error('SSE connection error:', error);
+            // 60秒后重试
+            setTimeout(() => {
+                initSSE();
+            }, 60000);
+        };
     }
-
-    // 添加连接状态指示器
-    addConnectionStatusIndicator();
-    
-    // 启动连接检查
-    setTimeout(checkApiConnection, 1000);
 
     // --- 事件监听器 ---
     elements.toggleMonitorBtn.addEventListener('click', handleToggleMonitor);
@@ -714,13 +942,18 @@ document.addEventListener('DOMContentLoaded', () => {
             startPolling();
         }
 
-        // If monitoring is active, polling will start automatically
-        setTimeout(checkApiConnection, 1000); // Add a 1-second delay
+        // 启动SSE
+        initSSE();
+        
+        // 检测浏览器性能
+        setTimeout(checkBrowserPerformance, 5000);
+        
+        // 开始API连接检查
+        setTimeout(checkApiConnection, 1000);
     }
 
     console.log("Adding event listeners and fetching initial data...");
     fetchAllData(); // 脚本运行时加载初始数据
-
 });
 
 console.log("Script loaded");

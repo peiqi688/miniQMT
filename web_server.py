@@ -8,7 +8,7 @@ import time
 import json
 import threading
 from datetime import datetime
-from flask import Flask, request, jsonify, send_from_directory, make_response
+from flask import Flask, request, jsonify, send_from_directory, make_response, Response, stream_with_context
 from flask_cors import CORS
 import pandas as pd
 
@@ -20,6 +20,7 @@ from position_manager import get_position_manager
 from trading_executor import get_trading_executor
 from strategy import get_trading_strategy
 import utils
+
 
 # 获取logger
 logger = get_logger("web_server")
@@ -209,26 +210,64 @@ def get_trade_records():
         logger.error(f"获取交易记录时出错: {str(e)}")
         return jsonify({'status': 'error', 'message': f"获取交易记录时出错: {str(e)}"}), 500
 
+# 添加SSE接口
+@app.route('/api/sse', methods=['GET'])
+def sse():
+    """提供Server-Sent Events流"""
+    def event_stream():
+        prev_data = None
+        while True:
+            try:
+                # 获取最新数据
+                account_info = position_manager.get_account_info() or {}
+                current_data = {
+                    'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    'holdings_count': len(realtime_data['positions_all']),
+                    'account_info': {
+                        'available': account_info.get('available', 0),
+                        'market_value': account_info.get('market_value', 0),
+                        'total_asset': account_info.get('total_asset', 0)
+                    }
+                }
+                
+                # 只在数据变化时发送更新
+                if current_data != prev_data:
+                    yield f"data: {json.dumps(current_data)}\n\n"
+                    prev_data = current_data
+            except Exception as e:
+                logger.error(f"SSE流生成数据时出错: {str(e)}")
+                yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            
+            time.sleep(2)  # 每2秒检查一次
+    
+    return Response(stream_with_context(event_stream()), 
+                   mimetype="text/event-stream",
+                   headers={"Cache-Control": "no-cache",
+                            "X-Accel-Buffering": "no"})
 
+# 修改get_positions_all函数，添加数据版本号
 @app.route('/api/positions-all', methods=['GET'])
 def get_positions_all():
     """获取所有持仓信息（包括所有字段）"""
     try:
         positions_all_df = position_manager.get_all_positions_with_all_fields()
         
-        # Replace NaN with None (which will become null in JSON)
-        positions_all_df = positions_all_df.replace({pd.NA: None, float('nan'): None}) # Add this line
+        # 计算数据版本号（使用时间戳）
+        data_version = int(time.time())
+        
+        # 处理NaN值
+        positions_all_df = positions_all_df.replace({pd.NA: None, float('nan'): None})
         
         # 转换为JSON可序列化的格式
         positions_all = positions_all_df.to_dict('records')
         
         # 更新实时数据
         realtime_data['positions_all'] = positions_all
-        # print(f"realtime_data['positions_all'] in get_positions_all: {realtime_data['positions_all']}") # Add this line
         
         response = make_response(jsonify({
             'status': 'success',
-            'data': positions_all
+            'data': positions_all,
+            'data_version': data_version  # 添加版本号
         }))
         response.headers['Content-Type'] = 'application/json; charset=utf-8'
         return response
@@ -245,26 +284,25 @@ def push_realtime_data():
     
     while not stop_push_flag:
         try:
-            # 更新所有持仓的最新价格
+            # 只在交易时间更新数据
             if config.is_trade_time():
+                # 更新所有持仓的最新价格
                 position_manager.update_all_positions_price()
+                
+                # 获取所有持仓数据
+                positions_all_df = position_manager.get_all_positions_with_all_fields()
+                
+                # 处理NaN值
+                positions_all_df = positions_all_df.replace({pd.NA: None, float('nan'): None})
+                
+                # 更新实时数据
+                realtime_data['positions_all'] = positions_all_df.to_dict('records')
             
-            # 获取所有持仓数据
-            positions_all_df = position_manager.get_all_positions_with_all_fields()
-            
-            # Replace NaN with None (which will become null in JSON)
-            positions_all_df = positions_all_df.replace({pd.NA: None, float('nan'): None}) # Add this line
-            
-            realtime_data['positions_all'] = positions_all_df.to_dict('records')
-            # print(f"realtime_data['positions_all'] in push_realtime_data: {realtime_data['positions_all']}") # Add this line
-            
-            # 休眠一段时间
+            # 休眠间隔
             time.sleep(3)
         except Exception as e:
             logger.error(f"推送实时数据时出错: {str(e)}")
-            time.sleep(3)
-
-
+            time.sleep(3)  # 出错后休眠
 
 
 def start_push_thread():

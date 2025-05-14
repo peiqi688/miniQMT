@@ -471,16 +471,7 @@ class DataManager:
 
 
     def get_latest_xtdata(self, stock_code):
-        """
-        获取最新行情数据
-        
-        参数:
-        stock_code (str): 股票代码
-        
-        返回:
-        dict: 最新行情数据
-        """
-
+        """获取最新行情数据"""
         stock_code = self._adjust_stock(stock_code)
 
         try:
@@ -488,8 +479,8 @@ class DataManager:
             latest_quote = xt.get_full_tick([stock_code])
             
             if not latest_quote or stock_code not in latest_quote:
-                logger.warning(f"xtdata:未获取到 {stock_code} 的tick行情")
-                return {}  # Return an empty dictionary instead of None
+                logger.warning(f"xtdata:未获取到 {stock_code} 的tick行情，返回值: {latest_quote}")
+                return {}  # 返回空字典而不是None
             
             quote_data = latest_quote[stock_code]
             logger.debug(f"xtdata: {stock_code} 最新行情: {quote_data}")
@@ -497,8 +488,8 @@ class DataManager:
             return quote_data
             
         except Exception as e:
-            logger.error(f"xtdata: 获取 {stock_code} 的最新行情时出错: {str(e)}")
-            return {}
+            logger.error(f"xtdata: 获取 {stock_code} 的最新行情时出错: {str(e)}", exc_info=True)
+            return {}  # 返回空字典而不是None
     
     def get_history_data_from_db(self, stock_code, start_date=None, end_date=None):
         """
