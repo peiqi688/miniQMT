@@ -10,11 +10,46 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
-        /* Ensure textarea scrolls */
-        #orderLog {
-             white-space: pre-wrap; /* Ensures line breaks are respected */
-             overflow-wrap: break-word; /* Breaks long words */
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 40px); /* 减去页面边距 */
+            min-height: 768px; /* 设置最小高度 */
         }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* 防止内容溢出导致整体页面出现滚动条 */
+        }
+
+        #orderLog {
+            height: 400px; /* 根据实际需求调整高度 */
+            min-height: 400px;
+            max-height: 400px;
+            overflow-y: scroll; /* 始终显示垂直滚动条 */
+            overflow-y: overlay; /* 在支持的浏览器中使用overlay模式 */
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+        }
+
+        /* 确保滚动条始终显示，避免布局跳动 */
+        #orderLog::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #logLoading, #logError {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 4px;
+            padding: 8px 16px;
+            z-index: 10;
+        }        
         /* Style for loading/error messages */
         .status-message {
             padding: 10px;
@@ -31,7 +66,29 @@
             from { opacity: 1; }
             to { opacity: 0; }
         }
-        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 0.3; }
+            100% { opacity: 0.6; }
+        }
+
+        .refreshing {
+            position: relative;
+        }
+
+        .refreshing::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+            animation: pulse 1s infinite;
+            z-index: 5;
+        }
+
         #refreshStatus {
             animation: fadeOut 0.5s ease-in-out;
             z-index: 1000;
@@ -201,11 +258,13 @@
                 </div>
             </div>
 
-            <div class="border rounded p-3 bg-gray-50 flex flex-col">
+            <div class="border rounded p-3 bg-gray-50 flex flex-col relative" style="height: 460px;">
                 <h3 class="text-lg font-semibold mb-2 text-blue-700">3. 下单日志</h3>
-                <textarea id="orderLog" class="flex-grow border rounded p-2 text-xs bg-white resize-none" readonly rows="20"></textarea>
-                <div id="logLoading" class="text-center p-4 text-gray-500 hidden">加载日志中...</div>
-                 <div id="logError" class="text-center p-4 text-red-500 hidden">无法加载日志。</div>
+                <div class="flex-grow relative">
+                    <textarea id="orderLog" class="w-full h-full border rounded p-2 text-xs bg-white resize-none" readonly></textarea>
+                    <div id="logLoading" class="text-center p-4 text-gray-500 hidden">加载日志中...</div>
+                    <div id="logError" class="text-center p-4 text-red-500 hidden">无法加载日志。</div>
+                </div>
             </div>
         </section>
 
