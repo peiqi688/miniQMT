@@ -24,7 +24,31 @@
             flex-direction: column;
             overflow: hidden;
         }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
 
+        .fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+
+        /* 优化刷新状态指示器 */
+        #refreshStatus {
+            animation: fadeOut 0.5s ease-in-out;
+            z-index: 1000;
+        }
+
+        /* 优化数据更新指示器 */
+        .highlight-update {
+            animation: highlight 1s ease-out;
+        }
+
+        @keyframes highlight {
+            0% { background-color: rgba(16, 185, 129, 0.2); }
+            100% { background-color: transparent; }
+        }
+        
         #orderLog {
             height: 400px;
             min-height: 400px;

@@ -263,7 +263,10 @@ def get_positions_all():
         
         # 更新实时数据
         realtime_data['positions_all'] = positions_all
-        
+
+        # 添加数据版本号（可以使用时间戳）
+        data_version = int(time.time())
+
         response = make_response(jsonify({
             'status': 'success',
             'data': positions_all,
