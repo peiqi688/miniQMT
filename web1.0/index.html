@@ -325,11 +325,12 @@
                     <label for="buyStrategy" class="text-sm font-medium whitespace-nowrap">1. 选股买入设置:</label>
                     <select id="buyStrategy" class="border rounded px-2 py-1 text-sm">
                         <option value="random_pool">从备选池随机买入</option>
-                        </select>
+                        <option value="custom_stock">自定义股票买入</option>
+                    </select>
                     <input type="number" id="buyQuantity" class="border rounded px-2 py-1 w-20 text-sm" placeholder="数量" value="1">
                     <label for="buyQuantity" class="text-sm">只</label>
                     <button id="executeBuyBtn" class="bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-bold py-1 px-3 rounded transition duration-150 ease-in-out whitespace-nowrap">
-                        按备选池入选设置一键买入
+                        一键买入
                     </button>
                 </div>
 
@@ -391,6 +392,19 @@
             </div>
         </section>
 
+    </div>
+
+    <div id="stockSelectDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-6 w-96 max-w-lg">
+            <h3 id="dialogTitle" class="text-lg font-semibold mb-4">选择股票</h3>
+            <div id="dialogContent">
+                <!-- 动态内容会在JavaScript中插入 -->
+            </div>
+            <div class="flex justify-end mt-6 space-x-2">
+                <button id="dialogCancelBtn" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">取消</button>
+                <button id="dialogConfirmBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">确定</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>

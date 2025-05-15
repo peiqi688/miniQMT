@@ -38,7 +38,8 @@ DEFAULT_PERIOD = "1d"
 INITIAL_DAYS = 365
 # 定时更新间隔（秒）
 UPDATE_INTERVAL = 60
-
+# 备选池股票文件路径
+STOCK2BUY_FILE = os.path.join(DATA_DIR, "stock_to_buy.json")
 # ======================= 交易配置 =======================
 # 交易账号信息（从外部文件读取，避免敏感信息硬编码）
 ACCOUNT_CONFIG_FILE = "account_config.json"
@@ -102,11 +103,11 @@ MA_PERIODS = [10, 20, 30, 60]
 CONFIG_PARAM_RANGES = {
     "singleBuyAmount": {"min": 1000, "max": 100000, "type": "float", "desc": "单只单次买入金额"},
     "firstProfitSell": {"min": 1.0, "max": 20.0, "type": "float", "desc": "首次止盈比例(%)"},
-    "stockGainSellPencent": {"min": 1.0, "max": 20.0, "type": "float", "desc": "首次盈利平仓卖出比例(%)"},
+    "stockGainSellPencent": {"min": 1.0, "max": 100.0, "type": "float", "desc": "首次盈利平仓卖出比例(%)"},
     "stopLossBuy": {"min": 1.0, "max": 20.0, "type": "float", "desc": "补仓跌幅(%)"},
     "stockStopLoss": {"min": 1.0, "max": 20.0, "type": "float", "desc": "止损比例(%)"},
     "singleStockMaxPosition": {"min": 10000, "max": 100000, "type": "float", "desc": "单只股票最大持仓"},
-    "totalMaxPosition": {"min": 50000, "max": 500000, "type": "float", "desc": "最大总持仓"},
+    "totalMaxPosition": {"min": 50000, "max": 1000000, "type": "float", "desc": "最大总持仓"},
     "connectPort": {"min": 1, "max": 65535, "type": "int", "desc": "连接端口"}
 }
 

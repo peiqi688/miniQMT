@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         getLogs: `/api/logs`,
         getPositionsAll: `/api/positions-all`, // 获取所有持仓数据
         getTradeRecords: `/api/trade-records`, // 获取交易记录
+        getStockPool: `/api/stock_pool/list`,
         // --- POST Endpoints ---
         saveConfig: `/api/config/save`,
         checkConnection: '/api/connection/status',
@@ -27,13 +28,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 轮询设置
     let POLLING_INTERVAL = 5000; // 默认5秒
-    const ACTIVE_POLLING_INTERVAL = 5000; // 活跃状态：5秒
-    const INACTIVE_POLLING_INTERVAL = 15000; // 非活跃状态：15秒
+    const ACTIVE_POLLING_INTERVAL = 3000; // 活跃状态：3秒
+    const INACTIVE_POLLING_INTERVAL = 10000; // 非活跃状态：10秒
     let pollingIntervalId = null;
     let isMonitoring = false; // 监控状态
     let isSimulationMode = false; // 模拟交易模式
     let isPageActive = true; // 页面活跃状态
     
+    // 为不同类型的数据设置不同的刷新频率
+    const DATA_REFRESH_INTERVALS = {
+        status: 5000,     // 状态信息每5秒刷新一次
+        holdings: 3000,   // 持仓列表每3秒刷新一次
+        logs: 5000        // 日志每5秒刷新一次
+    };
+
     // SSE连接
     let sseConnection = null;
     
@@ -628,14 +636,14 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.toggleMonitorBtn.textContent = '停止执行监控';
             elements.toggleMonitorBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
             elements.toggleMonitorBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-            startPolling(); // 开始轮询数据
+            //startPolling(); // 开始轮询数据
         } else {
             elements.statusIndicator.textContent = '未运行';
             elements.statusIndicator.className = 'text-lg font-bold text-red-600';
             elements.toggleMonitorBtn.textContent = '开始执行监控';
             elements.toggleMonitorBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
             elements.toggleMonitorBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-            stopPolling(); // 停止轮询数据
+            //stopPolling(); // 停止轮询数据
         }
         
 // 更新系统设置
@@ -733,6 +741,150 @@ if (monitoringInfo.simulationMode !== undefined) {
         updateSimulationModeUI();
     }
 }
+}
+
+
+// 显示股票选择对话框
+function showStockSelectDialog(title, content, confirmCallback) {
+    const dialog = document.getElementById('stockSelectDialog');
+    const dialogTitle = document.getElementById('dialogTitle');
+    const dialogContent = document.getElementById('dialogContent');
+    const dialogConfirmBtn = document.getElementById('dialogConfirmBtn');
+    const dialogCancelBtn = document.getElementById('dialogCancelBtn');
+    
+    // 设置对话框标题和内容
+    dialogTitle.textContent = title;
+    dialogContent.innerHTML = content;
+    
+    // 设置确认按钮事件
+    dialogConfirmBtn.onclick = () => {
+        confirmCallback();
+        dialog.classList.add('hidden');
+    };
+    
+    // 设置取消按钮事件
+    dialogCancelBtn.onclick = () => {
+        dialog.classList.add('hidden');
+    };
+    
+    // 显示对话框
+    dialog.classList.remove('hidden');
+}
+
+// 处理从备选池随机买入（修改为可编辑版本）
+async function handleRandomPoolBuy(quantity) {
+    try {
+        // 从后端获取备选池股票列表
+        const response = await apiRequest(API_ENDPOINTS.getStockPool);
+        
+        if (response.status === 'success' && Array.isArray(response.data)) {
+            const stocks = response.data;
+            
+            // 构建对话框内容 - 使用可编辑的文本框而非只读显示
+            const content = `
+                <p class="mb-2">以下股票将被用于随机买入（可编辑）：</p>
+                <textarea id="randomPoolStockInput" class="w-full border rounded p-2 h-40">${stocks.join('\n')}</textarea>
+            `;
+            
+            // 显示对话框
+            showStockSelectDialog(
+                '确认随机买入股票',
+                content,
+                () => {
+                    // 获取用户可能编辑过的股票代码
+                    const input = document.getElementById('randomPoolStockInput').value;
+                    const editedStocks = input.split('\n')
+                        .map(s => s.trim())
+                        .filter(s => s.length > 0);
+                    
+                    if (editedStocks.length === 0) {
+                        showMessage('请输入有效的股票代码', 'warning');
+                        return;
+                    }
+                    
+                    // 确认后执行买入，使用编辑后的股票列表
+                    executeBuyAction('random_pool', quantity, editedStocks);
+                }
+            );
+        } else {
+            throw new Error(response.message || '获取备选池股票失败');
+        }
+    } catch (error) {
+        showMessage(`获取备选池股票失败: ${error.message}`, 'error');
+    }
+}
+
+// 处理自定义股票买入
+function handleCustomStockBuy(quantity) {
+    // 构建对话框内容
+    const content = `
+        <p class="mb-2">请输入要买入的股票代码（一行一个）：</p>
+        <textarea id="customStockInput" class="w-full border rounded p-2 h-40"></textarea>
+    `;
+    
+    // 显示对话框
+    showStockSelectDialog(
+        '自定义股票买入',
+        content,
+        () => {
+            // 获取用户输入的股票代码
+            const input = document.getElementById('customStockInput').value;
+            const stocks = input.split('\n')
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+            
+            if (stocks.length === 0) {
+                showMessage('请输入有效的股票代码', 'warning');
+                return;
+            }
+            
+            // 执行买入
+            executeBuyAction('custom_stock', quantity, stocks);
+        }
+    );
+}
+
+// 执行买入动作
+async function executeBuyAction(strategy, quantity, stocks) {
+    elements.executeBuyBtn.disabled = true;
+    showMessage(`执行买入 (${strategy}, ${quantity}只)...`, 'loading', 0);
+    
+    try {
+        const buyData = {
+            strategy: strategy,
+            quantity: quantity,
+            stocks: stocks,
+            ...getConfigData() // 包含所有配置参数
+        };
+        
+        const data = await apiRequest(API_ENDPOINTS.executeBuy, {
+            method: 'POST',
+            body: JSON.stringify(buyData),
+        });
+        
+        if (data.status === 'success') {
+            showMessage(data.message || "买入指令已发送", 'success');
+            
+            // 重置请求锁定状态
+            requestLocks.holdings = false;
+            requestLocks.logs = false;
+            
+            // 刷新相关数据
+            await fetchHoldings();
+            await fetchLogs();
+            await fetchStatus(); // 更新余额等
+        } else {
+            showMessage(data.message || "买入指令发送失败", 'error');
+        }
+    } catch (error) {
+        // 错误已由apiRequest处理
+    } finally {
+        elements.executeBuyBtn.disabled = false;
+        // 3秒后清除消息
+        setTimeout(() => {
+            elements.messageArea.innerHTML = '';
+        }, 3000);
+    }
 }
 
 // 判断持仓数据是否需要更新
@@ -1470,125 +1622,103 @@ try {
 }
 
 async function handleExecuteBuy() {
-// 先验证交易量
-const quantity = parseInt(elements.buyQuantity.value) || 0;
-if (quantity <= 0) {
-    showMessage("请输入有效的买入数量", "error");
-    return;
-}
-
-const buyData = {
-    strategy: elements.buyStrategy.value,
-    quantity: quantity,
-    ...getConfigData() // 包含所有配置参数
-};
-
-elements.executeBuyBtn.disabled = true;
-showMessage(`执行买入 (${buyData.strategy}, ${buyData.quantity}只)...`, 'loading', 0);
-
-try {
-    const data = await apiRequest(API_ENDPOINTS.executeBuy, {
-        method: 'POST',                
-        body: JSON.stringify(buyData),
-    });
-    
-    if (data.status === 'success') {
-        showMessage(data.message || "买入指令已发送", 'success');
-        
-        // 重置请求锁定状态
-        requestLocks.holdings = false;
-        requestLocks.logs = false;
-        
-        // 刷新相关数据
-        await fetchHoldings();
-        await fetchLogs();
-        await fetchStatus(); // 更新余额等
-    } else {
-        showMessage(data.message || "买入指令发送失败", 'error');
+    // 先验证交易量
+    const quantity = parseInt(elements.buyQuantity.value) || 0;
+    if (quantity <= 0) {
+        showMessage("请输入有效的买入数量", "error");
+        return;
     }
-} catch (error) {
-    // 错误已由apiRequest处理
-} finally {
-    elements.executeBuyBtn.disabled = false;
-    // 3秒后清除消息
-    setTimeout(() => {
-        elements.messageArea.innerHTML = '';
-    }, 3000);
-}
+    
+    const strategy = elements.buyStrategy.value;
+    
+    // 根据不同策略显示不同对话框
+    if (strategy === 'random_pool') {
+        await handleRandomPoolBuy(quantity);
+    } else if (strategy === 'custom_stock') {
+        handleCustomStockBuy(quantity);
+    }
 }
 
 // --- 轮询机制 ---
 function startPolling() {
-if (pollingIntervalId) {
-    console.log("已存在轮询，停止旧轮询");
+    if (pollingIntervalId) {
+        console.log("已存在轮询，停止旧轮询");
+        clearInterval(pollingIntervalId);
+        pollingIntervalId = null;
+    }
+
+    // 设置适当的轮询间隔
+    POLLING_INTERVAL = isPageActive ? ACTIVE_POLLING_INTERVAL : INACTIVE_POLLING_INTERVAL;
+
+    // 确保轮询间隔至少为3秒
+    const actualInterval = Math.max(POLLING_INTERVAL, 3000);
+
+    console.log(`Starting data polling with interval: ${actualInterval}ms`);
+
+    // 先立即轮询一次
+    pollData();
+
+    pollingIntervalId = setInterval(pollData, actualInterval);
+
+    console.log(`Polling started with interval: ${actualInterval}ms`);  
+}
+
+function stopPolling() {
+    if (!pollingIntervalId) return; // 未在轮询
+    console.log("Stopping data polling.");
     clearInterval(pollingIntervalId);
     pollingIntervalId = null;
 }
 
-// 设置适当的轮询间隔
-POLLING_INTERVAL = isPageActive ? ACTIVE_POLLING_INTERVAL : INACTIVE_POLLING_INTERVAL;
-
-// 确保轮询间隔至少为3秒
-const actualInterval = Math.max(POLLING_INTERVAL, 3000);
-
-console.log(`Starting data polling with interval: ${actualInterval}ms`);
-
-// 先立即轮询一次
-pollData();
-
-pollingIntervalId = setInterval(pollData, actualInterval);
-
-console.log(`Polling started with interval: ${actualInterval}ms`);
-}
-
-function stopPolling() {
-if (!pollingIntervalId) return; // 未在轮询
-console.log("Stopping data polling.");
-clearInterval(pollingIntervalId);
-pollingIntervalId = null;
-}
-
 async function pollData() {
-console.log("Polling for data updates...");
+    console.log("Polling for data updates...");
 
-// 如果所有请求都在进行中，则跳过本次轮询
-if (requestLocks.status && requestLocks.holdings && requestLocks.logs) {
-    console.log("All requests in progress, skipping poll cycle");
-    return;
-}
+    // 如果所有请求都在进行中，则跳过本次轮询
+    if (requestLocks.status && requestLocks.holdings && requestLocks.logs) {
+        console.log("All requests in progress, skipping poll cycle");
+        return;
+    }
 
-// 添加微妙的刷新指示，而不是明显的加载提示
-document.body.classList.add('api-refreshing');
+    // 添加微妙的刷新指示，而不是明显的加载提示
+    document.body.classList.add('api-refreshing');
 
-// 根据条件决定是否显示刷新状态
-const now = Date.now();
-const allRecentlyUpdated = 
-    (now - lastDataUpdateTimestamps.status < 3000) &&
-    (now - lastDataUpdateTimestamps.holdings < 3000) &&
-    (now - lastDataUpdateTimestamps.logs < 3000);
-    
-if (!allRecentlyUpdated) {
-    showRefreshStatus();
-}
+    // 根据条件决定是否显示刷新状态
+    const now = Date.now();
+    const allRecentlyUpdated = 
+        (now - lastDataUpdateTimestamps.status < 3000) &&
+        (now - lastDataUpdateTimestamps.holdings < 3000) &&
+        (now - lastDataUpdateTimestamps.logs < 3000);
+        
+    if (!allRecentlyUpdated) {
+        showRefreshStatus();
+    }
 
-try {
-    // 顺序执行请求，而非并行，以减少服务器负担
-    if (!requestLocks.status) await fetchStatus();
-    // 短暂延迟，避免请求过于集中
-    await new Promise(r => setTimeout(r, 200));
-    
-    if (!requestLocks.holdings) await fetchHoldings();
-    await new Promise(r => setTimeout(r, 200));
-    
-    if (!requestLocks.logs) await fetchLogs();
-} catch (error) {
-    console.error("Poll cycle error:", error);
-} finally {
-    // 移除刷新状态
-    document.body.classList.remove('api-refreshing');
-}
+    try {
+        const now = Date.now();
+        
+        // 根据各数据类型的刷新间隔决定是否刷新
+        if (!requestLocks.status && now - lastDataUpdateTimestamps.status >= DATA_REFRESH_INTERVALS.status) {
+            await fetchStatus();
+            // 短暂延迟，避免请求过于集中
+            await new Promise(r => setTimeout(r, 200));
+        }
+        
+        if (!requestLocks.holdings && now - lastDataUpdateTimestamps.holdings >= DATA_REFRESH_INTERVALS.holdings) {
+            await fetchHoldings();
+            await new Promise(r => setTimeout(r, 200));
+        }
+        
+        if (!requestLocks.logs && now - lastDataUpdateTimestamps.logs >= DATA_REFRESH_INTERVALS.logs) {
+            await fetchLogs();
+        }
+    } catch (error) {
+        console.error("Poll cycle error:", error);
+    } finally {
+        // 移除刷新状态
+        document.body.classList.remove('api-refreshing');
+    }
 
-console.log("Polling cycle finished.");
+    console.log("Polling cycle finished.");
 }
 
 // --- 浏览器性能检测 ---
@@ -1741,10 +1871,8 @@ try {
     showMessage("部分数据加载失败", 'error', 3000);
 }
 
-// 如果监控已开启，自动启动轮询 (确保只有一个轮询实例)
-if (isMonitoring) {
-    startPolling();
-}
+// 自动启动轮询
+startPolling();
 
 // 启动SSE
 setTimeout(() => {

@@ -609,6 +609,31 @@ def init_holdings():
             'message': f"初始化持仓数据失败: {str(e)}"
         }), 500
 
+@app.route('/api/stock_pool/list', methods=['GET'])
+def get_stock_pool():
+    """获取备选池股票列表"""
+    try:
+        # 读取备选池股票文件
+        file_path = config.STOCK2BUY_FILE
+        if os.path.exists(file_path):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                stock_pool = json.load(f)
+        else:
+            # 如果文件不存在，使用默认股票池
+            stock_pool = config.STOCK_POOL
+            
+        return jsonify({
+            'status': 'success',
+            'data': stock_pool
+        })
+    except Exception as e:
+        logger.error(f"获取备选池股票列表时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"获取备选池股票列表失败: {str(e)}"
+        }), 500
+
+# 修改原有的execute_buy接口
 @app.route('/api/actions/execute_buy', methods=['POST'])
 def execute_buy():
     """执行买入操作"""
@@ -616,6 +641,7 @@ def execute_buy():
         buy_data = request.json
         strategy = buy_data.get('strategy', 'random_pool')
         quantity = int(buy_data.get('quantity', 0))
+        stocks = buy_data.get('stocks', [])
         
         if quantity <= 0:
             return jsonify({
@@ -623,12 +649,28 @@ def execute_buy():
                 'message': '买入数量必须大于0'
             }), 400
         
-        # 从股票池选择股票
-        stock_codes = config.STOCK_POOL[:quantity] if quantity <= len(config.STOCK_POOL) else config.STOCK_POOL
+        if not stocks:
+            return jsonify({
+                'status': 'error',
+                'message': '未提供股票列表'
+            }), 400
+        
+        # 根据策略选择股票
+        selected_stocks = []
+        if strategy == 'random_pool':
+            # 随机选择指定数量的股票
+            import random
+            if quantity <= len(stocks):
+                selected_stocks = random.sample(stocks, quantity)
+            else:
+                selected_stocks = stocks
+        elif strategy == 'custom_stock':
+            # 使用用户提供的股票列表
+            selected_stocks = stocks[:quantity]  # 取指定数量
         
         # 执行买入
         success_count = 0
-        for stock_code in stock_codes:
+        for stock_code in selected_stocks:
             # 计算买入金额
             amount = config.POSITION_UNIT
             
@@ -645,7 +687,7 @@ def execute_buy():
             'status': 'success',
             'message': f'成功发送{success_count}个买入指令',
             'success_count': success_count,
-            'total_count': len(stock_codes)
+            'total_count': len(selected_stocks)
         })
     except Exception as e:
         logger.error(f"执行买入操作时出错: {str(e)}")
