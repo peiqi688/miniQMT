@@ -45,6 +45,9 @@ class TradingExecutor:
         
         # 交易锁，防止并发交易
         self.trade_lock = threading.Lock()
+        
+        # 模拟交易订单ID计数器
+        self.sim_order_counter = 0
     
     def _init_xttrader(self):
         """初始化迅投交易API"""
@@ -207,6 +210,11 @@ class TradingExecutor:
         deal_info: 成交信息对象
         """
         try:
+            # 检查是否为模拟交易模式
+            if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
+                logger.info("模拟交易模式，忽略成交回调")
+                return
+
             logger.info(f"收到成交回调: {deal_info.m_strInstrumentID}, 成交价: {deal_info.m_dPrice}, 成交量: {deal_info.m_nVolume}")
             
             # 提取成交信息
@@ -226,7 +234,7 @@ class TradingExecutor:
             self._update_position_after_trade(stock_code, trade_type, price, volume)
             
             # 处理网格交易
-            if config.ENABLE_GRID_TRADING:
+            if config.GRID_TRADING_ENABLED:
                 self._handle_grid_trade_after_deal(stock_code, trade_type, price, volume, trade_id)
             
             # 执行回调函数
@@ -562,6 +570,136 @@ class TradingExecutor:
             logger.error(f"获取持仓信息时出错: {str(e)}")
             return []
     
+    def _check_trade_rules(self, stock_code, volume, price, is_buy=True):
+        """
+        检查交易规则
+        
+        参数:
+        stock_code (str): 股票代码
+        volume (int): 交易数量
+        price (float): 交易价格
+        is_buy (bool): 是否为买入交易
+        
+        返回:
+        tuple: (是否通过检查, 错误消息)
+        """
+        try:
+            error_msg = None
+            
+            # 检查交易量是否为100的整数倍
+            if volume <= 0 or volume % 100 != 0:
+                error_msg = f"交易数量必须为100的整数倍: {volume}"
+                return False, error_msg
+            
+            # 获取账户信息
+            account_info = self.get_account_info()
+            if not account_info:
+                error_msg = "无法获取账户信息，交易取消"
+                return False, error_msg
+            
+            if is_buy:
+                # 检查是否允许买入
+                if hasattr(config, 'ENABLE_ALLOW_BUY') and not config.ENABLE_ALLOW_BUY:
+                    error_msg = "系统当前不允许买入操作"
+                    return False, error_msg
+                
+                # 计算所需资金
+                required_amount = volume * price * 1.003  # 考虑手续费
+                
+                # 检查是否有足够资金
+                if account_info['available'] < required_amount:
+                    error_msg = f"可用资金不足，需要 {required_amount:.2f}，可用 {account_info['available']:.2f}"
+                    return False, error_msg
+            else:
+                # 检查是否允许卖出
+                if hasattr(config, 'ENABLE_ALLOW_SELL') and not config.ENABLE_ALLOW_SELL:
+                    error_msg = "系统当前不允许卖出操作"
+                    return False, error_msg
+                
+                # 获取持仓信息
+                position = self.position_manager.get_position(stock_code)
+                if not position:
+                    error_msg = f"未持有股票 {stock_code}，无法卖出"
+                    return False, error_msg
+                
+                # 检查是否有足够持仓
+                if position['available'] < volume:
+                    error_msg = f"可用持仓不足，需要 {volume}，可用 {position['available']}"
+                    return False, error_msg
+            
+            return True, None
+            
+        except Exception as e:
+            logger.error(f"检查交易规则时出错: {str(e)}")
+            return False, f"检查交易规则时出错: {str(e)}"
+    
+    def _adjust_price_for_market(self, stock_code, price, is_buy=True):
+        """
+        根据市场情况动态调整价格
+        
+        参数:
+        stock_code (str): 股票代码
+        price (float): 原始价格
+        is_buy (bool): 是否为买入交易
+        
+        返回:
+        float: 调整后的价格
+        """
+        try:
+            # 获取最新行情
+            latest_quote = self.data_manager.get_latest_data(stock_code)
+            if not latest_quote:
+                logger.warning(f"未能获取 {stock_code} 的最新行情，使用原始价格")
+                return price
+            
+            # 提取关键价格
+            current_price = latest_quote.get('lastPrice', 0)
+            if current_price == 0:
+                return price
+            
+            if is_buy:
+                # 买入价格调整逻辑
+                # 如果行情数据中有卖三价
+                sell3_price = latest_quote.get('askPrice3', None)
+                if sell3_price:
+                    # 确保买入价不低于卖三价，提高成交概率
+                    # 但也不要高于卖三价太多
+                    adjusted_price = min(price, sell3_price * 1.003)
+                else:
+                    # 如果没有卖三价，使用当前价格加小幅调整
+                    adjusted_price = current_price * 1.002
+            else:
+                # 卖出价格调整逻辑
+                # 如果行情数据中有买三价
+                buy3_price = latest_quote.get('bidPrice3', None)
+                if buy3_price:
+                    # 确保卖出价不高于买三价，提高成交概率
+                    # 但也不要低于买三价太多
+                    adjusted_price = max(price, buy3_price * 0.997)
+                else:
+                    # 如果没有买三价，使用当前价格减小幅调整
+                    adjusted_price = current_price * 0.998
+            
+            # 确保价格在合理范围内
+            adjusted_price = round(adjusted_price, 2)
+            if adjusted_price <= 0:
+                return price
+            
+            # 如果调整后的价格与原始价格差异太大，记录日志
+            if abs(adjusted_price - price) / price > 0.01:
+                logger.info(f"{stock_code} 价格调整: 从 {price:.2f} 到 {adjusted_price:.2f}")
+            
+            return adjusted_price
+            
+        except Exception as e:
+            logger.error(f"调整 {stock_code} 的交易价格时出错: {str(e)}")
+            return price
+    
+    def _generate_sim_order_id(self):
+        """生成模拟交易订单ID"""
+        self.sim_order_counter += 1
+        return f"SIM{datetime.now().strftime('%Y%m%d%H%M%S')}{self.sim_order_counter:04d}"
+    
     def buy_stock(self, stock_code, volume=None, price=None, amount=None, price_type=0, callback=None):
         """
         买入股票
@@ -584,23 +722,67 @@ class TradingExecutor:
                     logger.warning("当前不是交易时间，无法下单")
                     return None
                 
+                # 检查全局监控总开关
+                if hasattr(config, 'ENABLE_AUTO_TRADING') and not config.ENABLE_AUTO_TRADING:
+                    logger.warning("全局监控总开关已关闭，无法买入")
+                    return None
+                
+                # 检查买入权限
+                if hasattr(config, 'ENABLE_ALLOW_BUY') and not config.ENABLE_ALLOW_BUY:
+                    logger.warning("系统当前不允许买入操作")
+                    return None
+                
                 # 获取最新价格
                 if price is None:
                     latest_quote = self.data_manager.get_latest_data(stock_code)
                     if not latest_quote:
                         logger.error(f"未能获取 {stock_code} 的最新行情，无法下单")
                         return None
-                    price = latest_quote.get('lastPrice') or 0  # Use 0 as a fallback price
+                    price = latest_quote.get('lastPrice') or 0
                 
                 # 如果指定了金额而不是数量，计算数量
                 if volume is None and amount is not None:
-                    volume = int(amount / price / 100) * 100  # 向下取整到100的倍数
+                    volume = int(amount / price / 100) * 100  # 向下取整到100的整数倍
                 
                 if volume <= 0:
                     logger.error(f"买入数量必须大于0: {volume}")
                     return None
                 
-                # 调用交易API下单
+                # 检查交易规则
+                pass_check, error_msg = self._check_trade_rules(stock_code, volume, price, is_buy=True)
+                if not pass_check:
+                    logger.error(f"买入 {stock_code} 未通过交易规则检查: {error_msg}")
+                    return None
+                
+                # 调整价格
+                adjusted_price = self._adjust_price_for_market(stock_code, price, is_buy=True)
+                
+                # 检查是否为模拟交易模式
+                if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
+                    # 处理模拟交易
+                    sim_order_id = self._generate_sim_order_id()
+                    trade_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    
+                    # 记录模拟交易
+                    self._save_trade_record(
+                        stock_code=stock_code,
+                        trade_time=trade_time,
+                        trade_type='BUY',
+                        price=adjusted_price,
+                        volume=volume,
+                        amount=adjusted_price * volume,
+                        trade_id=sim_order_id,
+                        commission=adjusted_price * volume * 0.0003,  # 模拟手续费
+                        strategy='simulation'
+                    )
+                    
+                    # 更新持仓
+                    self._update_position_after_trade(stock_code, 'BUY', adjusted_price, volume)
+                    
+                    logger.info(f"[模拟] 买入 {stock_code} 成功，委托号: {sim_order_id}, 价格: {adjusted_price}, 数量: {volume}")
+                    return sim_order_id
+                
+                # 实盘交易
                 order_id = None
                 
                 # 尝试不同的API调用方式
@@ -610,18 +792,18 @@ class TradingExecutor:
                         if price_type == 1:  # 市价单
                             order_id = self.trader.market_order(stock_code, DIRECTION_BUY, volume)
                         else:  # 限价单
-                            order_id = self.trader.limit_order(stock_code, DIRECTION_BUY, price, volume)
+                            order_id = self.trader.limit_order(stock_code, DIRECTION_BUY, adjusted_price, volume)
                 elif hasattr(xtt, 'limit_order') and hasattr(xtt, 'market_order'):
                     # 如果使用函数式API
                     if price_type == 1:  # 市价单
                         order_id = xtt.market_order(self.account_id, self.account_type, stock_code, DIRECTION_BUY, volume)
                     else:  # 限价单
-                        order_id = xtt.limit_order(self.account_id, self.account_type, stock_code, DIRECTION_BUY, price, volume)
+                        order_id = xtt.limit_order(self.account_id, self.account_type, stock_code, DIRECTION_BUY, adjusted_price, volume)
                 else:
                     # 尝试通用下单接口
                     if hasattr(xtt, 'order'):
                         order_type = 1 if price_type == 1 else 0  # 1可能是市价，0可能是限价
-                        order_id = xtt.order(self.account_id, self.account_type, stock_code, DIRECTION_BUY, price, volume, order_type)
+                        order_id = xtt.order(self.account_id, self.account_type, stock_code, DIRECTION_BUY, adjusted_price, volume, order_type)
                     else:
                         logger.error("没有找到可用的下单方法")
                         return None
@@ -630,7 +812,7 @@ class TradingExecutor:
                     logger.error(f"买入 {stock_code} 失败")
                     return None
                 
-                logger.info(f"买入 {stock_code} 下单成功，委托号: {order_id}, 价格: {price}, 数量: {volume}")
+                logger.info(f"买入 {stock_code} 下单成功，委托号: {order_id}, 价格: {adjusted_price}, 数量: {volume}")
                 
                 # 注册回调
                 if callback:
@@ -664,13 +846,23 @@ class TradingExecutor:
                     logger.warning("当前不是交易时间，无法下单")
                     return None
                 
+                # 检查全局监控总开关
+                if hasattr(config, 'ENABLE_AUTO_TRADING') and not config.ENABLE_AUTO_TRADING:
+                    logger.warning("全局监控总开关已关闭，无法卖出")
+                    return None
+                
+                # 检查卖出权限
+                if hasattr(config, 'ENABLE_ALLOW_SELL') and not config.ENABLE_ALLOW_SELL:
+                    logger.warning("系统当前不允许卖出操作")
+                    return None
+                
                 # 获取最新价格
                 if price is None:
                     latest_quote = self.data_manager.get_latest_data(stock_code)
                     if not latest_quote:
                         logger.error(f"未能获取 {stock_code} 的最新行情，无法下单")
                         return None
-                    price = latest_quote.get('lastPrice') or 0  # Use 0 as a fallback price
+                    price = latest_quote.get('lastPrice') or 0
                 
                 # 如果指定了比例而不是数量，计算数量
                 if volume is None and ratio is not None:
@@ -686,7 +878,41 @@ class TradingExecutor:
                     logger.error(f"卖出数量必须大于0: {volume}")
                     return None
                 
-                # 调用交易API下单
+                # 检查交易规则
+                pass_check, error_msg = self._check_trade_rules(stock_code, volume, price, is_buy=False)
+                if not pass_check:
+                    logger.error(f"卖出 {stock_code} 未通过交易规则检查: {error_msg}")
+                    return None
+                
+                # 调整价格
+                adjusted_price = self._adjust_price_for_market(stock_code, price, is_buy=False)
+                
+                # 检查是否为模拟交易模式
+                if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
+                    # 处理模拟交易
+                    sim_order_id = self._generate_sim_order_id()
+                    trade_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    
+                    # 记录模拟交易
+                    self._save_trade_record(
+                        stock_code=stock_code,
+                        trade_time=trade_time,
+                        trade_type='SELL',
+                        price=adjusted_price,
+                        volume=volume,
+                        amount=adjusted_price * volume,
+                        trade_id=sim_order_id,
+                        commission=adjusted_price * volume * 0.0013,  # 模拟手续费(含印花税)
+                        strategy='simulation'
+                    )
+                    
+                    # 更新持仓
+                    self._update_position_after_trade(stock_code, 'SELL', adjusted_price, volume)
+                    
+                    logger.info(f"[模拟] 卖出 {stock_code} 成功，委托号: {sim_order_id}, 价格: {adjusted_price}, 数量: {volume}")
+                    return sim_order_id
+                
+                # 实盘交易
                 order_id = None
                 
                 # 尝试不同的API调用方式
@@ -696,18 +922,18 @@ class TradingExecutor:
                         if price_type == 1:  # 市价单
                             order_id = self.trader.market_order(stock_code, DIRECTION_SELL, volume)
                         else:  # 限价单
-                            order_id = self.trader.limit_order(stock_code, DIRECTION_SELL, price, volume)
+                            order_id = self.trader.limit_order(stock_code, DIRECTION_SELL, adjusted_price, volume)
                 elif hasattr(xtt, 'limit_order') and hasattr(xtt, 'market_order'):
                     # 如果使用函数式API
                     if price_type == 1:  # 市价单
                         order_id = xtt.market_order(self.account_id, self.account_type, stock_code, DIRECTION_SELL, volume)
                     else:  # 限价单
-                        order_id = xtt.limit_order(self.account_id, self.account_type, stock_code, DIRECTION_SELL, price, volume)
+                        order_id = xtt.limit_order(self.account_id, self.account_type, stock_code, DIRECTION_SELL, adjusted_price, volume)
                 else:
                     # 尝试通用下单接口
                     if hasattr(xtt, 'order'):
                         order_type = 1 if price_type == 1 else 0  # 1可能是市价，0可能是限价
-                        order_id = xtt.order(self.account_id, self.account_type, stock_code, DIRECTION_SELL, price, volume, order_type)
+                        order_id = xtt.order(self.account_id, self.account_type, stock_code, DIRECTION_SELL, adjusted_price, volume, order_type)
                     else:
                         logger.error("没有找到可用的下单方法")
                         return None
@@ -716,7 +942,7 @@ class TradingExecutor:
                     logger.error(f"卖出 {stock_code} 失败")
                     return None
                 
-                logger.info(f"卖出 {stock_code} 下单成功，委托号: {order_id}, 价格: {price}, 数量: {volume}")
+                logger.info(f"卖出 {stock_code} 下单成功，委托号: {order_id}, 价格: {adjusted_price}, 数量: {volume}")
                 
                 # 注册回调
                 if callback:
@@ -739,6 +965,11 @@ class TradingExecutor:
         bool: 是否成功发送撤单请求
         """
         try:
+            # 检查是否为模拟交易模式下的订单
+            if order_id.startswith("SIM"):
+                logger.info(f"[模拟] 撤单请求已处理，委托号: {order_id}")
+                return True
+            
             # 调用交易API撤单
             ret = False
             
