@@ -244,89 +244,145 @@ document.addEventListener('DOMContentLoaded', () => {
     function addParameterValidationListeners() {
         // 为每个需要验证的输入框添加监听器
         elements.singleBuyAmount.addEventListener('change', () => {
-            validateParameter(
+            if (validateParameter(
                 elements.singleBuyAmount, 
                 elements.singleBuyAmountError, 
                 paramRanges.singleBuyAmount?.min, 
                 paramRanges.singleBuyAmount?.max,
                 "单次买入金额"
-            );
+            )) {
+                throttledSyncParameter('singleBuyAmount', parseFloat(elements.singleBuyAmount.value));
+            }
         });
         
         elements.firstProfitSell.addEventListener('change', () => {
-            validateParameter(
+            if (validateParameter(
                 elements.firstProfitSell, 
                 elements.firstProfitSellError, 
                 paramRanges.firstProfitSell?.min, 
                 paramRanges.firstProfitSell?.max,
                 "首次止盈比例"
-            );
+            )) {
+                throttledSyncParameter('firstProfitSell', parseFloat(elements.firstProfitSell.value));
+            }
         });
         
         elements.stockGainSellPencent.addEventListener('change', () => {
-            validateParameter(
+            if (validateParameter(
                 elements.stockGainSellPencent, 
                 elements.stockGainSellPencentError, 
                 paramRanges.stockGainSellPencent?.min, 
                 paramRanges.stockGainSellPencent?.max,
                 "首次盈利平仓卖出比例"
-            );
+            )) {
+                throttledSyncParameter('stockGainSellPencent', parseFloat(elements.stockGainSellPencent.value));
+            }
         });
         
         elements.stopLossBuy.addEventListener('change', () => {
-            validateParameter(
+            if (validateParameter(
                 elements.stopLossBuy, 
                 elements.stopLossBuyError, 
                 paramRanges.stopLossBuy?.min, 
                 paramRanges.stopLossBuy?.max,
                 "补仓跌幅"
-            );
+            )) {
+                throttledSyncParameter('stopLossBuy', parseFloat(elements.stopLossBuy.value));
+            }
         });
         
         elements.stockStopLoss.addEventListener('change', () => {
-            validateParameter(
+            if (validateParameter(
                 elements.stockStopLoss, 
                 elements.stockStopLossError, 
                 paramRanges.stockStopLoss?.min, 
                 paramRanges.stockStopLoss?.max,
                 "止损比例"
-            );
+            )) {
+                throttledSyncParameter('stockStopLoss', parseFloat(elements.stockStopLoss.value));
+            }
         });
         
         elements.singleStockMaxPosition.addEventListener('change', () => {
-            validateParameter(
+            if (validateParameter(
                 elements.singleStockMaxPosition, 
                 elements.singleStockMaxPositionError, 
                 paramRanges.singleStockMaxPosition?.min, 
                 paramRanges.singleStockMaxPosition?.max,
                 "单只股票最大持仓"
-            );
+            )) {
+                throttledSyncParameter('singleStockMaxPosition', parseFloat(elements.singleStockMaxPosition.value));
+            }
         });
         
         elements.totalMaxPosition.addEventListener('change', () => {
-            validateParameter(
+            if (validateParameter(
                 elements.totalMaxPosition, 
                 elements.totalMaxPositionError, 
                 paramRanges.totalMaxPosition?.min, 
                 paramRanges.totalMaxPosition?.max,
                 "最大总持仓"
-            );
+            )) {
+                throttledSyncParameter('totalMaxPosition', parseFloat(elements.totalMaxPosition.value));
+            }
         });
         
         elements.connectPort.addEventListener('change', () => {
-            validateParameter(
+            if (validateParameter(
                 elements.connectPort, 
                 elements.connectPortError, 
                 paramRanges.connectPort?.min, 
                 paramRanges.connectPort?.max,
                 "端口号"
-            );
+            )) {
+                throttledSyncParameter('connectPort', parseInt(elements.connectPort.value));
+                // 端口更改后更新API基础URL
+                updateApiBaseUrl();
+            }
         });
         
+        // 开关类参数的实时同步
+        elements.allowBuy.addEventListener('change', (event) => {
+            throttledSyncParameter('allowBuy', event.target.checked);
+        });
+
+        elements.allowSell.addEventListener('change', (event) => {
+            throttledSyncParameter('allowSell', event.target.checked);
+        });
+
         // 模拟交易模式切换监听
         elements.simulationMode.addEventListener('change', (event) => {
             isSimulationMode = event.target.checked;
             updateSimulationModeUI();
+            throttledSyncParameter('simulationMode', event.target.checked);
+        });
+
+        elements.globalAllowBuySell.addEventListener('change', (event) => {
+            throttledSyncParameter('globalAllowBuySell', event.target.checked);
+        });
+
+        // 其他开关类参数实时同步
+        elements.firstProfitSellEnabled.addEventListener('change', (event) => {
+            throttledSyncParameter('firstProfitSellEnabled', event.target.checked);
+        });
+
+        elements.firstProfitSellPencent.addEventListener('change', (event) => {
+            throttledSyncParameter('firstProfitSellPencent', event.target.checked);
+        });
+
+        elements.stopLossBuyEnabled.addEventListener('change', (event) => {
+            throttledSyncParameter('stopLossBuyEnabled', event.target.checked);
+        });
+
+        elements.StopLossEnabled.addEventListener('change', (event) => {
+            throttledSyncParameter('StopLossEnabled', event.target.checked);
+        });
+        
+        // 监听IP地址变更
+        elements.totalAccounts.addEventListener('change', (event) => {
+            throttledSyncParameter('totalAccounts', event.target.value);
+            // IP变更后更新API基础URL
+            updateApiBaseUrl();
         });
     }
     
@@ -1266,6 +1322,37 @@ try {
     }, 3000);
 }
 }
+
+
+
+// 添加参数即时同步函数
+function syncParameterToBackend(paramName, value) {
+    // 创建只包含变更参数的对象
+    const paramData = {
+        [paramName]: value
+    };
+    
+    console.log(`同步参数到后台: ${paramName} = ${value}`);
+    
+    // 调用保存配置API，只发送变更的参数
+    apiRequest(API_ENDPOINTS.saveConfig, {
+        method: 'POST',
+        body: JSON.stringify(paramData)
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            console.log(`参数 ${paramName} 已同步到后台`);
+        } else {
+            console.error(`参数同步失败: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        console.error(`同步参数时出错: ${error}`);
+    });
+}
+
+// 使用节流防止频繁发送请求
+const throttledSyncParameter = throttle(syncParameterToBackend, 500);
 
 async function handleClearLogs() {
 if (!confirm("确定要清空所有日志吗？此操作不可撤销。")) return;
