@@ -96,6 +96,50 @@ MACD_SIGNAL = 9
 # 均线参数
 MA_PERIODS = [10, 20, 30, 60]
 
+
+# ======================= 参数配置范围 =======================
+# 参数范围定义，用于前后端校验
+CONFIG_PARAM_RANGES = {
+    "singleBuyAmount": {"min": 1000, "max": 100000, "type": "float", "desc": "单只单次买入金额"},
+    "firstProfitSell": {"min": 1.0, "max": 20.0, "type": "float", "desc": "首次止盈比例(%)"},
+    "stockGainSellPencent": {"min": 1.0, "max": 20.0, "type": "float", "desc": "首次盈利平仓卖出比例(%)"},
+    "stopLossBuy": {"min": 1.0, "max": 20.0, "type": "float", "desc": "补仓跌幅(%)"},
+    "stockStopLoss": {"min": 1.0, "max": 20.0, "type": "float", "desc": "止损比例(%)"},
+    "singleStockMaxPosition": {"min": 10000, "max": 100000, "type": "float", "desc": "单只股票最大持仓"},
+    "totalMaxPosition": {"min": 50000, "max": 500000, "type": "float", "desc": "最大总持仓"},
+    "connectPort": {"min": 1, "max": 65535, "type": "int", "desc": "连接端口"}
+}
+
+# 实现参数校验函数
+def validate_config_param(param_name, value):
+    """验证配置参数是否在有效范围内"""
+    if param_name not in CONFIG_PARAM_RANGES:
+        return True, ""  # 未定义范围的参数默认通过
+        
+    param_range = CONFIG_PARAM_RANGES[param_name]
+    param_type = param_range.get("type", "float")
+    param_min = param_range.get("min")
+    param_max = param_range.get("max")
+    
+    try:
+        # 类型转换
+        if param_type == "float":
+            value = float(value)
+        elif param_type == "int":
+            value = int(value)
+            
+        # 范围检查
+        if param_min is not None and value < param_min:
+            return False, f"{param_range['desc']}不能小于{param_min}"
+            
+        if param_max is not None and value > param_max:
+            return False, f"{param_range['desc']}不能大于{param_max}"
+            
+        return True, ""
+    except (ValueError, TypeError):
+        return False, f"{param_range['desc']}必须是{param_type}类型"
+
+
 # ======================= Web服务配置 =======================
 WEB_SERVER_HOST = "localhost"
 WEB_SERVER_PORT = 5000

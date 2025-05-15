@@ -73,6 +73,7 @@
         .loading { background-color: #e0f2fe; color: #0c4a6e; border: 1px solid #7dd3fc;}
         .error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
         .success { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; }
+        .warning { background-color: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
         
         /* API连接状态指示器 */
         .connection-status {
@@ -150,6 +151,30 @@
             animation: none;
             opacity: 0.1;
         }
+        
+        /* 参数验证错误提示 */
+        .param-error {
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        /* 模拟交易模式警告 */
+        .simulation-mode-warning {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .simulation-mode-warning svg {
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4">
@@ -157,25 +182,42 @@
     <div class="container mx-auto bg-white shadow-md rounded-lg p-5">
 
         <div id="messageArea"></div>
+        
+        <!-- 模拟交易模式警告 -->
+        <div id="simulationModeWarning" class="simulation-mode-warning hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+            <span>当前为模拟交易模式，所有买卖操作不会真实执行</span>
+        </div>
 
         <section class="mb-6 border rounded p-4 bg-gray-50">
             <h2 class="text-xl font-semibold mb-3 text-blue-700">1. 参数设置</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 items-center">
-                <div class="flex items-center space-x-2">
-                    <label for="singleBuyAmount" class="text-sm whitespace-nowrap">单只单次买入金额:</label>
-                    <input type="number" id="singleBuyAmount" class="border rounded px-2 py-1 w-full" value="35000">
+                <div class="flex flex-col">
+                    <div class="flex items-center space-x-2">
+                        <label for="singleBuyAmount" class="text-sm whitespace-nowrap">单只单次买入金额:</label>
+                        <input type="number" id="singleBuyAmount" class="border rounded px-2 py-1 w-full" value="35000">
+                    </div>
+                    <div id="singleBuyAmountError" class="param-error hidden"></div>
                 </div>
-                 <div class="flex items-center space-x-2">
-                    <label for="firstProfitSell" class="text-sm whitespace-nowrap">平仓盈利超过:</label>
-                    <input type="number" id="firstProfitSell" class="border rounded px-2 py-1 w-20" value="5.00">
-                    <input type="checkbox" id="firstProfitSellEnabled" class="form-checkbox h-5 w-5 text-blue-600" checked>
-                    <label for="firstProfitSellEnabled" class="text-sm">%</label>
+                 <div class="flex flex-col">
+                    <div class="flex items-center space-x-2">
+                        <label for="firstProfitSell" class="text-sm whitespace-nowrap">平仓盈利超过:</label>
+                        <input type="number" id="firstProfitSell" class="border rounded px-2 py-1 w-20" value="5.00">
+                        <input type="checkbox" id="firstProfitSellEnabled" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                        <label for="firstProfitSellEnabled" class="text-sm">%</label>
+                    </div>
+                    <div id="firstProfitSellError" class="param-error hidden"></div>
                  </div>
-                 <div class="flex items-center space-x-2">
-                    <label for="stockGainSellPencent" class="text-sm whitespace-nowrap">首次盈利平仓卖出:</label>
-                    <input type="number" id="stockGainSellPencent" class="border rounded px-2 py-1 w-20" value="60.00">
-					<input type="checkbox" id="firstProfitSellPencent" class="form-checkbox h-5 w-5 text-blue-600" checked>
-					<label for="firstProfitSellPencent" class="text-sm">%</label>
+                 <div class="flex flex-col">
+                    <div class="flex items-center space-x-2">
+                        <label for="stockGainSellPencent" class="text-sm whitespace-nowrap">首次盈利平仓卖出:</label>
+                        <input type="number" id="stockGainSellPencent" class="border rounded px-2 py-1 w-20" value="60.00">
+                        <input type="checkbox" id="firstProfitSellPencent" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                        <label for="firstProfitSellPencent" class="text-sm">%</label>
+                    </div>
+                    <div id="stockGainSellPencentError" class="param-error hidden"></div>
                 </div>
                  <div class="flex items-center space-x-2">
                     <input type="checkbox" id="allowBuy" class="form-checkbox h-5 w-5 text-blue-600" checked>
@@ -183,39 +225,60 @@
                     <input type="checkbox" id="allowSell" class="form-checkbox h-5 w-5 text-blue-600" checked>
                     <label for="allowSell" class="text-sm">允许卖</label>
                  </div>				
-				<div class="flex items-center space-x-2">
-                    <label for="stopLossBuy" class="text-sm whitespace-nowrap">补仓跌幅超过:</label>
-                    <input type="number" id="stopLossBuy" class="border rounded px-2 py-1 w-20" value="5.00" >
-                    <input type="checkbox" id="stopLossBuyEnabled" class="form-checkbox h-5 w-5 text-blue-600" checked>
-                    <label for="stopLossBuyEnabled" class="text-sm">%</label>
+				<div class="flex flex-col">
+                    <div class="flex items-center space-x-2">
+                        <label for="stopLossBuy" class="text-sm whitespace-nowrap">补仓跌幅超过:</label>
+                        <input type="number" id="stopLossBuy" class="border rounded px-2 py-1 w-20" value="5.00" >
+                        <input type="checkbox" id="stopLossBuyEnabled" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                        <label for="stopLossBuyEnabled" class="text-sm">%</label>
+                    </div>
+                    <div id="stopLossBuyError" class="param-error hidden"></div>
                 </div>				
-                <div class="flex items-center space-x-2">
-                    <label for="stockStopLoss" class="text-sm whitespace-nowrap">平仓止损超过:</label>
-                    <input type="number" id="stockStopLoss" class="border rounded px-2 py-1 w-20" value="7.00">
-					<input type="checkbox" id="StopLossEnabled" class="form-checkbox h-5 w-5 text-blue-600" checked>
-                    <label for="StopLossEnabled" class="text-sm">%</label>
+                <div class="flex flex-col">
+                    <div class="flex items-center space-x-2">
+                        <label for="stockStopLoss" class="text-sm whitespace-nowrap">平仓止损超过:</label>
+                        <input type="number" id="stockStopLoss" class="border rounded px-2 py-1 w-20" value="7.00">
+                        <input type="checkbox" id="StopLossEnabled" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                        <label for="StopLossEnabled" class="text-sm">%</label>
+                    </div>
+                    <div id="stockStopLossError" class="param-error hidden"></div>
                 </div>
-				<div class="flex items-center space-x-2">
-                    <label for="singleStockMaxPosition" class="text-sm whitespace-nowrap">单只股票最大持仓:</label>
-                    <input type="number" id="singleStockMaxPosition" class="border rounded px-2 py-1 w-full" value="70000">
+				<div class="flex flex-col">
+                    <div class="flex items-center space-x-2">
+                        <label for="singleStockMaxPosition" class="text-sm whitespace-nowrap">单只股票最大持仓:</label>
+                        <input type="number" id="singleStockMaxPosition" class="border rounded px-2 py-1 w-full" value="70000">
+                    </div>
+                    <div id="singleStockMaxPositionError" class="param-error hidden"></div>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <label for="totalMaxPosition" class="text-sm whitespace-nowrap">最大总持仓:</label>
-                    <input type="number" id="totalMaxPosition" class="border rounded px-2 py-1 w-full" value="400000">
+                <div class="flex flex-col">
+                    <div class="flex items-center space-x-2">
+                        <label for="totalMaxPosition" class="text-sm whitespace-nowrap">最大总持仓:</label>
+                        <input type="number" id="totalMaxPosition" class="border rounded px-2 py-1 w-full" value="400000">
+                    </div>
+                    <div id="totalMaxPositionError" class="param-error hidden"></div>
                 </div>
-				<div class="flex items-center space-x-2">
-                    <label for="totalAccounts" class="text-sm whitespace-nowrap">连接IP:</label>
-                    <input type="text" id="totalAccounts" class="border rounded px-2 py-1 w-full" value="127.0.0.1">
+				<div class="flex flex-col">
+                    <div class="flex items-center space-x-2">
+                        <label for="totalAccounts" class="text-sm whitespace-nowrap">连接IP:</label>
+                        <input type="text" id="totalAccounts" class="border rounded px-2 py-1 w-full" value="127.0.0.1">
+                    </div>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <label for="connectPort" class="text-sm whitespace-nowrap">端口号:</label>
-                    <input type="number" id="connectPort" class="border rounded px-2 py-1 w-full" value="5000">
-				</div>
+                <div class="flex flex-col">
+                    <div class="flex items-center space-x-2">
+                        <label for="connectPort" class="text-sm whitespace-nowrap">端口号:</label>
+                        <input type="number" id="connectPort" class="border rounded px-2 py-1 w-full" value="5000">
+                    </div>
+                    <div id="connectPortError" class="param-error hidden"></div>
+                </div>
 				<div></div>
                 <div class="flex items-center space-x-2">
 					<input type="checkbox" id="globalAllowBuySell" class="form-checkbox h-8 w-8 text-blue-600" checked>
 					<label for="globalAllowBuySell" class="text-sm">全局监控总开关</label>
 				</div>
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="simulationMode" class="form-checkbox h-8 w-8 text-orange-600">
+                    <label for="simulationMode" class="text-sm font-bold text-orange-600">模拟交易模式</label>
+                </div>
             </div>
 
             <div class="mt-4 flex justify-between items-center">

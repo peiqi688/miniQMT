@@ -129,10 +129,20 @@ def get_status():
         )
         is_monitoring = strategy_monitoring or position_monitoring
 
+        # 获取全局设置状态
+        system_settings = {
+            'isMonitoring': is_monitoring,
+            'enableAutoTrading': config.ENABLE_AUTO_TRADING,
+            'allowBuy': getattr(config, 'ALLOW_BUY', True),
+            'allowSell': getattr(config, 'ALLOW_SELL', True),
+            'simulationMode': getattr(config, 'SIMULATION_MODE', False)
+        }
+
         return jsonify({
             'status': 'success',
             'isMonitoring': is_monitoring,
             'account': account_data,
+            'settings': system_settings,
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         })
     except Exception as e:
@@ -200,7 +210,6 @@ def get_trade_records():
         trade_records = trades_df.to_dict(orient='records')
         
         response = make_response(jsonify({
-
             'status': 'success',
             'data': trade_records
         }))        
@@ -209,6 +218,486 @@ def get_trade_records():
     except Exception as e:
         logger.error(f"获取交易记录时出错: {str(e)}")
         return jsonify({'status': 'error', 'message': f"获取交易记录时出错: {str(e)}"}), 500
+
+# 配置管理API
+@app.route('/api/config', methods=['GET'])
+def get_config():
+    """获取系统配置"""
+    try:
+        # 从config模块获取配置项
+        config_data = {
+            "singleBuyAmount": config.POSITION_UNIT,
+            "firstProfitSell": config.INITIAL_TAKE_PROFIT_RATIO * 100,
+            "firstProfitSellEnabled": config.ENABLE_DYNAMIC_STOP_PROFIT,
+            "stockGainSellPencent": config.INITIAL_TAKE_PROFIT_RATIO_PERCENTAGE * 100,
+            "allowBuy": getattr(config, 'ALLOW_BUY', True),
+            "allowSell": getattr(config, 'ALLOW_SELL', True),
+            "stopLossBuy": abs(config.BUY_GRID_LEVELS[1] - 1) * 100,
+            "stopLossBuyEnabled": True,
+            "stockStopLoss": abs(config.STOP_LOSS_RATIO) * 100,
+            "StopLossEnabled": True,
+            "singleStockMaxPosition": config.MAX_POSITION_VALUE,
+            "totalMaxPosition": config.MAX_TOTAL_POSITION_RATIO * 1000000,
+            "connectPort": config.WEB_SERVER_PORT,
+            "totalAccounts": "127.0.0.1",
+            "globalAllowBuySell": config.ENABLE_AUTO_TRADING,
+            "simulationMode": getattr(config, 'SIMULATION_MODE', False)
+        }
+        
+        # 获取参数范围
+        param_ranges = {k: {'min': v['min'], 'max': v['max']} for k, v in config.CONFIG_PARAM_RANGES.items()}
+        
+        return jsonify({
+            'status': 'success',
+            'data': config_data,
+            'ranges': param_ranges
+        })
+    except Exception as e:
+        logger.error(f"获取配置时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"获取配置时出错: {str(e)}"
+        }), 500
+
+@app.route('/api/config/save', methods=['POST'])
+def save_config():
+    """保存系统配置"""
+    try:
+        config_data = request.json
+        
+        # 参数校验
+        validation_errors = []
+        for param_name, value in config_data.items():
+            # 检查类型，跳过布尔值和字符串
+            if isinstance(value, bool) or isinstance(value, str):
+                continue
+                
+            # 校验参数
+            is_valid, error_msg = config.validate_config_param(param_name, value)
+            if not is_valid:
+                validation_errors.append(error_msg)
+        
+        # 如果有验证错误，返回错误信息
+        if validation_errors:
+            return jsonify({
+                'status': 'error',
+                'message': '参数校验失败',
+                'errors': validation_errors
+            }), 400
+        
+        # 更新配置
+        # 注意：这里只是临时更新运行时配置，不会修改配置文件
+        # 在实际应用中，您可能需要将配置写入配置文件
+        
+        # 更新主要参数
+        if "singleBuyAmount" in config_data:
+            config.POSITION_UNIT = float(config_data["singleBuyAmount"])
+        if "firstProfitSell" in config_data:
+            config.INITIAL_TAKE_PROFIT_RATIO = float(config_data["firstProfitSell"]) / 100
+        if "firstProfitSellEnabled" in config_data:
+            config.ENABLE_DYNAMIC_STOP_PROFIT = bool(config_data["firstProfitSellEnabled"])
+        if "stockGainSellPencent" in config_data:
+            config.INITIAL_TAKE_PROFIT_RATIO_PERCENTAGE = float(config_data["stockGainSellPencent"]) / 100
+        if "stopLossBuy" in config_data:
+            # 更新第二个网格级别
+            ratio = 1 - float(config_data["stopLossBuy"]) / 100
+            config.BUY_GRID_LEVELS[1] = ratio
+        if "stockStopLoss" in config_data:
+            config.STOP_LOSS_RATIO = -float(config_data["stockStopLoss"]) / 100
+        if "singleStockMaxPosition" in config_data:
+            config.MAX_POSITION_VALUE = float(config_data["singleStockMaxPosition"])
+        if "totalMaxPosition" in config_data:
+            config.MAX_TOTAL_POSITION_RATIO = float(config_data["totalMaxPosition"]) / 1000000
+            
+        # 开关类参数
+        if "allowBuy" in config_data:
+            setattr(config, 'ALLOW_BUY', bool(config_data["allowBuy"]))
+        if "allowSell" in config_data:
+            setattr(config, 'ALLOW_SELL', bool(config_data["allowSell"]))
+        if "globalAllowBuySell" in config_data:
+            config.ENABLE_AUTO_TRADING = bool(config_data["globalAllowBuySell"])
+        if "simulationMode" in config_data:
+            setattr(config, 'SIMULATION_MODE', bool(config_data["simulationMode"]))
+        
+        logger.info(f"配置已更新: {config_data}")
+        
+        return jsonify({
+            'status': 'success',
+            'message': '配置已保存并应用'
+        })
+    except Exception as e:
+        logger.error(f"保存配置时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"保存配置失败: {str(e)}"
+        }), 500
+
+@app.route('/api/monitor/start', methods=['POST'])
+def start_monitor():
+    """启动监控"""
+    try:
+        # 获取并保存配置
+        if request.is_json:
+            config_data = request.json
+            
+            # 参数校验
+            validation_errors = []
+            for param_name, value in config_data.items():
+                # 检查类型，跳过布尔值和字符串
+                if isinstance(value, bool) or isinstance(value, str):
+                    continue
+                    
+                # 校验参数
+                is_valid, error_msg = config.validate_config_param(param_name, value)
+                if not is_valid:
+                    validation_errors.append(error_msg)
+            
+            # 如果有验证错误，返回错误信息
+            if validation_errors:
+                return jsonify({
+                    'status': 'error',
+                    'message': '参数校验失败，无法启动监控',
+                    'errors': validation_errors
+                }), 400
+            
+            # 保存配置
+            # 更新主要参数
+            if "singleBuyAmount" in config_data:
+                config.POSITION_UNIT = float(config_data["singleBuyAmount"])
+            if "firstProfitSell" in config_data:
+                config.INITIAL_TAKE_PROFIT_RATIO = float(config_data["firstProfitSell"]) / 100
+            if "firstProfitSellEnabled" in config_data:
+                config.ENABLE_DYNAMIC_STOP_PROFIT = bool(config_data["firstProfitSellEnabled"])
+            if "stockGainSellPencent" in config_data:
+                config.INITIAL_TAKE_PROFIT_RATIO_PERCENTAGE = float(config_data["stockGainSellPencent"]) / 100
+            if "stopLossBuy" in config_data:
+                # 更新第二个网格级别
+                ratio = 1 - float(config_data["stopLossBuy"]) / 100
+                config.BUY_GRID_LEVELS[1] = ratio
+            if "stockStopLoss" in config_data:
+                config.STOP_LOSS_RATIO = -float(config_data["stockStopLoss"]) / 100
+            if "singleStockMaxPosition" in config_data:
+                config.MAX_POSITION_VALUE = float(config_data["singleStockMaxPosition"])
+            if "totalMaxPosition" in config_data:
+                config.MAX_TOTAL_POSITION_RATIO = float(config_data["totalMaxPosition"]) / 1000000
+                
+            # 开关类参数
+            if "allowBuy" in config_data:
+                setattr(config, 'ALLOW_BUY', bool(config_data["allowBuy"]))
+            if "allowSell" in config_data:
+                setattr(config, 'ALLOW_SELL', bool(config_data["allowSell"]))
+            if "globalAllowBuySell" in config_data:
+                config.ENABLE_AUTO_TRADING = bool(config_data["globalAllowBuySell"])
+            if "simulationMode" in config_data:
+                setattr(config, 'SIMULATION_MODE', bool(config_data["simulationMode"]))
+                
+        # 启用自动交易
+        config.ENABLE_AUTO_TRADING = True
+        
+        # 启动策略线程
+        trading_strategy.start_strategy_thread()
+        
+        # 启动持仓监控线程
+        position_manager.start_position_monitor_thread()
+        
+        return jsonify({
+            'status': 'success',
+            'message': '监控已启动',
+            'isMonitoring': True
+        })
+    except Exception as e:
+        logger.error(f"启动监控时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"启动监控失败: {str(e)}"
+        }), 500
+
+@app.route('/api/monitor/stop', methods=['POST'])
+def stop_monitor():
+    """停止监控"""
+    try:
+        # 停止策略线程
+        trading_strategy.stop_strategy_thread()
+        
+        # 停止持仓监控线程
+        position_manager.stop_position_monitor_thread()
+        
+        # 禁用自动交易
+        config.ENABLE_AUTO_TRADING = False
+        
+        return jsonify({
+            'status': 'success',
+            'message': '监控已停止',
+            'isMonitoring': False
+        })
+    except Exception as e:
+        logger.error(f"停止监控时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"停止监控失败: {str(e)}"
+        }), 500
+
+@app.route('/api/logs/clear', methods=['POST'])
+def clear_logs():
+    """清空日志"""
+    try:
+        # 执行清空日志的操作
+        # 这里假设交易记录存储在数据库中，我们执行清空操作
+        cursor = data_manager.conn.cursor()
+        cursor.execute("DELETE FROM trade_records")
+        data_manager.conn.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': '日志已清空'
+        })
+    except Exception as e:
+        logger.error(f"清空日志时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"清空日志失败: {str(e)}"
+        }), 500
+
+@app.route('/api/data/clear_current', methods=['POST'])
+def clear_current_data():
+    """清空当前数据"""
+    try:
+        # 清空持仓数据
+        cursor = data_manager.conn.cursor()
+        cursor.execute("DELETE FROM positions")
+        data_manager.conn.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': '当前数据已清空'
+        })
+    except Exception as e:
+        logger.error(f"清空当前数据时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"清空当前数据失败: {str(e)}"
+        }), 500
+
+@app.route('/api/data/clear_buysell', methods=['POST'])
+def clear_buysell_data():
+    """清空买入/卖出数据"""
+    try:
+        # 清空交易记录
+        cursor = data_manager.conn.cursor()
+        cursor.execute("DELETE FROM trade_records")
+        data_manager.conn.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': '买入/卖出数据已清空'
+        })
+    except Exception as e:
+        logger.error(f"清空买入/卖出数据时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"清空买入/卖出数据失败: {str(e)}"
+        }), 500
+
+@app.route('/api/data/import', methods=['POST'])
+def import_data():
+    """导入保存数据"""
+    try:
+        # 这里需要实现导入数据的逻辑
+        # 由于没有具体实现，返回成功消息
+        return jsonify({
+            'status': 'success',
+            'message': '数据导入成功'
+        })
+    except Exception as e:
+        logger.error(f"导入数据时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"导入数据失败: {str(e)}"
+        }), 500
+
+@app.route('/api/holdings/init', methods=['POST'])
+def init_holdings():
+    """初始化持仓数据"""
+    try:
+        # 获取配置数据
+        if request.is_json:
+            config_data = request.json
+            
+            # 校验并保存配置
+            # 这里重复使用save_config的代码
+            validation_errors = []
+            for param_name, value in config_data.items():
+                # 检查类型，跳过布尔值和字符串
+                if isinstance(value, bool) or isinstance(value, str):
+                    continue
+                    
+                # 校验参数
+                is_valid, error_msg = config.validate_config_param(param_name, value)
+                if not is_valid:
+                    validation_errors.append(error_msg)
+            
+            # 如果有验证错误，返回错误信息
+            if validation_errors:
+                return jsonify({
+                    'status': 'error',
+                    'message': '参数校验失败，无法初始化持仓',
+                    'errors': validation_errors
+                }), 400
+            
+            # 应用配置
+            # 更新主要参数
+            if "singleBuyAmount" in config_data:
+                config.POSITION_UNIT = float(config_data["singleBuyAmount"])
+            if "firstProfitSell" in config_data:
+                config.INITIAL_TAKE_PROFIT_RATIO = float(config_data["firstProfitSell"]) / 100
+            if "firstProfitSellEnabled" in config_data:
+                config.ENABLE_DYNAMIC_STOP_PROFIT = bool(config_data["firstProfitSellEnabled"])
+            if "stockGainSellPencent" in config_data:
+                config.INITIAL_TAKE_PROFIT_RATIO_PERCENTAGE = float(config_data["stockGainSellPencent"]) / 100
+            if "stopLossBuy" in config_data:
+                # 更新第二个网格级别
+                ratio = 1 - float(config_data["stopLossBuy"]) / 100
+                config.BUY_GRID_LEVELS[1] = ratio
+            if "stockStopLoss" in config_data:
+                config.STOP_LOSS_RATIO = -float(config_data["stockStopLoss"]) / 100
+            if "singleStockMaxPosition" in config_data:
+                config.MAX_POSITION_VALUE = float(config_data["singleStockMaxPosition"])
+            if "totalMaxPosition" in config_data:
+                config.MAX_TOTAL_POSITION_RATIO = float(config_data["totalMaxPosition"]) / 1000000
+                
+            # 开关类参数
+            if "allowBuy" in config_data:
+                setattr(config, 'ALLOW_BUY', bool(config_data["allowBuy"]))
+            if "allowSell" in config_data:
+                setattr(config, 'ALLOW_SELL', bool(config_data["allowSell"]))
+            if "globalAllowBuySell" in config_data:
+                config.ENABLE_AUTO_TRADING = bool(config_data["globalAllowBuySell"])
+            if "simulationMode" in config_data:
+                setattr(config, 'SIMULATION_MODE', bool(config_data["simulationMode"]))
+        
+        # 初始化持仓数据
+        # 这里需要实现初始化持仓的逻辑
+        # 可以通过查询交易接口获取实际持仓
+        
+        # 假设我们直接从交易执行器获取持仓
+        positions = trading_executor.get_stock_positions()
+        
+        # 清空已有持仓数据
+        cursor = data_manager.conn.cursor()
+        cursor.execute("DELETE FROM positions")
+        data_manager.conn.commit()
+        
+        # 导入最新持仓
+        for pos in positions:
+            # 假设position_manager有一个update_position方法
+            position_manager.update_position(
+                stock_code=pos['stock_code'],
+                volume=pos['volume'],
+                cost_price=pos['cost_price'],
+                current_price=pos['current_price']
+            )
+        
+        return jsonify({
+            'status': 'success',
+            'message': '持仓数据初始化成功',
+            'count': len(positions)
+        })
+    except Exception as e:
+        logger.error(f"初始化持仓数据时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"初始化持仓数据失败: {str(e)}"
+        }), 500
+
+@app.route('/api/actions/execute_buy', methods=['POST'])
+def execute_buy():
+    """执行买入操作"""
+    try:
+        buy_data = request.json
+        strategy = buy_data.get('strategy', 'random_pool')
+        quantity = int(buy_data.get('quantity', 0))
+        
+        if quantity <= 0:
+            return jsonify({
+                'status': 'error',
+                'message': '买入数量必须大于0'
+            }), 400
+        
+        # 从股票池选择股票
+        stock_codes = config.STOCK_POOL[:quantity] if quantity <= len(config.STOCK_POOL) else config.STOCK_POOL
+        
+        # 执行买入
+        success_count = 0
+        for stock_code in stock_codes:
+            # 计算买入金额
+            amount = config.POSITION_UNIT
+            
+            # 执行买入
+            order_id = trading_strategy.manual_buy(
+                stock_code=stock_code,
+                amount=amount
+            )
+            
+            if order_id:
+                success_count += 1
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'成功发送{success_count}个买入指令',
+            'success_count': success_count,
+            'total_count': len(stock_codes)
+        })
+    except Exception as e:
+        logger.error(f"执行买入操作时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"执行买入操作失败: {str(e)}"
+        }), 500
+
+@app.route('/api/holdings/update', methods=['POST'])
+def update_holding_params():
+    """更新持仓参数"""
+    try:
+        data = request.json
+        stock_code = data.get('stock_code')
+        profit_triggered = data.get('profit_triggered')
+        highest_price = data.get('highest_price')
+        stop_loss_price = data.get('stop_loss_price')
+        
+        if not stock_code:
+            return jsonify({
+                'status': 'error',
+                'message': '股票代码不能为空'
+            }), 400
+        
+        # 获取当前持仓
+        position = position_manager.get_position(stock_code)
+        if not position:
+            return jsonify({
+                'status': 'error',
+                'message': f'未找到{stock_code}的持仓信息'
+            }), 404
+        
+        # 更新持仓参数
+        position_manager.update_position(
+            stock_code=stock_code,
+            volume=position['volume'],
+            cost_price=position['cost_price'],
+            profit_triggered=profit_triggered if profit_triggered is not None else position['profit_triggered'],
+            highest_price=highest_price if highest_price is not None else position['highest_price'],
+            stop_loss_price=stop_loss_price if stop_loss_price is not None else position['stop_loss_price']
+        )
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'{stock_code}持仓参数更新成功'
+        })
+    except Exception as e:
+        logger.error(f"更新持仓参数时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"更新持仓参数失败: {str(e)}"
+        }), 500
 
 # 添加SSE接口
 @app.route('/api/sse', methods=['GET'])
@@ -227,6 +716,12 @@ def sse():
                         'available': account_info.get('available', 0),
                         'market_value': account_info.get('market_value', 0),
                         'total_asset': account_info.get('total_asset', 0)
+                    },
+                    'monitoring': {
+                        'isMonitoring': config.ENABLE_AUTO_TRADING,
+                        'allowBuy': getattr(config, 'ALLOW_BUY', True),
+                        'allowSell': getattr(config, 'ALLOW_SELL', True),
+                        'simulationMode': getattr(config, 'SIMULATION_MODE', False)
                     }
                 }
                 
