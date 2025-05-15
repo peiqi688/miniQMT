@@ -646,23 +646,24 @@ document.addEventListener('DOMContentLoaded', () => {
             //stopPolling(); // 停止轮询数据
         }
         
-// 更新系统设置
-if (statusData.settings) {
-    // 同步模拟交易模式状态
-    isSimulationMode = statusData.settings.simulationMode || false;
-    elements.simulationMode.checked = isSimulationMode;
-    
-    // 同步允许买卖设置
-    elements.allowBuy.checked = statusData.settings.allowBuy || false;
-    elements.allowSell.checked = statusData.settings.allowSell || false;
-    
-    // 同步全局监控开关
-    elements.globalAllowBuySell.checked = statusData.settings.enableAutoTrading || false;
-    
-    // 更新模拟交易模式UI
-    updateSimulationModeUI();
-}
-}
+        // 更新系统设置
+        if (statusData.settings) {
+            // 同步模拟交易模式状态
+            isSimulationMode = statusData.settings.simulationMode || false;
+            elements.simulationMode.checked = isSimulationMode;
+            
+            // 同步允许买卖设置
+            elements.allowBuy.checked = statusData.settings.allowBuy || false;
+            elements.allowSell.checked = statusData.settings.allowSell || false;
+            
+            // 同步全局监控开关，保持界面和后端一致
+            const autoTradingEnabled = statusData.settings.enableAutoTrading || false;
+            elements.globalAllowBuySell.checked = autoTradingEnabled;
+            
+            // 更新模拟交易模式UI
+            updateSimulationModeUI();
+        }
+    }
 
 // 轻量级账户信息更新，用于SSE
 function updateQuickAccountInfo(accountInfo) {

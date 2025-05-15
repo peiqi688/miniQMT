@@ -392,7 +392,7 @@ def start_monitor():
                 setattr(config, 'ENABLE_SIMULATION_MODE', bool(config_data["simulationMode"]))
                 
         # 启用自动交易
-        config.ENABLE_AUTO_TRADING = True
+        # config.ENABLE_AUTO_TRADING = True
         
         # 启动策略线程
         trading_strategy.start_strategy_thread()
@@ -400,10 +400,18 @@ def start_monitor():
         # 启动持仓监控线程
         position_manager.start_position_monitor_thread()
         
+        # 启动策略线程 - 仅当自动交易启用时
+        if config.ENABLE_AUTO_TRADING:
+            trading_strategy.start_strategy_thread()
+            message = '监控已启动，自动交易已启用'
+        else:
+            message = '监控已启动，自动交易已禁用'
+        
         return jsonify({
             'status': 'success',
-            'message': '监控已启动',
-            'isMonitoring': True
+            'message': message,
+            'isMonitoring': True,
+            'autoTradingEnabled': config.ENABLE_AUTO_TRADING
         })
     except Exception as e:
         logger.error(f"启动监控时出错: {str(e)}")
