@@ -133,9 +133,9 @@ def get_status():
         system_settings = {
             'isMonitoring': is_monitoring,
             'enableAutoTrading': config.ENABLE_AUTO_TRADING,
-            'allowBuy': getattr(config, 'ALLOW_BUY', True),
-            'allowSell': getattr(config, 'ALLOW_SELL', True),
-            'simulationMode': getattr(config, 'SIMULATION_MODE', False)
+            'allowBuy': getattr(config, 'ENABLE_ALLOW_BUY', True),
+            'allowSell': getattr(config, 'ENABLE_ALLOW_SELL', True),
+            'simulationMode': getattr(config, 'ENABLE_SIMULATION_MODE', False)
         }
 
         return jsonify({
@@ -230,8 +230,8 @@ def get_config():
             "firstProfitSell": config.INITIAL_TAKE_PROFIT_RATIO * 100,
             "firstProfitSellEnabled": config.ENABLE_DYNAMIC_STOP_PROFIT,
             "stockGainSellPencent": config.INITIAL_TAKE_PROFIT_RATIO_PERCENTAGE * 100,
-            "allowBuy": getattr(config, 'ALLOW_BUY', True),
-            "allowSell": getattr(config, 'ALLOW_SELL', True),
+            "allowBuy": getattr(config, 'ENABLE_ALLOW_BUY', True),
+            "allowSell": getattr(config, 'ENABLE_ALLOW_SELL', True),
             "stopLossBuy": abs(config.BUY_GRID_LEVELS[1] - 1) * 100,
             "stopLossBuyEnabled": True,
             "stockStopLoss": abs(config.STOP_LOSS_RATIO) * 100,
@@ -241,7 +241,7 @@ def get_config():
             "connectPort": config.WEB_SERVER_PORT,
             "totalAccounts": "127.0.0.1",
             "globalAllowBuySell": config.ENABLE_AUTO_TRADING,
-            "simulationMode": getattr(config, 'SIMULATION_MODE', False)
+            "simulationMode": getattr(config, 'ENABLE_SIMULATION_MODE', False)
         }
         
         # 获取参数范围
@@ -311,13 +311,13 @@ def save_config():
             
         # 开关类参数
         if "allowBuy" in config_data:
-            setattr(config, 'ALLOW_BUY', bool(config_data["allowBuy"]))
+            setattr(config, 'ENABLE_ALLOW_BUY', bool(config_data["allowBuy"]))
         if "allowSell" in config_data:
-            setattr(config, 'ALLOW_SELL', bool(config_data["allowSell"]))
+            setattr(config, 'ENABLE_ALLOW_SELL', bool(config_data["allowSell"]))
         if "globalAllowBuySell" in config_data:
             config.ENABLE_AUTO_TRADING = bool(config_data["globalAllowBuySell"])
         if "simulationMode" in config_data:
-            setattr(config, 'SIMULATION_MODE', bool(config_data["simulationMode"]))
+            setattr(config, 'ENABLE_SIMULATION_MODE', bool(config_data["simulationMode"]))
         
         logger.info(f"配置已更新: {config_data}")
         
@@ -383,13 +383,13 @@ def start_monitor():
                 
             # 开关类参数
             if "allowBuy" in config_data:
-                setattr(config, 'ALLOW_BUY', bool(config_data["allowBuy"]))
+                setattr(config, 'ENABLE_ALLOW_BUY', bool(config_data["allowBuy"]))
             if "allowSell" in config_data:
-                setattr(config, 'ALLOW_SELL', bool(config_data["allowSell"]))
+                setattr(config, 'ENABLE_ALLOW_SELL', bool(config_data["allowSell"]))
             if "globalAllowBuySell" in config_data:
                 config.ENABLE_AUTO_TRADING = bool(config_data["globalAllowBuySell"])
             if "simulationMode" in config_data:
-                setattr(config, 'SIMULATION_MODE', bool(config_data["simulationMode"]))
+                setattr(config, 'ENABLE_SIMULATION_MODE', bool(config_data["simulationMode"]))
                 
         # 启用自动交易
         config.ENABLE_AUTO_TRADING = True
@@ -567,13 +567,13 @@ def init_holdings():
                 
             # 开关类参数
             if "allowBuy" in config_data:
-                setattr(config, 'ALLOW_BUY', bool(config_data["allowBuy"]))
+                setattr(config, 'ENABLE_ALLOW_BUY', bool(config_data["allowBuy"]))
             if "allowSell" in config_data:
-                setattr(config, 'ALLOW_SELL', bool(config_data["allowSell"]))
+                setattr(config, 'ENABLE_ALLOW_SELL', bool(config_data["allowSell"]))
             if "globalAllowBuySell" in config_data:
                 config.ENABLE_AUTO_TRADING = bool(config_data["globalAllowBuySell"])
             if "simulationMode" in config_data:
-                setattr(config, 'SIMULATION_MODE', bool(config_data["simulationMode"]))
+                setattr(config, 'ENABLE_SIMULATION_MODE', bool(config_data["simulationMode"]))
         
         # 初始化持仓数据
         # 这里需要实现初始化持仓的逻辑
@@ -719,9 +719,9 @@ def sse():
                     },
                     'monitoring': {
                         'isMonitoring': config.ENABLE_AUTO_TRADING,
-                        'allowBuy': getattr(config, 'ALLOW_BUY', True),
-                        'allowSell': getattr(config, 'ALLOW_SELL', True),
-                        'simulationMode': getattr(config, 'SIMULATION_MODE', False)
+                        'allowBuy': getattr(config, 'ENABLE_ALLOW_BUY', True),
+                        'allowSell': getattr(config, 'ENABLE_ALLOW_SELL', True),
+                        'simulationMode': getattr(config, 'ENABLE_SIMULATION_MODE', False)
                     }
                 }
                 
