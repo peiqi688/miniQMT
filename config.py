@@ -14,6 +14,17 @@ LOG_FILE = "qmt_trading.log"
 LOG_MAX_SIZE = 10 * 1024 * 1024  # 10MB
 LOG_BACKUP_COUNT = 5  # 保留5个备份文件
 
+# ======================= 功能开关 =======================
+ENABLE_SIMULATION_MODE = True  # 设置为True开启模拟交易模式
+ENABLE_AUTO_TRADING = False  # 是否启用自动交易
+ENABLE_ALLOW_BUY = True  # 是否允许买入
+ENABLE_ALLOW_SELL = True  # 是否允许卖出
+ENABLE_DATA_SYNC = True  # 是否启用数据同步
+ENABLE_POSITION_MONITOR = True  # 是否启用持仓监控
+ENABLE_LOG_CLEANUP = True  # 是否启用日志清理
+ENABLE_GRID_TRADING = True  # 是否启用网格交易
+ENABLE_DYNAMIC_STOP_PROFIT = True  # 是否启用动态止盈
+
 # ======================= 数据配置 =======================
 # 历史数据存储路径
 DATA_DIR = "data"
@@ -89,18 +100,6 @@ MA_PERIODS = [10, 20, 30, 60]
 WEB_SERVER_HOST = "localhost"
 WEB_SERVER_PORT = 5000
 WEB_SERVER_DEBUG = True
-
-# ======================= 功能开关 =======================
-ENABLE_SIMULATION_MODE = True  # 设置为True开启模拟交易模式
-ENABLE_AUTO_TRADING = False  # 是否启用自动交易
-ENABLE_ALLOW_BUY = True  # 是否允许买入
-ENABLE_ALLOW_SELL = True  # 是否允许卖出
-
-ENABLE_DATA_SYNC = True  # 是否启用数据同步
-ENABLE_POSITION_MONITOR = True  # 是否启用持仓监控
-ENABLE_LOG_CLEANUP = True  # 是否启用日志清理
-ENABLE_GRID_TRADING = True  # 是否启用网格交易
-ENABLE_DYNAMIC_STOP_PROFIT = True  # 是否启用动态止盈
 
 # ======================= 日志清理配置 =======================
 LOG_CLEANUP_DAYS = 30  # 保留最近30天的日志
