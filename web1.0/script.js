@@ -1413,7 +1413,7 @@ async function handleToggleMonitor() {
     }
 
     // 用户明确设置了监控状态
-    userMonitoringIntent  = !isMonitoring;
+    userMonitoringIntent = !isMonitoring;
     const endpoint = isMonitoring ? API_ENDPOINTS.stopMonitor : API_ENDPOINTS.startMonitor;
     const actionText = isMonitoring ? '停止' : '启动';
     elements.toggleMonitorBtn.disabled = true;

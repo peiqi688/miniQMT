@@ -340,79 +340,18 @@ def save_config():
 def start_monitor():
     """启动监控"""
     try:
-        # 获取并保存配置
-        if request.is_json:
-            config_data = request.json
-            
-            # 参数校验
-            validation_errors = []
-            for param_name, value in config_data.items():
-                # 检查类型，跳过布尔值和字符串
-                if isinstance(value, bool) or isinstance(value, str):
-                    continue
-                    
-                # 校验参数
-                is_valid, error_msg = config.validate_config_param(param_name, value)
-                if not is_valid:
-                    validation_errors.append(error_msg)
-            
-            # 如果有验证错误，返回错误信息
-            if validation_errors:
-                return jsonify({
-                    'status': 'error',
-                    'message': '参数校验失败，无法启动监控',
-                    'errors': validation_errors
-                }), 400
-            
-            # 保存配置
-            # 更新主要参数
-            if "singleBuyAmount" in config_data:
-                config.POSITION_UNIT = float(config_data["singleBuyAmount"])
-            if "firstProfitSell" in config_data:
-                config.INITIAL_TAKE_PROFIT_RATIO = float(config_data["firstProfitSell"]) / 100
-            if "firstProfitSellEnabled" in config_data:
-                config.ENABLE_DYNAMIC_STOP_PROFIT = bool(config_data["firstProfitSellEnabled"])
-            if "stockGainSellPencent" in config_data:
-                config.INITIAL_TAKE_PROFIT_RATIO_PERCENTAGE = float(config_data["stockGainSellPencent"]) / 100
-            if "stopLossBuy" in config_data:
-                # 更新第二个网格级别
-                ratio = 1 - float(config_data["stopLossBuy"]) / 100
-                config.BUY_GRID_LEVELS[1] = ratio
-            if "stockStopLoss" in config_data:
-                config.STOP_LOSS_RATIO = -float(config_data["stockStopLoss"]) / 100
-            if "singleStockMaxPosition" in config_data:
-                config.MAX_POSITION_VALUE = float(config_data["singleStockMaxPosition"])
-            if "totalMaxPosition" in config_data:
-                config.MAX_TOTAL_POSITION_RATIO = float(config_data["totalMaxPosition"]) / 1000000
-                
-            # 开关类参数
-            if "allowBuy" in config_data:
-                setattr(config, 'ENABLE_ALLOW_BUY', bool(config_data["allowBuy"]))
-            if "allowSell" in config_data:
-                setattr(config, 'ENABLE_ALLOW_SELL', bool(config_data["allowSell"]))
-            if "globalAllowBuySell" in config_data:
-                config.ENABLE_AUTO_TRADING = bool(config_data["globalAllowBuySell"])
-            if "simulationMode" in config_data:
-                setattr(config, 'ENABLE_SIMULATION_MODE', bool(config_data["simulationMode"]))
-                
-        # 明确设置监控状态为开启
+        # 设置全局监控状态为开启（仅用于前端UI状态控制）
         config.ENABLE_MONITORING = True
         
-        # 启动持仓监控线程
-        position_manager.start_position_monitor_thread()
+        # position_manager线程可能已经运行，无需重新启动
+        # 这里只需确保前端数据刷新正常工作
         
-        # 启动策略线程 - 仅当自动交易启用时
-        if config.ENABLE_AUTO_TRADING:
-            trading_strategy.start_strategy_thread()
-            message = '监控已启动，自动交易已启用'
-        else:
-            message = '监控已启动，自动交易已禁用'
-        
+        # 不修改自动交易状态，只启动UI数据刷新相关功能
         return jsonify({
             'status': 'success',
-            'message': message,
+            'message': '监控已启动',
             'isMonitoring': True,
-            'autoTradingEnabled': config.ENABLE_AUTO_TRADING
+            'autoTradingEnabled': config.ENABLE_AUTO_TRADING  # 返回当前自动交易状态，不修改它
         })
     except Exception as e:
         logger.error(f"启动监控时出错: {str(e)}")
@@ -428,14 +367,6 @@ def stop_monitor():
         # 明确设置监控状态为关闭
         config.ENABLE_MONITORING = False
 
-        # 停止策略线程
-        # trading_strategy.stop_strategy_thread()
-        
-        # 停止持仓监控线程
-        position_manager.stop_position_monitor_thread()
-        
-        # 禁用自动交易
-        # config.ENABLE_AUTO_TRADING = False
         
         return jsonify({
             'status': 'success',
