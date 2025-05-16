@@ -342,25 +342,18 @@ def save_config():
 
 @app.route('/api/monitor/start', methods=['POST'])
 def start_monitor():
-    """启动监控"""
+    """启动监控 - 仅控制前端数据刷新"""
     try:
         old_state = config.ENABLE_MONITORING
-        
-        # 确保变量类型一致，统一使用布尔值
         config.ENABLE_MONITORING = True
         
-        # 如果状态没有发生变化，发出警告日志
-        if old_state == config.ENABLE_MONITORING:
-            logger.warning(f"UI监控状态未变化: {old_state} -> {config.ENABLE_MONITORING} (通过API)")
-        else:
-            logger.info(f"UI监控状态变更: {old_state} -> {config.ENABLE_MONITORING} (通过API)")
+        logger.info(f"UI监控状态变更: {old_state} -> {config.ENABLE_MONITORING} (通过API)")
         
-        # 明确返回新状态
         return jsonify({
             'status': 'success',
             'message': '监控已启动',
-            'isMonitoring': config.ENABLE_MONITORING,  # 明确返回新状态
-            'autoTradingEnabled': config.ENABLE_AUTO_TRADING  # 同时返回自动交易状态
+            'isMonitoring': config.ENABLE_MONITORING,
+            'autoTradingEnabled': config.ENABLE_AUTO_TRADING  # 返回不变的自动交易状态
         })
     except Exception as e:
         logger.error(f"启动监控时出错: {str(e)}")

@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let isAutoTradingEnabled = false; // 自动交易状态，由全局监控总开关控制
     let isSimulationMode = false; // 模拟交易模式
     let isPageActive = true; // 页面活跃状态
+    let userMonitoringIntent = null; // 用户监控意图（点击按钮后）
+    let isApiConnected = true; // API连接状态，初始假设已连接
     
     // 为不同类型的数据设置不同的刷新频率
     const DATA_REFRESH_INTERVALS = {
@@ -132,6 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
         orderLog: document.getElementById('orderLog'),
         logLoading: document.getElementById('logLoading'),
         logError: document.getElementById('logError'),
+        // 连接状态
+        connectionStatus: document.getElementById('connectionStatus')
     };
 
     // --- 监听页面可见性变化 ---
@@ -139,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isPageActive = !document.hidden;
         
         // 如果轮询已启动，重新调整轮询间隔
-        if (pollingIntervalId) {
+        if (pollingIntervalId && isMonitoring) {
             stopPolling();
             startPolling();
         }
@@ -589,10 +593,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             console.log(`API Response: ${options.method || 'GET'} ${endpoint}`, data.status || 'success');
+            
+            // 更新API连接状态为已连接
+            updateConnectionStatus(true);
+            
             return data;
         } catch (error) {
             console.error(`API Error: ${options.method || 'GET'} ${endpoint}`, error);
             showMessage(`请求失败: ${error.message}`, 'error');
+            
+            // 可能是API连接问题，标记为未连接
+            if (endpoint !== 'connection/status') {
+                updateConnectionStatus(false);
+            }
+            
             throw error;
         }
     }
@@ -624,6 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSimulationModeUI();
     }
 
+    // 修改后的updateStatusDisplay函数 - 关键修改在这里
     function updateStatusDisplay(statusData) {
         // 检查数据是否实际变化
         const lastStatusData = window._lastStatusData || {};
@@ -639,31 +654,31 @@ document.addEventListener('DOMContentLoaded', () => {
     
         if (!statusData) return;
     
-        // 账户信息
+        // 账户信息更新
         elements.accountId.textContent = statusData.account?.id ?? '--';
         elements.availableBalance.textContent = statusData.account?.availableBalance?.toFixed(2) ?? '--';
         elements.maxHoldingValue.textContent = statusData.account?.maxHoldingValue?.toFixed(2) ?? '--';
         elements.totalAssets.textContent = statusData.account?.totalAssets?.toFixed(2) ?? '--';
         elements.lastUpdateTimestamp.textContent = statusData.account?.timestamp ?? new Date().toLocaleString('zh-CN');
         
-        // 关键修改：更精确地处理监控状态、用户意图和自动交易状态
+        // 获取后端状态，但不自动更新前端状态
         const backendMonitoring = statusData.isMonitoring ?? false;
         const backendAutoTrading = statusData.settings?.enableAutoTrading ?? false;
     
-        // 更新自动交易状态
+        // 更新自动交易状态 - 只更新全局监控总开关，不影响监控状态
         isAutoTradingEnabled = backendAutoTrading;
         elements.globalAllowBuySell.checked = isAutoTradingEnabled;
         
-        // 核心逻辑：检查用户是否有明确点击意图
+        // 核心修改：用户明确的监控意图优先，用户操作后不再让后端状态覆盖前端状态
         if (userMonitoringIntent !== null) {
             // 用户通过按钮明确表达了监控意图
             console.log(`使用用户意图设置监控状态: ${userMonitoringIntent}`);
             isMonitoring = userMonitoringIntent;
             
-            // 检查状态是否一致
+            // 检查状态是否一致并同步到后端，但不让后端状态影响前端
             if (isMonitoring !== backendMonitoring) {
                 console.warn(`监控状态不一致: 前端=${isMonitoring}, 后端=${backendMonitoring}, 尝试同步`);
-                // 可以选择发送额外同步请求
+                // 发送额外同步请求，单向同步前端状态到后端
                 const endpoint = isMonitoring ? API_ENDPOINTS.startMonitor : API_ENDPOINTS.stopMonitor;
                 apiRequest(endpoint, { 
                     method: 'POST', 
@@ -673,30 +688,17 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // 已使用用户意图，重置它
             userMonitoringIntent = null;
-        } else {
-            // 没有用户意图，使用后端状态
-            if (isMonitoring !== backendMonitoring) {
-                console.log(`监控状态变化: ${isMonitoring} -> ${backendMonitoring} (从后端同步)`);
-                isMonitoring = backendMonitoring;
-            }
+        }
+        // 重要修改：不再自动使用后端状态覆盖前端监控状态
+        // 只在初始加载时使用后端状态
+        else if (!window._initialMonitoringLoaded) {
+            isMonitoring = backendMonitoring;
+            window._initialMonitoringLoaded = true;
+            console.log(`初始化监控状态: ${isMonitoring}`);
         }
     
         // 根据最终确定的监控状态更新UI
-        if (isMonitoring) {
-            elements.statusIndicator.textContent = '运行中';
-            elements.statusIndicator.className = 'text-lg font-bold text-green-600';
-            elements.toggleMonitorBtn.textContent = '停止执行监控';
-            elements.toggleMonitorBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-            elements.toggleMonitorBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-            startPolling(); // 开始轮询数据
-        } else {
-            elements.statusIndicator.textContent = '未运行';
-            elements.statusIndicator.className = 'text-lg font-bold text-red-600';
-            elements.toggleMonitorBtn.textContent = '开始执行监控';
-            elements.toggleMonitorBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-            elements.toggleMonitorBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-            stopPolling(); // 停止轮询数据
-        }
+        updateMonitoringUI();
         
         // 更新系统设置
         if (statusData.settings) {
@@ -710,6 +712,33 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // 更新模拟交易模式UI
             updateSimulationModeUI();
+        }
+    }
+
+    // 新增：监控状态UI更新函数，与自动交易状态分离
+    function updateMonitoringUI() {
+        if (isMonitoring) {
+            elements.statusIndicator.textContent = '运行中';
+            elements.statusIndicator.className = 'text-lg font-bold text-green-600';
+            elements.toggleMonitorBtn.textContent = '停止执行监控';
+            elements.toggleMonitorBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            elements.toggleMonitorBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+            
+            // 只有在非轮询状态下才开始轮询
+            if (!pollingIntervalId) {
+                startPolling();
+            }
+        } else {
+            elements.statusIndicator.textContent = '未运行';
+            elements.statusIndicator.className = 'text-lg font-bold text-red-600';
+            elements.toggleMonitorBtn.textContent = '开始执行监控';
+            elements.toggleMonitorBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+            elements.toggleMonitorBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            
+            // 只有在轮询状态下才停止轮询
+            if (pollingIntervalId) {
+                stopPolling();
+            }
         }
     }
 
@@ -741,36 +770,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 更新监控状态UI，用于SSE
+    // 更新监控状态UI，用于SSE - 修改后的版本，不再让监控状态和自动交易状态相互干扰
     function updateMonitoringInfo(monitoringInfo) {
         if (!monitoringInfo) return;
 
-        // 更新全局开关状态
-        if (monitoringInfo.isMonitoring !== undefined) {
-            const wasMonitoring = isMonitoring;
-            isMonitoring = monitoringInfo.isMonitoring;
-            
-            // 只有状态有变化时才更新UI
-            if (wasMonitoring !== isMonitoring) {
-                if (isMonitoring) {
-                    elements.statusIndicator.textContent = '运行中';
-                    elements.statusIndicator.className = 'text-lg font-bold text-green-600';
-                    elements.toggleMonitorBtn.textContent = '停止执行监控';
-                    elements.toggleMonitorBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-                    elements.toggleMonitorBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-                    startPolling(); // 开始轮询数据
-                } else {
-                    elements.statusIndicator.textContent = '未运行';
-                    elements.statusIndicator.className = 'text-lg font-bold text-red-600';
-                    elements.toggleMonitorBtn.textContent = '开始执行监控';
-                    elements.toggleMonitorBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-                    elements.toggleMonitorBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-                    stopPolling(); // 停止轮询数据
-                }
-            }
-        }
-
-        // 明确区分自动交易状态
+        // 只更新全局监控总开关状态，不影响监控开关状态
         if (monitoringInfo.autoTradingEnabled !== undefined) {
             const wasAutoTrading = isAutoTradingEnabled;
             isAutoTradingEnabled = monitoringInfo.autoTradingEnabled;
@@ -1228,11 +1232,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 lastDataUpdateTimestamps.status = Date.now();
             } else {
                 showMessage("加载状态信息失败: " + (data.message || "未知错误"), 'error');
-                updateStatusDisplay({ isMonitoring: false, account: {} });
+                // 不自动重置监控状态，保持用户设置
+                // updateStatusDisplay({ isMonitoring: false, account: {} });
             }
         } catch (error) {
             showMessage("加载状态信息失败", 'error');
-            updateStatusDisplay({ isMonitoring: false, account: {} });
+            // 不自动重置监控状态，保持用户设置
+            // updateStatusDisplay({ isMonitoring: false, account: {} });
         } finally {
             // 释放请求锁定，添加小延迟避免立即重复请求
             setTimeout(() => {
@@ -1397,17 +1403,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 连接状态检测 ---
+    // --- 连接状态检测 - 修改后只影响连接状态指示器，不影响监控状态 ---
     function updateConnectionStatus(isConnected) {
-        const statusElement = document.getElementById('connectionStatus');
+        // 更新连接状态
+        isApiConnected = isConnected;
+        
+        // 只更新UI显示，不影响监控状态
         if (isConnected) {
-            statusElement.textContent = "API已连接";
-            statusElement.classList.remove('disconnected');
-            statusElement.classList.add('connected');
+            elements.connectionStatus.textContent = "API已连接";
+            elements.connectionStatus.classList.remove('disconnected');
+            elements.connectionStatus.classList.add('connected');
         } else {
-            statusElement.textContent = "API未连接";
-            statusElement.classList.remove('connected');
-            statusElement.classList.add('disconnected');
+            elements.connectionStatus.textContent = "API未连接";
+            elements.connectionStatus.classList.remove('connected');
+            elements.connectionStatus.classList.add('disconnected');
         }
     }
 
@@ -1421,18 +1430,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const data = await response.json();
             console.log("Connection check response:", data);
+            
+            // 只更新连接状态指示器，不影响监控状态
             updateConnectionStatus(data.connected);
         } catch (error) {
             console.error("Error checking API connection:", error);
             updateConnectionStatus(false);
         } finally {
+            // 继续轮询连接状态
             setTimeout(throttledCheckApiConnection, 5000);
         }
     }, 5000);
 
 
     // --- 操作处理函数 ---
-    // 修改后的监控开启/关闭函数 - 只影响前端数据刷新，不影响后端持仓监控
+    // 修改后的监控开启/关闭函数 - 只影响前端数据刷新，不再与后端自动交易状态混淆
     async function handleToggleMonitor() {
         // 先验证表单数据
         if (!validateForm()) {
@@ -1465,21 +1477,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isMonitoring = newMonitoringState;
                 
                 // 更新UI
-                if (isMonitoring) {
-                    elements.statusIndicator.textContent = '运行中';
-                    elements.statusIndicator.className = 'text-lg font-bold text-green-600';
-                    elements.toggleMonitorBtn.textContent = '停止执行监控';
-                    elements.toggleMonitorBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-                    elements.toggleMonitorBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-                    startPolling(); // 开始轮询数据
-                } else {
-                    elements.statusIndicator.textContent = '未运行';
-                    elements.statusIndicator.className = 'text-lg font-bold text-red-600';
-                    elements.toggleMonitorBtn.textContent = '开始执行监控';
-                    elements.toggleMonitorBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-                    elements.toggleMonitorBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-                    stopPolling(); // 停止轮询数据
-                }
+                updateMonitoringUI();
                 
                 showMessage(`${actionText}监控成功: ${data.message || ''}（注意：此操作不影响自动交易）`, 'success');
             } else {
@@ -1488,13 +1486,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 userMonitoringIntent = null;
             }
             
-            // 仍然调用fetchStatus以获取其他更新，但不让它覆盖监控状态
-            await fetchStatus();
+            // 跳过调用fetchStatus，因为我们已经主动设置了状态
         } catch (error) {
             showMessage(`${actionText}监控失败: ${error.message}`, 'error');
             // 恢复用户意图，因为操作失败
             userMonitoringIntent = null;
-            await fetchStatus();
         } finally {
             elements.toggleMonitorBtn.disabled = false;
             // 3秒后清除消息
@@ -1735,7 +1731,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 轮询机制 ---
+    // --- 轮询机制 - 修改后确保只依赖于isMonitoring状态 ---
     function startPolling() {
         if (pollingIntervalId) {
             console.log("已存在轮询，停止旧轮询");
@@ -1767,6 +1763,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function pollData() {
+        // 如果监控状态关闭，不再继续轮询
+        if (!isMonitoring) {
+            console.log("Monitor is off, stopping polling");
+            stopPolling();
+            return;
+        }
+        
+        // 如果API未连接，尝试重新检查连接
+        if (!isApiConnected) {
+            console.log("API disconnected, checking connection...");
+            try {
+                const response = await fetch(API_ENDPOINTS.checkConnection);
+                if (response.ok) {
+                    const data = await response.json();
+                    updateConnectionStatus(data.connected || false);
+                } else {
+                    updateConnectionStatus(false);
+                }
+                
+                // 如果仍未连接，跳过本次轮询
+                if (!isApiConnected) {
+                    console.log("API still disconnected, skipping poll");
+                    return;
+                }
+            } catch (error) {
+                console.error("Connection check failed:", error);
+                updateConnectionStatus(false);
+                return;
+            }
+        }
+
         console.log("Polling for data updates...");
 
         // 如果所有请求都在进行中，则跳过本次轮询
@@ -1856,7 +1883,7 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(checkFrame);
     }
 
-    // --- SSE连接 ---
+    // --- SSE连接 - 修改后确保不混淆两种状态 ---
     function initSSE() {
         if (sseConnection) {
             sseConnection.close();
@@ -1881,14 +1908,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 lastSseUpdateTime = now;
                 
-                // 更新关键UI元素而不刷新整个页面
+                // 更新账户信息 - 不影响监控或自动交易状态
                 if (data.account_info) {
                     updateQuickAccountInfo(data.account_info);
                 }
                 
-                // 更新监控相关信息
-                if (data.monitoring) {
-                    updateMonitoringInfo(data.monitoring);
+                // 更新自动交易状态 - 不影响监控状态
+                if (data.monitoring && data.monitoring.autoTradingEnabled !== undefined) {
+                    isAutoTradingEnabled = data.monitoring.autoTradingEnabled;
+                    elements.globalAllowBuySell.checked = isAutoTradingEnabled;
                 }
                 
                 // 显示轻微的更新提示（但不频繁显示）
@@ -1967,8 +1995,10 @@ document.addEventListener('DOMContentLoaded', () => {
             showMessage("部分数据加载失败", 'error', 3000);
         }
 
-        // 自动启动轮询
-        startPolling();
+        // 如果监控状态为开启，则自动启动轮询
+        if (isMonitoring) {
+            startPolling();
+        }
 
         // 启动SSE
         setTimeout(() => {
