@@ -127,12 +127,12 @@ def get_status():
             position_manager.monitor_thread is not None and
             position_manager.monitor_thread.is_alive()
         )
-        is_monitoring = strategy_monitoring or position_monitoring
+        is_monitoring = position_monitoring
 
-        # 获取全局设置状态
+        # 获取全局设置状态 - 明确区分自动交易和监控状态
         system_settings = {
-            'isMonitoring': is_monitoring,
-            'enableAutoTrading': config.ENABLE_AUTO_TRADING,
+            'isMonitoring': is_monitoring,  # 监控状态
+            'enableAutoTrading': config.ENABLE_AUTO_TRADING,  # 自动交易状态
             'allowBuy': getattr(config, 'ENABLE_ALLOW_BUY', True),
             'allowSell': getattr(config, 'ENABLE_ALLOW_SELL', True),
             'simulationMode': getattr(config, 'ENABLE_SIMULATION_MODE', False)
@@ -140,7 +140,7 @@ def get_status():
 
         return jsonify({
             'status': 'success',
-            'isMonitoring': is_monitoring,
+            'isMonitoring': is_monitoring,  # 顶层也返回监控状态
             'account': account_data,
             'settings': system_settings,
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -316,6 +316,16 @@ def save_config():
             setattr(config, 'ENABLE_ALLOW_SELL', bool(config_data["allowSell"]))
         if "globalAllowBuySell" in config_data:
             config.ENABLE_AUTO_TRADING = bool(config_data["globalAllowBuySell"])
+            # 只在自动交易功能需要时启动或停止策略线程
+            if config.ENABLE_AUTO_TRADING:
+                if hasattr(trading_strategy, 'strategy_thread') and trading_strategy.strategy_thread is not None and trading_strategy.strategy_thread.is_alive():
+                    # 如果监控已启动，且启用了自动交易，则启动策略线程
+                    trading_strategy.start_strategy_thread()
+            else:
+                # 如果禁用了自动交易，则停止策略线程
+                if hasattr(trading_strategy, 'strategy_thread') and trading_strategy.strategy_thread is not None:
+                    trading_strategy.stop_strategy_thread()
+
         if "simulationMode" in config_data:
             setattr(config, 'ENABLE_SIMULATION_MODE', bool(config_data["simulationMode"]))
         
@@ -395,7 +405,7 @@ def start_monitor():
         # config.ENABLE_AUTO_TRADING = True
         
         # 启动策略线程
-        trading_strategy.start_strategy_thread()
+        # trading_strategy.start_strategy_thread()
         
         # 启动持仓监控线程
         position_manager.start_position_monitor_thread()
@@ -431,7 +441,7 @@ def stop_monitor():
         position_manager.stop_position_monitor_thread()
         
         # 禁用自动交易
-        config.ENABLE_AUTO_TRADING = False
+        # config.ENABLE_AUTO_TRADING = False
         
         return jsonify({
             'status': 'success',

@@ -629,21 +629,39 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.lastUpdateTimestamp.textContent = statusData.account?.timestamp ?? new Date().toLocaleString('zh-CN');
     
         // 监控状态
-        isMonitoring = statusData.isMonitoring ?? false;
+        const backendMonitoring = statusData.isMonitoring ?? false;
+    
+        if (!userSetMonitoring || backendMonitoring === userSetMonitoring) {
+            isMonitoring = backendMonitoring;
+        } else {
+            // 用户已设置监控状态，但后端状态不匹配，再次发送请求同步
+            console.log(`监控状态不同步: 用户设置=${userSetMonitoring}, 后端=${backendMonitoring}`);
+            
+            // 可选：自动同步到用户期望的状态
+            if (userSetMonitoring) {
+                setTimeout(() => {
+                    apiRequest(API_ENDPOINTS.startMonitor, { 
+                        method: 'POST',                
+                        body: JSON.stringify(getConfigData())
+                    }).catch(e => console.error("重新同步监控状态失败", e));
+                }, 1000);
+            }
+        }
+
         if (isMonitoring) {
             elements.statusIndicator.textContent = '运行中';
             elements.statusIndicator.className = 'text-lg font-bold text-green-600';
             elements.toggleMonitorBtn.textContent = '停止执行监控';
             elements.toggleMonitorBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
             elements.toggleMonitorBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-            //startPolling(); // 开始轮询数据
+            startPolling(); // 开始轮询数据
         } else {
             elements.statusIndicator.textContent = '未运行';
             elements.statusIndicator.className = 'text-lg font-bold text-red-600';
             elements.toggleMonitorBtn.textContent = '开始执行监控';
             elements.toggleMonitorBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
             elements.toggleMonitorBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-            //stopPolling(); // 停止轮询数据
+            stopPolling(); // 停止轮询数据
         }
         
         // 更新系统设置
@@ -657,9 +675,8 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.allowSell.checked = statusData.settings.allowSell || false;
             
             // 同步全局监控开关，保持界面和后端一致
-            const autoTradingEnabled = statusData.settings.enableAutoTrading || false;
-            elements.globalAllowBuySell.checked = autoTradingEnabled;
-            
+            elements.globalAllowBuySell.checked = statusData.settings.enableAutoTrading || false;
+         
             // 更新模拟交易模式UI
             updateSimulationModeUI();
         }
@@ -1372,42 +1389,52 @@ try {
 }
 }, 5000);
 
+
+// 添加一个本地标志，记录用户明确设置的监控状态
+let userSetMonitoring = false;
 // --- 操作处理函数 ---
 async function handleToggleMonitor() {
-// 先验证表单数据
-if (!validateForm()) {
-    showMessage("请检查配置参数，修正错误后再启动监控", 'error');
-    return;
-}
+    // 先验证表单数据
+    if (!validateForm()) {
+        showMessage("请检查配置参数，修正错误后再启动监控", 'error');
+        return;
+    }
 
-const endpoint = isMonitoring ? API_ENDPOINTS.stopMonitor : API_ENDPOINTS.startMonitor;
-const actionText = isMonitoring ? '停止' : '启动';
-elements.toggleMonitorBtn.disabled = true;
-showMessage(`${actionText}监控中...`, 'loading', 0);
+    const endpoint = isMonitoring ? API_ENDPOINTS.stopMonitor : API_ENDPOINTS.startMonitor;
+    const actionText = isMonitoring ? '停止' : '启动';
+    elements.toggleMonitorBtn.disabled = true;
+    showMessage(`${actionText}监控中...`, 'loading', 0);
 
-try {
-    // 获取所有表单值，构建配置数据
-    const configData = getConfigData();
-    
-    const data = await apiRequest(endpoint, { 
-        method: 'POST',                
-        body: JSON.stringify(configData)
-    });
-    
-    showMessage(`${actionText}监控 ${data.status === 'success' ? '成功' : '失败'}: ${data.message || ''}`, 
-        data.status === 'success' ? 'success' : 'error');
+    try {
+        // 获取所有表单值，构建配置数据
+        const configData = getConfigData();
         
-    await fetchStatus();
-} catch (error) {
-    showMessage(`${actionText}监控失败: ${error.message}`, 'error');
-    await fetchStatus();
-} finally {
-    elements.toggleMonitorBtn.disabled = false;
-    // 3秒后清除消息
-    setTimeout(() => {
-        elements.messageArea.innerHTML = '';
-    }, 3000);
-}
+        // 确保配置中包含当前的全局监控总开关状态
+        // 但"开始/停止执行监控"按钮不应改变这个状态
+        configData.globalAllowBuySell = elements.globalAllowBuySell.checked;
+        
+        const data = await apiRequest(endpoint, { 
+            method: 'POST',                
+            body: JSON.stringify(configData)
+        });
+
+        // 用户明确设置了监控状态
+        userSetMonitoring = !isMonitoring;
+
+        showMessage(`${actionText}监控 ${data.status === 'success' ? '成功' : '失败'}: ${data.message || ''}`, 
+            data.status === 'success' ? 'success' : 'error');
+            
+        await fetchStatus();
+    } catch (error) {
+        showMessage(`${actionText}监控失败: ${error.message}`, 'error');
+        await fetchStatus();
+    } finally {
+        elements.toggleMonitorBtn.disabled = false;
+        // 3秒后清除消息
+        setTimeout(() => {
+            elements.messageArea.innerHTML = '';
+        }, 3000);
+    }
 }
 
 // 获取所有配置表单的值
