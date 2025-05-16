@@ -16,6 +16,7 @@ LOG_BACKUP_COUNT = 5  # 保留5个备份文件
 
 # ======================= 功能开关 =======================
 ENABLE_SIMULATION_MODE = True  # 设置为True开启模拟交易模式
+ENABLE_MONITORING = False    # 控制监控状态
 ENABLE_AUTO_TRADING = False  # 是否启用自动交易
 ENABLE_ALLOW_BUY = True  # 是否允许买入
 ENABLE_ALLOW_SELL = True  # 是否允许卖出

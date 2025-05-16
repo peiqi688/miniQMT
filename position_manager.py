@@ -1058,10 +1058,9 @@ class PositionManager:
 
     def start_position_monitor_thread(self):
         """启动持仓监控线程"""
-        if not config.ENABLE_POSITION_MONITOR:
-            logger.info("持仓监控功能已关闭，不启动监控线程")
-            return
-            
+        # 删除对ENABLE_POSITION_MONITOR的检查
+        # 完全依靠调用者来控制是否启动监控
+        
         if self.monitor_thread and self.monitor_thread.is_alive():
             logger.warning("持仓监控线程已在运行")
             return
@@ -1070,6 +1069,10 @@ class PositionManager:
         self.monitor_thread = threading.Thread(target=self._position_monitor_loop)
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
+        
+        # 设置全局监控状态标志
+        config.ENABLE_MONITORING = True
+        
         logger.info("持仓监控线程已启动")
     
     def stop_position_monitor_thread(self):
@@ -1077,6 +1080,10 @@ class PositionManager:
         if self.monitor_thread and self.monitor_thread.is_alive():
             self.stop_flag = True
             self.monitor_thread.join(timeout=5)
+            
+            # 重置全局监控状态标志
+            config.ENABLE_MONITORING = False
+            
             logger.info("持仓监控线程已停止")
 
     def get_all_positions_with_all_fields(self):

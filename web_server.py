@@ -118,16 +118,8 @@ def get_status():
             'timestamp': account_info.get('timestamp', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         }
         
-        # 判断监控状态
-        strategy_monitoring = (
-            trading_strategy.strategy_thread is not None and 
-            trading_strategy.strategy_thread.is_alive()
-        )
-        position_monitoring = (
-            position_manager.monitor_thread is not None and
-            position_manager.monitor_thread.is_alive()
-        )
-        is_monitoring = position_monitoring
+        # 监控状态 - 使用独立的配置标志，不再依赖线程状态判断
+        is_monitoring = config.ENABLE_MONITORING
 
         # 获取全局设置状态 - 明确区分自动交易和监控状态
         system_settings = {
@@ -317,14 +309,14 @@ def save_config():
         if "globalAllowBuySell" in config_data:
             config.ENABLE_AUTO_TRADING = bool(config_data["globalAllowBuySell"])
             # 只在自动交易功能需要时启动或停止策略线程
+            # 关键：不要影响监控线程或监控状态
             if config.ENABLE_AUTO_TRADING:
-                if hasattr(trading_strategy, 'strategy_thread') and trading_strategy.strategy_thread is not None and trading_strategy.strategy_thread.is_alive():
-                    # 如果监控已启动，且启用了自动交易，则启动策略线程
+                # 如果开启自动交易且监控已启动，则启动策略线程
+                if config.ENABLE_MONITORING:
                     trading_strategy.start_strategy_thread()
             else:
-                # 如果禁用了自动交易，则停止策略线程
-                if hasattr(trading_strategy, 'strategy_thread') and trading_strategy.strategy_thread is not None:
-                    trading_strategy.stop_strategy_thread()
+                # 如果关闭自动交易，则停止策略线程
+                trading_strategy.stop_strategy_thread()
 
         if "simulationMode" in config_data:
             setattr(config, 'ENABLE_SIMULATION_MODE', bool(config_data["simulationMode"]))
@@ -333,7 +325,9 @@ def save_config():
         
         return jsonify({
             'status': 'success',
-            'message': '配置已保存并应用'
+            'message': '配置已保存并应用',
+            'isMonitoring': config.ENABLE_MONITORING,  # 返回不变的监控状态
+            'autoTradingEnabled': config.ENABLE_AUTO_TRADING
         })
     except Exception as e:
         logger.error(f"保存配置时出错: {str(e)}")
@@ -401,11 +395,8 @@ def start_monitor():
             if "simulationMode" in config_data:
                 setattr(config, 'ENABLE_SIMULATION_MODE', bool(config_data["simulationMode"]))
                 
-        # 启用自动交易
-        # config.ENABLE_AUTO_TRADING = True
-        
-        # 启动策略线程
-        # trading_strategy.start_strategy_thread()
+        # 明确设置监控状态为开启
+        config.ENABLE_MONITORING = True
         
         # 启动持仓监控线程
         position_manager.start_position_monitor_thread()
@@ -434,8 +425,11 @@ def start_monitor():
 def stop_monitor():
     """停止监控"""
     try:
+        # 明确设置监控状态为关闭
+        config.ENABLE_MONITORING = False
+
         # 停止策略线程
-        trading_strategy.stop_strategy_thread()
+        # trading_strategy.stop_strategy_thread()
         
         # 停止持仓监控线程
         position_manager.stop_position_monitor_thread()

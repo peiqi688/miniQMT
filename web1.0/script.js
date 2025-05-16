@@ -366,9 +366,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         elements.globalAllowBuySell.addEventListener('change', (event) => {
-            throttledSyncParameter('globalAllowBuySell', event.target.checked);
+            // 明确：不影响监控状态
+            // 只发送自动交易状态更新
+            const autoTradingEnabled = event.target.checked;
+            
+            apiRequest(API_ENDPOINTS.saveConfig, {
+                method: 'POST',
+                body: JSON.stringify({ globalAllowBuySell: autoTradingEnabled })
+            })
+            .then(response => {
+                console.log("自动交易状态已更新:", autoTradingEnabled);
+            })
+            .catch(error => {
+                console.error("更新自动交易状态失败:", error);
+                // 可选：回滚UI状态
+                event.target.checked = !autoTradingEnabled;
+            });
         });
-
         // 其他开关类参数实时同步
         elements.firstProfitSellEnabled.addEventListener('change', (event) => {
             throttledSyncParameter('firstProfitSellEnabled', event.target.checked);
@@ -630,22 +644,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
         // 监控状态
         const backendMonitoring = statusData.isMonitoring ?? false;
-    
-        if (!userSetMonitoring || backendMonitoring === userSetMonitoring) {
-            isMonitoring = backendMonitoring;
-        } else {
-            // 用户已设置监控状态，但后端状态不匹配，再次发送请求同步
-            console.log(`监控状态不同步: 用户设置=${userSetMonitoring}, 后端=${backendMonitoring}`);
+
+        // 核心逻辑：当用户有明确意图时，优先使用用户的选择
+        if (userMonitoringIntent !== null) {
+            isMonitoring = userMonitoringIntent;
             
-            // 可选：自动同步到用户期望的状态
-            if (userSetMonitoring) {
-                setTimeout(() => {
-                    apiRequest(API_ENDPOINTS.startMonitor, { 
-                        method: 'POST',                
-                        body: JSON.stringify(getConfigData())
-                    }).catch(e => console.error("重新同步监控状态失败", e));
-                }, 1000);
+            // 如果后端状态与用户意图不一致，可选择再次同步
+            if (backendMonitoring !== userMonitoringIntent) {
+                console.log(`监控状态不一致：用户意图=${userMonitoringIntent}，后端状态=${backendMonitoring}`);
+                // 可选：再次发送请求同步状态
             }
+        } else {
+            // 没有用户意图时，使用后端状态
+            isMonitoring = backendMonitoring;
         }
 
         if (isMonitoring) {
@@ -1390,8 +1401,9 @@ try {
 }, 5000);
 
 
-// 添加一个本地标志，记录用户明确设置的监控状态
-let userSetMonitoring = false;
+// 当用户点击"开始/停止执行监控"按钮时，设置一个标志记录用户意图
+let userMonitoringIntent = null;  // null/true/false
+
 // --- 操作处理函数 ---
 async function handleToggleMonitor() {
     // 先验证表单数据
@@ -1400,6 +1412,8 @@ async function handleToggleMonitor() {
         return;
     }
 
+    // 用户明确设置了监控状态
+    userMonitoringIntent  = !isMonitoring;
     const endpoint = isMonitoring ? API_ENDPOINTS.stopMonitor : API_ENDPOINTS.startMonitor;
     const actionText = isMonitoring ? '停止' : '启动';
     elements.toggleMonitorBtn.disabled = true;
@@ -1417,9 +1431,6 @@ async function handleToggleMonitor() {
             method: 'POST',                
             body: JSON.stringify(configData)
         });
-
-        // 用户明确设置了监控状态
-        userSetMonitoring = !isMonitoring;
 
         showMessage(`${actionText}监控 ${data.status === 'success' ? '成功' : '失败'}: ${data.message || ''}`, 
             data.status === 'success' ? 'success' : 'error');
