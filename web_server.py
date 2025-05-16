@@ -121,10 +121,14 @@ def get_status():
         # 监控状态 - 使用独立的配置标志，不再依赖线程状态判断
         is_monitoring = config.ENABLE_MONITORING
 
+        # 添加额外日志用于调试
+        logger.debug(f"当前状态: UI监控={is_monitoring}, 自动交易={config.ENABLE_AUTO_TRADING}, 持仓监控={config.ENABLE_POSITION_MONITOR}")
+
         # 获取全局设置状态 - 明确区分自动交易和监控状态
         system_settings = {
             'isMonitoring': is_monitoring,  # 监控状态
             'enableAutoTrading': config.ENABLE_AUTO_TRADING,  # 自动交易状态
+            'positionMonitorRunning': config.ENABLE_POSITION_MONITOR,  # 增加持仓监控状态
             'allowBuy': getattr(config, 'ENABLE_ALLOW_BUY', True),
             'allowSell': getattr(config, 'ENABLE_ALLOW_SELL', True),
             'simulationMode': getattr(config, 'ENABLE_SIMULATION_MODE', False)
@@ -307,13 +311,13 @@ def save_config():
         if "allowSell" in config_data:
             setattr(config, 'ENABLE_ALLOW_SELL', bool(config_data["allowSell"]))
         if "globalAllowBuySell" in config_data:
+            old_auto_trading = config.ENABLE_AUTO_TRADING
             config.ENABLE_AUTO_TRADING = bool(config_data["globalAllowBuySell"])
+            logger.info(f"自动交易状态变更: {old_auto_trading} -> {config.ENABLE_AUTO_TRADING} (通过保存配置)")
             # 只在自动交易功能需要时启动或停止策略线程
-            # 关键：不要影响监控线程或监控状态
             if config.ENABLE_AUTO_TRADING:
-                # 如果开启自动交易且监控已启动，则启动策略线程
-                if config.ENABLE_MONITORING:
-                    trading_strategy.start_strategy_thread()
+                # 无论监控状态如何，只要自动交易开启就启动策略线程
+                trading_strategy.start_strategy_thread()
             else:
                 # 如果关闭自动交易，则停止策略线程
                 trading_strategy.stop_strategy_thread()
@@ -340,18 +344,23 @@ def save_config():
 def start_monitor():
     """启动监控"""
     try:
-        # 设置全局监控状态为开启（仅用于前端UI状态控制）
+        old_state = config.ENABLE_MONITORING
+        
+        # 确保变量类型一致，统一使用布尔值
         config.ENABLE_MONITORING = True
         
-        # position_manager线程可能已经运行，无需重新启动
-        # 这里只需确保前端数据刷新正常工作
+        # 如果状态没有发生变化，发出警告日志
+        if old_state == config.ENABLE_MONITORING:
+            logger.warning(f"UI监控状态未变化: {old_state} -> {config.ENABLE_MONITORING} (通过API)")
+        else:
+            logger.info(f"UI监控状态变更: {old_state} -> {config.ENABLE_MONITORING} (通过API)")
         
-        # 不修改自动交易状态，只启动UI数据刷新相关功能
+        # 明确返回新状态
         return jsonify({
             'status': 'success',
             'message': '监控已启动',
-            'isMonitoring': True,
-            'autoTradingEnabled': config.ENABLE_AUTO_TRADING  # 返回当前自动交易状态，不修改它
+            'isMonitoring': config.ENABLE_MONITORING,  # 明确返回新状态
+            'autoTradingEnabled': config.ENABLE_AUTO_TRADING  # 同时返回自动交易状态
         })
     except Exception as e:
         logger.error(f"启动监控时出错: {str(e)}")
@@ -364,14 +373,22 @@ def start_monitor():
 def stop_monitor():
     """停止监控"""
     try:
-        # 明确设置监控状态为关闭
+        old_state = config.ENABLE_MONITORING
+        
+        # 确保变量类型一致，统一使用布尔值
         config.ENABLE_MONITORING = False
-
+        
+        # 如果状态没有发生变化，发出警告日志
+        if old_state == config.ENABLE_MONITORING:
+            logger.warning(f"UI监控状态未变化: {old_state} -> {config.ENABLE_MONITORING} (通过API)")
+        else:
+            logger.info(f"UI监控状态变更: {old_state} -> {config.ENABLE_MONITORING} (通过API)")
         
         return jsonify({
             'status': 'success',
             'message': '监控已停止',
-            'isMonitoring': False
+            'isMonitoring': config.ENABLE_MONITORING,  # 明确返回新状态
+            'autoTradingEnabled': config.ENABLE_AUTO_TRADING  # 同时返回自动交易状态
         })
     except Exception as e:
         logger.error(f"停止监控时出错: {str(e)}")
@@ -379,7 +396,30 @@ def stop_monitor():
             'status': 'error',
             'message': f"停止监控失败: {str(e)}"
         }), 500
-
+    
+@app.route('/api/debug/status', methods=['GET'])
+def debug_status():
+    """返回详细的系统状态，用于调试"""
+    try:
+        return jsonify({
+            'status': 'success',
+            'system_status': {
+                'ENABLE_MONITORING': config.ENABLE_MONITORING,
+                'ENABLE_AUTO_TRADING': config.ENABLE_AUTO_TRADING,
+                'ENABLE_POSITION_MONITOR': config.ENABLE_POSITION_MONITOR,
+                'ENABLE_ALLOW_BUY': getattr(config, 'ENABLE_ALLOW_BUY', True),
+                'ENABLE_ALLOW_SELL': getattr(config, 'ENABLE_ALLOW_SELL', True),
+                'ENABLE_SIMULATION_MODE': getattr(config, 'ENABLE_SIMULATION_MODE', False),
+            },
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+    except Exception as e:
+        logger.error(f"获取调试状态时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"获取调试状态失败: {str(e)}"
+        }), 500
+    
 @app.route('/api/logs/clear', methods=['POST'])
 def clear_logs():
     """清空日志"""

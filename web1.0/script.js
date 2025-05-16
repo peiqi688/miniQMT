@@ -636,26 +636,52 @@ document.addEventListener('DOMContentLoaded', () => {
         
         window._lastStatusData = {...statusData};
         console.log("Updating status display - data changed");
-
+    
         if (!statusData) return;
-
+    
         // 账户信息
         elements.accountId.textContent = statusData.account?.id ?? '--';
         elements.availableBalance.textContent = statusData.account?.availableBalance?.toFixed(2) ?? '--';
         elements.maxHoldingValue.textContent = statusData.account?.maxHoldingValue?.toFixed(2) ?? '--';
         elements.totalAssets.textContent = statusData.account?.totalAssets?.toFixed(2) ?? '--';
         elements.lastUpdateTimestamp.textContent = statusData.account?.timestamp ?? new Date().toLocaleString('zh-CN');
-    
-        // 监控状态 - 注意区分监控UI状态和自动交易状态
+        
+        // 关键修改：更精确地处理监控状态、用户意图和自动交易状态
         const backendMonitoring = statusData.isMonitoring ?? false;
         const backendAutoTrading = statusData.settings?.enableAutoTrading ?? false;
-
+    
         // 更新自动交易状态
         isAutoTradingEnabled = backendAutoTrading;
         elements.globalAllowBuySell.checked = isAutoTradingEnabled;
-        isMonitoring = backendMonitoring;
-
-        // 根据监控状态更新UI
+        
+        // 核心逻辑：检查用户是否有明确点击意图
+        if (userMonitoringIntent !== null) {
+            // 用户通过按钮明确表达了监控意图
+            console.log(`使用用户意图设置监控状态: ${userMonitoringIntent}`);
+            isMonitoring = userMonitoringIntent;
+            
+            // 检查状态是否一致
+            if (isMonitoring !== backendMonitoring) {
+                console.warn(`监控状态不一致: 前端=${isMonitoring}, 后端=${backendMonitoring}, 尝试同步`);
+                // 可以选择发送额外同步请求
+                const endpoint = isMonitoring ? API_ENDPOINTS.startMonitor : API_ENDPOINTS.stopMonitor;
+                apiRequest(endpoint, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ isMonitoring: isMonitoring }) 
+                }).catch(err => console.error("同步监控状态失败:", err));
+            }
+            
+            // 已使用用户意图，重置它
+            userMonitoringIntent = null;
+        } else {
+            // 没有用户意图，使用后端状态
+            if (isMonitoring !== backendMonitoring) {
+                console.log(`监控状态变化: ${isMonitoring} -> ${backendMonitoring} (从后端同步)`);
+                isMonitoring = backendMonitoring;
+            }
+        }
+    
+        // 根据最终确定的监控状态更新UI
         if (isMonitoring) {
             elements.statusIndicator.textContent = '运行中';
             elements.statusIndicator.className = 'text-lg font-bold text-green-600';
@@ -1414,7 +1440,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 用户明确设置了监控UI状态
+        // 先设置本地用户意图状态
+        const newMonitoringState = !isMonitoring;
+        userMonitoringIntent = newMonitoringState; // 记录用户意图
+        
         const endpoint = isMonitoring ? API_ENDPOINTS.stopMonitor : API_ENDPOINTS.startMonitor;
         const actionText = isMonitoring ? '停止' : '启动';
         elements.toggleMonitorBtn.disabled = true;
@@ -1422,10 +1451,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // 构建仅包含监控状态的数据
-            // 注意：不包含自动交易状态
             const monitoringData = {
-                isMonitoring:  !isMonitoring
-                // 不包含globalAllowBuySell
+                isMonitoring: newMonitoringState
             };
             
             const data = await apiRequest(endpoint, { 
@@ -1433,12 +1460,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(monitoringData)
             });
 
-            showMessage(`${actionText}监控 ${data.status === 'success' ? '成功' : '失败'}: ${data.message || ''}`, 
-                data.status === 'success' ? 'success' : 'error');
+            if (data.status === 'success') {
+                // 直接更新本地状态，不等待fetchStatus
+                isMonitoring = newMonitoringState;
                 
+                // 更新UI
+                if (isMonitoring) {
+                    elements.statusIndicator.textContent = '运行中';
+                    elements.statusIndicator.className = 'text-lg font-bold text-green-600';
+                    elements.toggleMonitorBtn.textContent = '停止执行监控';
+                    elements.toggleMonitorBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                    elements.toggleMonitorBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                    startPolling(); // 开始轮询数据
+                } else {
+                    elements.statusIndicator.textContent = '未运行';
+                    elements.statusIndicator.className = 'text-lg font-bold text-red-600';
+                    elements.toggleMonitorBtn.textContent = '开始执行监控';
+                    elements.toggleMonitorBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    elements.toggleMonitorBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    stopPolling(); // 停止轮询数据
+                }
+                
+                showMessage(`${actionText}监控成功: ${data.message || ''}（注意：此操作不影响自动交易）`, 'success');
+            } else {
+                showMessage(`${actionText}监控失败: ${data.message || '未知错误'}`, 'error');
+                // 恢复用户意图，因为操作失败
+                userMonitoringIntent = null;
+            }
+            
+            // 仍然调用fetchStatus以获取其他更新，但不让它覆盖监控状态
             await fetchStatus();
         } catch (error) {
             showMessage(`${actionText}监控失败: ${error.message}`, 'error');
+            // 恢复用户意图，因为操作失败
+            userMonitoringIntent = null;
             await fetchStatus();
         } finally {
             elements.toggleMonitorBtn.disabled = false;
