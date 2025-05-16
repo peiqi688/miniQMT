@@ -31,7 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const ACTIVE_POLLING_INTERVAL = 3000; // 活跃状态：3秒
     const INACTIVE_POLLING_INTERVAL = 10000; // 非活跃状态：10秒
     let pollingIntervalId = null;
-    let isMonitoring = false; // 监控状态
+    let isMonitoring = false; // 前端监控状态，仅控制UI数据刷新
+    let isAutoTradingEnabled = false; // 自动交易状态，由全局监控总开关控制
     let isSimulationMode = false; // 模拟交易模式
     let isPageActive = true; // 页面活跃状态
     
@@ -365,10 +366,11 @@ document.addEventListener('DOMContentLoaded', () => {
             throttledSyncParameter('simulationMode', event.target.checked);
         });
 
+        // 全局监控总开关 - 自动交易控制
         elements.globalAllowBuySell.addEventListener('change', (event) => {
-            // 明确：不影响监控状态
-            // 只发送自动交易状态更新
+            // 明确：这里只影响自动交易状态，不影响监控UI状态
             const autoTradingEnabled = event.target.checked;
+            isAutoTradingEnabled = autoTradingEnabled; // 更新本地状态
             
             apiRequest(API_ENDPOINTS.saveConfig, {
                 method: 'POST',
@@ -381,8 +383,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("更新自动交易状态失败:", error);
                 // 可选：回滚UI状态
                 event.target.checked = !autoTradingEnabled;
+                isAutoTradingEnabled = !autoTradingEnabled;
             });
         });
+        
         // 其他开关类参数实时同步
         elements.firstProfitSellEnabled.addEventListener('change', (event) => {
             throttledSyncParameter('firstProfitSellEnabled', event.target.checked);
@@ -642,23 +646,16 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.totalAssets.textContent = statusData.account?.totalAssets?.toFixed(2) ?? '--';
         elements.lastUpdateTimestamp.textContent = statusData.account?.timestamp ?? new Date().toLocaleString('zh-CN');
     
-        // 监控状态
+        // 监控状态 - 注意区分监控UI状态和自动交易状态
         const backendMonitoring = statusData.isMonitoring ?? false;
+        const backendAutoTrading = statusData.settings?.enableAutoTrading ?? false;
 
-        // 核心逻辑：当用户有明确意图时，优先使用用户的选择
-        if (userMonitoringIntent !== null) {
-            isMonitoring = userMonitoringIntent;
-            
-            // 如果后端状态与用户意图不一致，可选择再次同步
-            if (backendMonitoring !== userMonitoringIntent) {
-                console.log(`监控状态不一致：用户意图=${userMonitoringIntent}，后端状态=${backendMonitoring}`);
-                // 可选：再次发送请求同步状态
-            }
-        } else {
-            // 没有用户意图时，使用后端状态
-            isMonitoring = backendMonitoring;
-        }
+        // 更新自动交易状态
+        isAutoTradingEnabled = backendAutoTrading;
+        elements.globalAllowBuySell.checked = isAutoTradingEnabled;
+        isMonitoring = backendMonitoring;
 
+        // 根据监控状态更新UI
         if (isMonitoring) {
             elements.statusIndicator.textContent = '运行中';
             elements.statusIndicator.className = 'text-lg font-bold text-green-600';
@@ -685,1248 +682,1253 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.allowBuy.checked = statusData.settings.allowBuy || false;
             elements.allowSell.checked = statusData.settings.allowSell || false;
             
-            // 同步全局监控开关，保持界面和后端一致
-            elements.globalAllowBuySell.checked = statusData.settings.enableAutoTrading || false;
-         
             // 更新模拟交易模式UI
             updateSimulationModeUI();
         }
     }
 
-// 轻量级账户信息更新，用于SSE
-function updateQuickAccountInfo(accountInfo) {
-if (accountInfo.available !== undefined) {
-    elements.availableBalance.textContent = parseFloat(accountInfo.available).toFixed(2);
-    // 添加闪烁效果
-    elements.availableBalance.classList.add('highlight-update');
-    setTimeout(() => {
-        elements.availableBalance.classList.remove('highlight-update');
-    }, 1000);
-}
+    // 轻量级账户信息更新，用于SSE
+    function updateQuickAccountInfo(accountInfo) {
+        if (accountInfo.available !== undefined) {
+            elements.availableBalance.textContent = parseFloat(accountInfo.available).toFixed(2);
+            // 添加闪烁效果
+            elements.availableBalance.classList.add('highlight-update');
+            setTimeout(() => {
+                elements.availableBalance.classList.remove('highlight-update');
+            }, 1000);
+        }
 
-if (accountInfo.market_value !== undefined) {
-    elements.maxHoldingValue.textContent = parseFloat(accountInfo.market_value).toFixed(2);
-    elements.maxHoldingValue.classList.add('highlight-update');
-    setTimeout(() => {
-        elements.maxHoldingValue.classList.remove('highlight-update');
-    }, 1000);
-}
+        if (accountInfo.market_value !== undefined) {
+            elements.maxHoldingValue.textContent = parseFloat(accountInfo.market_value).toFixed(2);
+            elements.maxHoldingValue.classList.add('highlight-update');
+            setTimeout(() => {
+                elements.maxHoldingValue.classList.remove('highlight-update');
+            }, 1000);
+        }
 
-if (accountInfo.total_asset !== undefined) {
-    elements.totalAssets.textContent = parseFloat(accountInfo.total_asset).toFixed(2);
-    elements.totalAssets.classList.add('highlight-update');
-    setTimeout(() => {
-        elements.totalAssets.classList.remove('highlight-update');
-    }, 1000);
-}
-}
-
-// 更新监控状态UI，用于SSE
-function updateMonitoringInfo(monitoringInfo) {
-if (!monitoringInfo) return;
-
-// 更新全局开关状态
-if (monitoringInfo.isMonitoring !== undefined) {
-    const wasMonitoring = isMonitoring;
-    isMonitoring = monitoringInfo.isMonitoring;
-    
-    // 只有状态有变化时才更新UI
-    if (wasMonitoring !== isMonitoring) {
-        if (isMonitoring) {
-            elements.statusIndicator.textContent = '运行中';
-            elements.statusIndicator.className = 'text-lg font-bold text-green-600';
-            elements.toggleMonitorBtn.textContent = '停止执行监控';
-            elements.toggleMonitorBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-            elements.toggleMonitorBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-            startPolling(); // 开始轮询数据
-        } else {
-            elements.statusIndicator.textContent = '未运行';
-            elements.statusIndicator.className = 'text-lg font-bold text-red-600';
-            elements.toggleMonitorBtn.textContent = '开始执行监控';
-            elements.toggleMonitorBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-            elements.toggleMonitorBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-            stopPolling(); // 停止轮询数据
+        if (accountInfo.total_asset !== undefined) {
+            elements.totalAssets.textContent = parseFloat(accountInfo.total_asset).toFixed(2);
+            elements.totalAssets.classList.add('highlight-update');
+            setTimeout(() => {
+                elements.totalAssets.classList.remove('highlight-update');
+            }, 1000);
         }
     }
-}
 
-// 更新允许买入/卖出状态
-if (monitoringInfo.allowBuy !== undefined) {
-    elements.allowBuy.checked = monitoringInfo.allowBuy;
-}
+    // 更新监控状态UI，用于SSE
+    function updateMonitoringInfo(monitoringInfo) {
+        if (!monitoringInfo) return;
 
-if (monitoringInfo.allowSell !== undefined) {
-    elements.allowSell.checked = monitoringInfo.allowSell;
-}
-
-// 更新模拟交易模式
-if (monitoringInfo.simulationMode !== undefined) {
-    const wasSimulationMode = isSimulationMode;
-    isSimulationMode = monitoringInfo.simulationMode;
-    elements.simulationMode.checked = isSimulationMode;
-    
-    // 只有状态有变化时才更新UI
-    if (wasSimulationMode !== isSimulationMode) {
-        updateSimulationModeUI();
-    }
-}
-}
-
-
-// 显示股票选择对话框
-function showStockSelectDialog(title, content, confirmCallback) {
-    const dialog = document.getElementById('stockSelectDialog');
-    const dialogTitle = document.getElementById('dialogTitle');
-    const dialogContent = document.getElementById('dialogContent');
-    const dialogConfirmBtn = document.getElementById('dialogConfirmBtn');
-    const dialogCancelBtn = document.getElementById('dialogCancelBtn');
-    
-    // 设置对话框标题和内容
-    dialogTitle.textContent = title;
-    dialogContent.innerHTML = content;
-    
-    // 设置确认按钮事件
-    dialogConfirmBtn.onclick = () => {
-        confirmCallback();
-        dialog.classList.add('hidden');
-    };
-    
-    // 设置取消按钮事件
-    dialogCancelBtn.onclick = () => {
-        dialog.classList.add('hidden');
-    };
-    
-    // 显示对话框
-    dialog.classList.remove('hidden');
-}
-
-// 处理从备选池随机买入（修改为可编辑版本）
-async function handleRandomPoolBuy(quantity) {
-    try {
-        // 从后端获取备选池股票列表
-        const response = await apiRequest(API_ENDPOINTS.getStockPool);
-        
-        if (response.status === 'success' && Array.isArray(response.data)) {
-            const stocks = response.data;
+        // 更新全局开关状态
+        if (monitoringInfo.isMonitoring !== undefined) {
+            const wasMonitoring = isMonitoring;
+            isMonitoring = monitoringInfo.isMonitoring;
             
-            // 构建对话框内容 - 使用可编辑的文本框而非只读显示
-            const content = `
-                <p class="mb-2">以下股票将被用于随机买入（可编辑）：</p>
-                <textarea id="randomPoolStockInput" class="w-full border rounded p-2 h-40">${stocks.join('\n')}</textarea>
-            `;
-            
-            // 显示对话框
-            showStockSelectDialog(
-                '确认随机买入股票',
-                content,
-                () => {
-                    // 获取用户可能编辑过的股票代码
-                    const input = document.getElementById('randomPoolStockInput').value;
-                    const editedStocks = input.split('\n')
-                        .map(s => s.trim())
-                        .filter(s => s.length > 0);
-                    
-                    if (editedStocks.length === 0) {
-                        showMessage('请输入有效的股票代码', 'warning');
-                        return;
-                    }
-                    
-                    // 确认后执行买入，使用编辑后的股票列表
-                    executeBuyAction('random_pool', quantity, editedStocks);
+            // 只有状态有变化时才更新UI
+            if (wasMonitoring !== isMonitoring) {
+                if (isMonitoring) {
+                    elements.statusIndicator.textContent = '运行中';
+                    elements.statusIndicator.className = 'text-lg font-bold text-green-600';
+                    elements.toggleMonitorBtn.textContent = '停止执行监控';
+                    elements.toggleMonitorBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                    elements.toggleMonitorBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                    startPolling(); // 开始轮询数据
+                } else {
+                    elements.statusIndicator.textContent = '未运行';
+                    elements.statusIndicator.className = 'text-lg font-bold text-red-600';
+                    elements.toggleMonitorBtn.textContent = '开始执行监控';
+                    elements.toggleMonitorBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    elements.toggleMonitorBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    stopPolling(); // 停止轮询数据
                 }
-            );
-        } else {
-            throw new Error(response.message || '获取备选池股票失败');
+            }
         }
-    } catch (error) {
-        showMessage(`获取备选池股票失败: ${error.message}`, 'error');
-    }
-}
 
-// 处理自定义股票买入
-function handleCustomStockBuy(quantity) {
-    // 构建对话框内容
-    const content = `
-        <p class="mb-2">请输入要买入的股票代码（一行一个）：</p>
-        <textarea id="customStockInput" class="w-full border rounded p-2 h-40"></textarea>
-    `;
-    
-    // 显示对话框
-    showStockSelectDialog(
-        '自定义股票买入',
-        content,
-        () => {
-            // 获取用户输入的股票代码
-            const input = document.getElementById('customStockInput').value;
-            const stocks = input.split('\n')
-                .map(s => s.trim())
-                .filter(s => s.length > 0);
+        // 明确区分自动交易状态
+        if (monitoringInfo.autoTradingEnabled !== undefined) {
+            const wasAutoTrading = isAutoTradingEnabled;
+            isAutoTradingEnabled = monitoringInfo.autoTradingEnabled;
             
-            if (stocks.length === 0) {
-                showMessage('请输入有效的股票代码', 'warning');
+            // 只有状态有变化时才更新UI
+            if (wasAutoTrading !== isAutoTradingEnabled) {
+                elements.globalAllowBuySell.checked = isAutoTradingEnabled;
+            }
+        }
+
+        // 更新允许买入/卖出状态
+        if (monitoringInfo.allowBuy !== undefined) {
+            elements.allowBuy.checked = monitoringInfo.allowBuy;
+        }
+
+        if (monitoringInfo.allowSell !== undefined) {
+            elements.allowSell.checked = monitoringInfo.allowSell;
+        }
+
+        // 更新模拟交易模式
+        if (monitoringInfo.simulationMode !== undefined) {
+            const wasSimulationMode = isSimulationMode;
+            isSimulationMode = monitoringInfo.simulationMode;
+            elements.simulationMode.checked = isSimulationMode;
+            
+            // 只有状态有变化时才更新UI
+            if (wasSimulationMode !== isSimulationMode) {
+                updateSimulationModeUI();
+            }
+        }
+    }
+
+    // 显示股票选择对话框
+    function showStockSelectDialog(title, content, confirmCallback) {
+        const dialog = document.getElementById('stockSelectDialog');
+        const dialogTitle = document.getElementById('dialogTitle');
+        const dialogContent = document.getElementById('dialogContent');
+        const dialogConfirmBtn = document.getElementById('dialogConfirmBtn');
+        const dialogCancelBtn = document.getElementById('dialogCancelBtn');
+        
+        // 设置对话框标题和内容
+        dialogTitle.textContent = title;
+        dialogContent.innerHTML = content;
+        
+        // 设置确认按钮事件
+        dialogConfirmBtn.onclick = () => {
+            confirmCallback();
+            dialog.classList.add('hidden');
+        };
+        
+        // 设置取消按钮事件
+        dialogCancelBtn.onclick = () => {
+            dialog.classList.add('hidden');
+        };
+        
+        // 显示对话框
+        dialog.classList.remove('hidden');
+    }
+
+    // 处理从备选池随机买入（修改为可编辑版本）
+    async function handleRandomPoolBuy(quantity) {
+        try {
+            // 从后端获取备选池股票列表
+            const response = await apiRequest(API_ENDPOINTS.getStockPool);
+            
+            if (response.status === 'success' && Array.isArray(response.data)) {
+                const stocks = response.data;
+                
+                // 构建对话框内容 - 使用可编辑的文本框而非只读显示
+                const content = `
+                    <p class="mb-2">以下股票将被用于随机买入（可编辑）：</p>
+                    <textarea id="randomPoolStockInput" class="w-full border rounded p-2 h-40">${stocks.join('\n')}</textarea>
+                `;
+                
+                // 显示对话框
+                showStockSelectDialog(
+                    '确认随机买入股票',
+                    content,
+                    () => {
+                        // 获取用户可能编辑过的股票代码
+                        const input = document.getElementById('randomPoolStockInput').value;
+                        const editedStocks = input.split('\n')
+                            .map(s => s.trim())
+                            .filter(s => s.length > 0);
+                        
+                        if (editedStocks.length === 0) {
+                            showMessage('请输入有效的股票代码', 'warning');
+                            return;
+                        }
+                        
+                        // 确认后执行买入，使用编辑后的股票列表
+                        executeBuyAction('random_pool', quantity, editedStocks);
+                    }
+                );
+            } else {
+                throw new Error(response.message || '获取备选池股票失败');
+            }
+        } catch (error) {
+            showMessage(`获取备选池股票失败: ${error.message}`, 'error');
+        }
+    }
+
+    // 处理自定义股票买入
+    function handleCustomStockBuy(quantity) {
+        // 构建对话框内容
+        const content = `
+            <p class="mb-2">请输入要买入的股票代码（一行一个）：</p>
+            <textarea id="customStockInput" class="w-full border rounded p-2 h-40"></textarea>
+        `;
+        
+        // 显示对话框
+        showStockSelectDialog(
+            '自定义股票买入',
+            content,
+            () => {
+                // 获取用户输入的股票代码
+                const input = document.getElementById('customStockInput').value;
+                const stocks = input.split('\n')
+                    .map(s => s.trim())
+                    .filter(s => s.length > 0);
+                
+                if (stocks.length === 0) {
+                    showMessage('请输入有效的股票代码', 'warning');
+                    return;
+                }
+                
+                // 执行买入
+                executeBuyAction('custom_stock', quantity, stocks);
+            }
+        );
+    }
+
+    // 执行买入动作
+    async function executeBuyAction(strategy, quantity, stocks) {
+        elements.executeBuyBtn.disabled = true;
+        showMessage(`执行买入 (${strategy}, ${quantity}只)...`, 'loading', 0);
+        
+        try {
+            const buyData = {
+                strategy: strategy,
+                quantity: quantity,
+                stocks: stocks,
+                ...getConfigData() // 包含所有配置参数
+            };
+            
+            const data = await apiRequest(API_ENDPOINTS.executeBuy, {
+                method: 'POST',
+                body: JSON.stringify(buyData),
+            });
+            
+            if (data.status === 'success') {
+                showMessage(data.message || "买入指令已发送", 'success');
+                
+                // 重置请求锁定状态
+                requestLocks.holdings = false;
+                requestLocks.logs = false;
+                
+                // 刷新相关数据
+                await fetchHoldings();
+                await fetchLogs();
+                await fetchStatus(); // 更新余额等
+            } else {
+                showMessage(data.message || "买入指令发送失败", 'error');
+            }
+        } catch (error) {
+            // 错误已由apiRequest处理
+        } finally {
+            elements.executeBuyBtn.disabled = false;
+            // 3秒后清除消息
+            setTimeout(() => {
+                elements.messageArea.innerHTML = '';
+            }, 3000);
+        }
+    }
+
+    // 判断持仓数据是否需要更新
+    function shouldUpdateRow(oldData, newData) {
+        // 检查关键字段是否有变化
+        const keysToCheck = ['current_price', 'market_value', 'profit_ratio', 'available', 'volume', 'change_percentage'];
+        return keysToCheck.some(key => {
+            // 对于数值，考虑舍入误差
+            if (typeof oldData[key] === 'number' && typeof newData[key] === 'number') {
+                return Math.abs(oldData[key] - newData[key]) > 0.001;
+            }
+            return oldData[key] !== newData[key];
+        });
+    }
+
+    // 更新现有持仓行
+    function updateExistingRow(row, stock) {
+        // 更新各个单元格的值
+        const cells = row.querySelectorAll('td');
+
+        // 确保保留复选框
+
+        // 更新基本信息
+        cells[1].textContent = stock.stock_code || '--';
+        cells[2].textContent = stock.stock_name || stock.name || '--';
+
+        // 更新涨跌幅，包括类名
+        const changePercentage = parseFloat(stock.change_percentage || 0);
+        cells[3].textContent = `${changePercentage.toFixed(2)}%`;
+        cells[3].className = `border p-2 ${changePercentage >= 0 ? 'text-red-600' : 'text-green-600'}`;
+
+        // 更新价格、成本和盈亏
+        cells[4].textContent = parseFloat(stock.current_price || 0).toFixed(2);
+        cells[5].textContent = parseFloat(stock.cost_price || 0).toFixed(2);
+
+        const profitRatio = parseFloat(stock.profit_ratio || 0);
+        cells[6].textContent = `${profitRatio.toFixed(2)}%`;
+        cells[6].className = `border p-2 ${profitRatio >= 0 ? 'text-red-600' : 'text-green-600'}`;
+
+        // 更新持仓信息
+        cells[7].textContent = stock.market_value || '--';
+        cells[8].textContent = stock.available || 0;
+        cells[9].textContent = stock.volume || 0;
+
+        // 更新止盈标志
+        cells[10].innerHTML = `<input type="checkbox" ${stock.profit_triggered ? 'checked' : ''} disabled>`;
+
+        // 更新其他数据
+        cells[11].textContent = parseFloat(stock.highest_price || 0).toFixed(2);
+        cells[12].textContent = parseFloat(stock.stop_loss_price || 0).toFixed(2);
+        cells[13].textContent = (stock.open_date || '').split(' ')[0];
+        cells[14].textContent = parseFloat(stock.base_cost_price || stock.cost_price || 0).toFixed(2);
+
+        // 高亮闪烁更新的单元格
+        cells[4].classList.add('highlight-update');
+        setTimeout(() => {
+            cells[4].classList.remove('highlight-update');
+        }, 1000);
+    }
+
+    // 创建新的持仓行
+    function createStockRow(stock) {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50 even:bg-gray-100';
+        row.dataset.stockCode = stock.stock_code; // 添加标识属性
+
+        // 计算关键值
+        const changePercentage = parseFloat(stock.change_percentage || 0);
+        const profitRatio = parseFloat(stock.profit_ratio || 0);
+
+        // 构建行内容
+        row.innerHTML = `
+            <td class="border p-2"><input type="checkbox" class="holding-checkbox" data-id="${stock.id || stock.stock_code}"></td>
+            <td class="border p-2">${stock.stock_code || '--'}</td>
+            <td class="border p-2">${stock.stock_name || stock.name || '--'}</td>                
+            <td class="border p-2 ${changePercentage >= 0 ? 'text-red-600' : 'text-green-600'}">${changePercentage.toFixed(2)}%</td>
+            <td class="border p-2">${parseFloat(stock.current_price || 0).toFixed(2)}</td>
+            <td class="border p-2">${parseFloat(stock.cost_price || 0).toFixed(2)}</td>
+            <td class="border p-2 ${profitRatio >= 0 ? 'text-red-600' : 'text-green-600'}">${profitRatio.toFixed(2)}%</td>
+            <td class="border p-2">${stock.market_value || '--'}</td>
+            <td class="border p-2">${stock.available || 0}</td>       
+            <td class="border p-2">${stock.volume || 0}</td>         
+            <td class="border p-2 text-center"><input type="checkbox" ${stock.profit_triggered ? 'checked' : ''} disabled></td>
+            <td class="border p-2">${parseFloat(stock.highest_price || 0).toFixed(2)}</td>                
+            <td class="border p-2">${parseFloat(stock.stop_loss_price || 0).toFixed(2)}</td> 
+            <td class="border p-2 whitespace-nowrap">${(stock.open_date || '').split(' ')[0]}</td>                               
+            <td class="border p-2">${parseFloat(stock.base_cost_price || stock.cost_price || 0).toFixed(2)}</td>
+        `;
+
+        return row;
+    }
+
+    // 更新持仓表格（增量更新版本）
+    function updateHoldingsTable(holdings) {
+        // 检查数据是否实际发生变化
+        const holdingsStr = JSON.stringify(holdings);
+        if (window._lastHoldingsStr === holdingsStr) {
+            console.log("Holdings data unchanged, skipping update");
+            return;
+        }
+        window._lastHoldingsStr = holdingsStr;
+
+        console.log("Updating holdings table - data changed");
+        elements.holdingsLoading.classList.add('hidden');
+        elements.holdingsError.classList.add('hidden');
+
+        if (!Array.isArray(holdings) || holdings.length === 0) {
+            elements.holdingsTableBody.innerHTML = '<tr><td colspan="15" class="text-center p-4 text-gray-500">无持仓数据</td></tr>';
+            return;
+        }
+
+        // 获取现有行
+        const existingRows = {};
+        const existingRowElements = elements.holdingsTableBody.querySelectorAll('tr[data-stock-code]');
+        existingRowElements.forEach(row => {
+            existingRows[row.dataset.stockCode] = row;
+        });
+
+        // 临时文档片段，减少DOM重绘
+        const fragment = document.createDocumentFragment();
+
+        // 记录处理过的股票代码
+        const processedStocks = new Set();
+
+        // 数据变化标记
+        let hasChanges = false;
+
+        holdings.forEach(stock => {
+            processedStocks.add(stock.stock_code);
+            
+            // 检查是否已存在此股票行
+            if (existingRows[stock.stock_code]) {
+                // 获取现有数据
+                const oldData = existingRows[stock.stock_code].data || {};
+                
+                // 检查是否需要更新
+                if (shouldUpdateRow(oldData, stock)) {
+                    updateExistingRow(existingRows[stock.stock_code], stock);
+                    hasChanges = true;
+                }
+                
+                // 更新存储的数据
+                existingRows[stock.stock_code].data = {...stock};
+            } else {
+                // 创建新行
+                const row = createStockRow(stock);
+                // 存储数据引用
+                row.data = {...stock};
+                fragment.appendChild(row);
+                hasChanges = true;
+            }
+        });
+
+        // 添加新行
+        if (fragment.childNodes.length > 0) {
+            elements.holdingsTableBody.appendChild(fragment);
+        }
+
+        // 移除不再存在的行
+        let hasRemovals = false;
+        existingRowElements.forEach(row => {
+            if (!processedStocks.has(row.dataset.stockCode)) {
+                row.remove();
+                hasRemovals = true;
+            }
+        });
+
+        // 只有发生变化时才添加复选框监听器
+        if (hasChanges || hasRemovals) {
+            addHoldingCheckboxListeners();
+        }
+    }
+
+    function addHoldingCheckboxListeners() {
+        const checkboxes = elements.holdingsTableBody.querySelectorAll('.holding-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                // 检查是否所有复选框都被选中
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                elements.selectAllHoldings.checked = allChecked;
+            });
+        });
+    }
+
+    function updateLogs(logEntries) {
+        // 检查数据是否实际发生变化
+        const logsStr = JSON.stringify(logEntries);
+        if (window._lastLogsStr === logsStr) {
+            console.log("Logs data unchanged, skipping update");
+            return;
+        }
+        window._lastLogsStr = logsStr;
+
+        // 记住当前滚动位置和是否在底部
+        const isAtBottom = elements.orderLog.scrollTop + elements.orderLog.clientHeight >= elements.orderLog.scrollHeight - 10;
+        const currentScrollTop = elements.orderLog.scrollTop;
+
+        elements.logLoading.classList.add('hidden');
+        elements.logError.classList.add('hidden');
+
+        // 格式化日志内容
+        if (Array.isArray(logEntries)) {
+            // 假设每个 logEntry 是一个对象，我们需要将其转换为字符串
+            const formattedLogs = logEntries.map(entry => {
+                // 根据你的交易记录对象结构调整格式化方式
+                if (typeof entry === 'object' && entry !== null) {
+                    // 使用 entry.trade_time, entry.trade_type,  而不是  entry.time, entry.action
+                    //  并且没有 stock_name,  trade_type  需要转换一下
+                    const action = entry.trade_type === 'BUY' ? '买入' : (entry.trade_type === 'SELL' ? '卖出' : entry.trade_type);
+                    return `时间: ${entry.trade_time || ''}, 代码: ${entry.stock_code || ''}, 名称: , 操作: ${action || ''}, 价格: ${entry.price || ''}, 数量: ${entry.volume || ''}, 状态: `;
+
+                    //  如果后端返回了 stock_name  字段，  把上面 return 语句中的  名称: ,  改成  名称: ${entry.stock_name || ''},
+
+                } else {
+                    return String(entry); // 如果不是对象，直接转换为字符串
+                }
+            });
+            elements.orderLog.value = formattedLogs.join('\n');
+            
+            // 标记数据已更新
+            console.log("Logs updated with new data");
+        } else {
+            elements.orderLog.value = "无可识别的日志数据";
+            console.error("未知的日志数据格式:", logEntries);
+        }
+
+        // 只有当之前在底部时，才自动滚动到底部
+        if (isAtBottom) {
+            setTimeout(() => {
+                elements.orderLog.scrollTop = elements.orderLog.scrollHeight;
+            }, 10);
+        } else {
+            // 否则保持原来的滚动位置
+            setTimeout(() => {
+                elements.orderLog.scrollTop = currentScrollTop;
+            }, 10);
+        }
+    }
+
+    // --- 数据获取函数 ---
+    async function fetchConfig() {
+        try {
+            const data = await apiRequest(API_ENDPOINTS.getConfig);
+            if (data.status === 'success') {
+                updateConfigForm(data.data);
+                
+                // 保存参数范围
+                if (data.ranges) {
+                    paramRanges = data.ranges;
+                    // 添加参数验证监听器
+                    addParameterValidationListeners();
+                }
+            } else {
+                showMessage("加载配置失败: " + (data.message || "未知错误"), 'error');
+            }
+        } catch (error) {
+            showMessage("加载配置失败", 'error');
+        }
+    }
+
+    async function fetchStatus() {
+        // 如果已经有请求在进行中，则跳过
+        if (requestLocks.status) {
+            console.log('Status request already in progress, skipping');
+            return;
+        }
+
+        // 最小刷新间隔检查 - 3秒
+        const now = Date.now();
+        if (now - lastDataUpdateTimestamps.status < 3000) {
+            console.log('Status data recently updated, skipping');
+            return;
+        }
+
+        // 标记请求开始
+        requestLocks.status = true;
+
+        try {
+            const data = await apiRequest(API_ENDPOINTS.getStatus);
+            if (data.status === 'success') {
+                updateStatusDisplay(data);
+                lastDataUpdateTimestamps.status = Date.now();
+            } else {
+                showMessage("加载状态信息失败: " + (data.message || "未知错误"), 'error');
+                updateStatusDisplay({ isMonitoring: false, account: {} });
+            }
+        } catch (error) {
+            showMessage("加载状态信息失败", 'error');
+            updateStatusDisplay({ isMonitoring: false, account: {} });
+        } finally {
+            // 释放请求锁定，添加小延迟避免立即重复请求
+            setTimeout(() => {
+                requestLocks.status = false;
+            }, 1000);
+        }
+    }
+
+    async function fetchHoldings() {
+        // 如果已经有请求在进行中，则跳过
+        if (requestLocks.holdings) {
+            console.log('Holdings request already in progress, skipping');
+            return;
+        }
+
+        // 最小刷新间隔检查 - 3秒
+        const now = Date.now();
+        if (now - lastDataUpdateTimestamps.holdings < 3000) {
+            console.log('Holdings data recently updated, skipping');
+            return;
+        }
+
+        // 标记请求开始
+        requestLocks.holdings = true;
+
+        // 使用延迟显示加载状态，避免短暂操作造成闪烁
+        let loadingTimer = null;
+
+        // 仅在加载时间超过300ms时才显示加载提示
+        if (!elements.holdingsLoading.classList.contains('shown')) {
+            loadingTimer = setTimeout(() => {
+                elements.holdingsLoading.classList.remove('hidden');
+                elements.holdingsLoading.classList.add('shown');
+            }, 300);
+        }
+
+        try {            
+            const data = await apiRequest(API_ENDPOINTS.getPositionsAll);
+            
+            // 取消加载提示定时器
+            if (loadingTimer) clearTimeout(loadingTimer);
+            
+            // 检查版本是否变化
+            if (data.data_version && data.data_version <= currentDataVersions.holdings) {
+                console.log('Holdings data version unchanged, skipping update');
+                elements.holdingsLoading.classList.add('hidden');
+                elements.holdingsLoading.classList.remove('shown');
                 return;
             }
             
-            // 执行买入
-            executeBuyAction('custom_stock', quantity, stocks);
+            // 更新版本号
+            if (data.data_version) {
+                currentDataVersions.holdings = data.data_version;
+            }
+            
+            if (data.status === 'success' && Array.isArray(data.data)) {
+                updateHoldingsTable(data.data);
+                lastDataUpdateTimestamps.holdings = Date.now();
+            } else {
+                throw new Error(data.message || '数据格式错误');
+            }
+            
+            // 短暂延迟后隐藏加载提示
+            setTimeout(() => {
+                elements.holdingsLoading.classList.add('hidden');
+                elements.holdingsLoading.classList.remove('shown');
+            }, 300);
+        } catch (error) {
+            // 取消加载提示定时器
+            if (loadingTimer) clearTimeout(loadingTimer);
+            
+            elements.holdingsLoading.classList.add('hidden');
+            elements.holdingsLoading.classList.remove('shown');
+            
+            // 显示错误信息
+            elements.holdingsError.classList.remove('hidden');
+            elements.holdingsError.textContent = `加载失败: ${error.message}`;
+            
+            // 5秒后自动隐藏错误信息
+            setTimeout(() => {
+                elements.holdingsError.classList.add('hidden');
+            }, 5000);
+            
+            showMessage("加载持仓数据失败", 'error');
+        } finally {
+            // 释放请求锁定，添加小延迟避免立即重复请求
+            setTimeout(() => {
+                requestLocks.holdings = false;
+            }, 1000);
         }
-    );
-}
+    }
 
-// 执行买入动作
-async function executeBuyAction(strategy, quantity, stocks) {
-    elements.executeBuyBtn.disabled = true;
-    showMessage(`执行买入 (${strategy}, ${quantity}只)...`, 'loading', 0);
-    
-    try {
-        const buyData = {
-            strategy: strategy,
-            quantity: quantity,
-            stocks: stocks,
-            ...getConfigData() // 包含所有配置参数
+    async function fetchLogs() {  
+        // 如果已经有请求在进行中，则跳过
+        if (requestLocks.logs) {
+            console.log('Logs request already in progress, skipping');
+            return;
+        }
+
+        // 最小刷新间隔检查 - 3秒
+        const now = Date.now();
+        if (now - lastDataUpdateTimestamps.logs < 3000) {
+            console.log('Logs data recently updated, skipping');
+            return;
+        }
+
+        // 标记请求开始
+        requestLocks.logs = true;
+
+        // 使用延迟显示加载状态
+        let loadingTimer = null;
+
+        // 仅在加载时间超过300ms时才显示加载提示
+        if (!elements.logLoading.classList.contains('shown')) {
+            loadingTimer = setTimeout(() => {
+                elements.logLoading.classList.remove('hidden');
+                elements.logLoading.classList.add('shown');
+            }, 300);
+        }
+
+        try {
+            const data = await apiRequest(API_ENDPOINTS.getTradeRecords);
+            
+            // 取消加载提示定时器
+            if (loadingTimer) clearTimeout(loadingTimer);
+            
+            if (data.status === 'success' && Array.isArray(data.data)) {
+                // 更新日志内容
+                updateLogs(data.data);
+                lastDataUpdateTimestamps.logs = Date.now();
+            } else {
+                throw new Error(data.message || '数据格式错误');
+            }
+            
+            // 短暂延迟后隐藏加载提示
+            setTimeout(() => {
+                elements.logLoading.classList.add('hidden');
+                elements.logLoading.classList.remove('shown');
+            }, 300);
+        } catch (error) {
+            // 取消加载提示定时器
+            if (loadingTimer) clearTimeout(loadingTimer);
+            
+            elements.logLoading.classList.add('hidden');
+            elements.logLoading.classList.remove('shown');
+            
+            // 显示错误信息
+            elements.logError.classList.remove('hidden');
+            elements.logError.textContent = `加载失败: ${error.message}`;
+            
+            // 5秒后自动隐藏错误信息
+            setTimeout(() => {
+                elements.logError.classList.add('hidden');
+            }, 5000);
+            
+            showMessage("加载交易记录失败", 'error');
+        } finally {
+            // 释放请求锁定，添加小延迟避免立即重复请求
+            setTimeout(() => {
+                requestLocks.logs = false;
+            }, 1000);
+        }
+    }
+
+    // --- 连接状态检测 ---
+    function updateConnectionStatus(isConnected) {
+        const statusElement = document.getElementById('connectionStatus');
+        if (isConnected) {
+            statusElement.textContent = "API已连接";
+            statusElement.classList.remove('disconnected');
+            statusElement.classList.add('connected');
+        } else {
+            statusElement.textContent = "API未连接";
+            statusElement.classList.remove('connected');
+            statusElement.classList.add('disconnected');
+        }
+    }
+
+    // 添加节流的API连接检测
+    const throttledCheckApiConnection = throttle(async function() {
+        try {
+            console.log("Checking API connection at:", API_ENDPOINTS.checkConnection);
+            const response = await fetch(API_ENDPOINTS.checkConnection);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log("Connection check response:", data);
+            updateConnectionStatus(data.connected);
+        } catch (error) {
+            console.error("Error checking API connection:", error);
+            updateConnectionStatus(false);
+        } finally {
+            setTimeout(throttledCheckApiConnection, 5000);
+        }
+    }, 5000);
+
+
+    // --- 操作处理函数 ---
+    // 修改后的监控开启/关闭函数 - 只影响前端数据刷新，不影响后端持仓监控
+    async function handleToggleMonitor() {
+        // 先验证表单数据
+        if (!validateForm()) {
+            showMessage("请检查配置参数，修正错误后再启动监控", 'error');
+            return;
+        }
+
+        // 用户明确设置了监控UI状态
+        const endpoint = isMonitoring ? API_ENDPOINTS.stopMonitor : API_ENDPOINTS.startMonitor;
+        const actionText = isMonitoring ? '停止' : '启动';
+        elements.toggleMonitorBtn.disabled = true;
+        showMessage(`${actionText}监控中...`, 'loading', 0);
+
+        try {
+            // 构建仅包含监控状态的数据
+            // 注意：不包含自动交易状态
+            const monitoringData = {
+                isMonitoring:  !isMonitoring
+                // 不包含globalAllowBuySell
+            };
+            
+            const data = await apiRequest(endpoint, { 
+                method: 'POST',                
+                body: JSON.stringify(monitoringData)
+            });
+
+            showMessage(`${actionText}监控 ${data.status === 'success' ? '成功' : '失败'}: ${data.message || ''}`, 
+                data.status === 'success' ? 'success' : 'error');
+                
+            await fetchStatus();
+        } catch (error) {
+            showMessage(`${actionText}监控失败: ${error.message}`, 'error');
+            await fetchStatus();
+        } finally {
+            elements.toggleMonitorBtn.disabled = false;
+            // 3秒后清除消息
+            setTimeout(() => {
+                elements.messageArea.innerHTML = '';
+            }, 3000);
+        }
+    }
+
+    // 获取所有配置表单的值
+    function getConfigData() {
+        return {
+            singleBuyAmount: parseFloat(elements.singleBuyAmount.value) || 35000,
+            firstProfitSell: parseFloat(elements.firstProfitSell.value) || 5.0,
+            firstProfitSellEnabled: elements.firstProfitSellEnabled.checked,
+            stockGainSellPencent: parseFloat(elements.stockGainSellPencent.value) || 60.0,
+            firstProfitSellPencent: elements.firstProfitSellPencent.checked,
+            allowBuy: elements.allowBuy.checked,
+            allowSell: elements.allowSell.checked,
+            stopLossBuy: parseFloat(elements.stopLossBuy.value) || 5.0,
+            stopLossBuyEnabled: elements.stopLossBuyEnabled.checked,
+            stockStopLoss: parseFloat(elements.stockStopLoss.value) || 7.0,
+            StopLossEnabled: elements.StopLossEnabled.checked,
+            singleStockMaxPosition: parseFloat(elements.singleStockMaxPosition.value) || 70000,
+            totalMaxPosition: parseFloat(elements.totalMaxPosition.value) || 400000,
+            connectPort: elements.connectPort.value || '5000',
+            totalAccounts: elements.totalAccounts.value || '127.0.0.1',
+            globalAllowBuySell: elements.globalAllowBuySell.checked,
+            simulationMode: elements.simulationMode.checked            
+        };
+    }
+
+    async function handleSaveConfig() {
+        // 先验证表单数据
+        if (!validateForm()) {
+            showMessage("请检查配置参数，修正错误后再保存", 'error');
+            return;
+        }
+
+        const configData = getConfigData();
+        console.log("Saving config:", configData);
+        showMessage("保存配置中...", 'loading', 0);
+        elements.saveConfigBtn.disabled = true;
+
+        try {
+            const data = await apiRequest(API_ENDPOINTS.saveConfig, {
+                method: 'POST',                
+                body: JSON.stringify(configData),
+            });
+            
+            if (data.status === 'success') {
+                showMessage(data.message || "配置已保存", 'success');
+                
+                // 更新模拟交易模式状态
+                isSimulationMode = configData.simulationMode;
+                updateSimulationModeUI();
+                
+                // 更新自动交易状态
+                isAutoTradingEnabled = configData.globalAllowBuySell;
+            } else {
+                showMessage(data.message || "保存失败", 'error');
+                
+                // 如果有验证错误，显示详细信息
+                if (data.errors && Array.isArray(data.errors)) {
+                    showMessage(`参数错误: ${data.errors.join(', ')}`, 'error');
+                }
+            }
+        } catch (error) {
+            // 错误已由apiRequest处理
+        } finally {
+            elements.saveConfigBtn.disabled = false;
+            // 3秒后清除消息
+            setTimeout(() => {
+                elements.messageArea.innerHTML = '';
+            }, 3000);
+        }
+    }
+
+    // 添加参数即时同步函数
+    function syncParameterToBackend(paramName, value) {
+        // 创建只包含变更参数的对象
+        const paramData = {
+            [paramName]: value
         };
         
-        const data = await apiRequest(API_ENDPOINTS.executeBuy, {
+        console.log(`同步参数到后台: ${paramName} = ${value}`);
+        
+        // 调用保存配置API，只发送变更的参数
+        apiRequest(API_ENDPOINTS.saveConfig, {
             method: 'POST',
-            body: JSON.stringify(buyData),
+            body: JSON.stringify(paramData)
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                console.log(`参数 ${paramName} 已同步到后台`);
+            } else {
+                console.error(`参数同步失败: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error(`同步参数时出错: ${error}`);
         });
-        
-        if (data.status === 'success') {
-            showMessage(data.message || "买入指令已发送", 'success');
+    }
+
+    // 使用节流防止频繁发送请求
+    const throttledSyncParameter = throttle(syncParameterToBackend, 500);
+
+    async function handleClearLogs() {
+        if (!confirm("确定要清空所有日志吗？此操作不可撤销。")) return;
+        showMessage("清空日志中...", 'loading', 0);
+        elements.clearLogBtn.disabled = true;
+        try {
+            const data = await apiRequest(API_ENDPOINTS.clearLogs, { method: 'POST' });
             
-            // 重置请求锁定状态
-            requestLocks.holdings = false;
-            requestLocks.logs = false;
+            if (data.status === 'success') {
+                showMessage(data.message || "日志已清空", 'success');
+                elements.orderLog.value = ''; // 立即清空前端显示
+                window._lastLogsStr = ''; // 重置日志缓存
+            } else {
+                showMessage(data.message || "清空日志失败", 'error');
+            }
+        } catch (error) {
+            // 错误已由apiRequest处理
+        } finally {
+            elements.clearLogBtn.disabled = false;
+            // 3秒后清除消息
+            setTimeout(() => {
+                elements.messageArea.innerHTML = '';
+            }, 3000);
+        }
+    }
+
+    // 初始化持仓数据函数
+    async function handleInitHoldings() {
+        if (!confirm("确定要初始化持仓数据吗？")) return;
+
+        // 更新API基础URL
+        updateApiBaseUrl();
+
+        // 先验证表单数据
+        if (!validateForm()) {
+            showMessage("请检查配置参数，修正错误后再初始化持仓", 'error');
+            return;
+        }
+
+        elements.initHoldingsBtn.disabled = true;
+        const originalText = elements.initHoldingsBtn.textContent;
+        elements.initHoldingsBtn.textContent = "初始化中...";
+        showMessage("正在初始化持仓数据...", 'loading', 0);
+
+        try {
+            const configData = getConfigData();
+            const data = await apiRequest(API_ENDPOINTS.initHoldings, {                
+                method: 'POST',
+                body: JSON.stringify(configData),
+            });
             
-            // 刷新相关数据
-            await fetchHoldings();
-            await fetchLogs();
-            await fetchStatus(); // 更新余额等
-        } else {
-            showMessage(data.message || "买入指令发送失败", 'error');
+            if (data.status === 'success') {
+                showMessage(data.message || "持仓数据初始化成功", 'success');
+                
+                // 重置请求锁定状态
+                requestLocks.holdings = false;
+                
+                // 强制刷新持仓数据和账户状态
+                await fetchHoldings(); 
+                await fetchStatus();
+            } else {
+                showMessage(data.message || "初始化持仓数据失败", 'error');
+            }
+        } catch (error) {
+            // 错误已由apiRequest处理
+        } finally {
+            elements.initHoldingsBtn.disabled = false;
+            elements.initHoldingsBtn.textContent = originalText;
+            // 3秒后清除消息
+            setTimeout(() => {
+                elements.messageArea.innerHTML = '';
+            }, 3000);
         }
-    } catch (error) {
-        // 错误已由apiRequest处理
-    } finally {
-        elements.executeBuyBtn.disabled = false;
-        // 3秒后清除消息
-        setTimeout(() => {
-            elements.messageArea.innerHTML = '';
-        }, 3000);
-    }
-}
-
-// 判断持仓数据是否需要更新
-function shouldUpdateRow(oldData, newData) {
-// 检查关键字段是否有变化
-const keysToCheck = ['current_price', 'market_value', 'profit_ratio', 'available', 'volume', 'change_percentage'];
-return keysToCheck.some(key => {
-    // 对于数值，考虑舍入误差
-    if (typeof oldData[key] === 'number' && typeof newData[key] === 'number') {
-        return Math.abs(oldData[key] - newData[key]) > 0.001;
-    }
-    return oldData[key] !== newData[key];
-});
-}
-
-// 更新现有持仓行
-function updateExistingRow(row, stock) {
-// 更新各个单元格的值
-const cells = row.querySelectorAll('td');
-
-// 确保保留复选框
-
-// 更新基本信息
-cells[1].textContent = stock.stock_code || '--';
-cells[2].textContent = stock.stock_name || stock.name || '--';
-
-// 更新涨跌幅，包括类名
-const changePercentage = parseFloat(stock.change_percentage || 0);
-cells[3].textContent = `${changePercentage.toFixed(2)}%`;
-cells[3].className = `border p-2 ${changePercentage >= 0 ? 'text-red-600' : 'text-green-600'}`;
-
-// 更新价格、成本和盈亏
-cells[4].textContent = parseFloat(stock.current_price || 0).toFixed(2);
-cells[5].textContent = parseFloat(stock.cost_price || 0).toFixed(2);
-
-const profitRatio = parseFloat(stock.profit_ratio || 0);
-cells[6].textContent = `${profitRatio.toFixed(2)}%`;
-cells[6].className = `border p-2 ${profitRatio >= 0 ? 'text-red-600' : 'text-green-600'}`;
-
-// 更新持仓信息
-cells[7].textContent = stock.market_value || '--';
-cells[8].textContent = stock.available || 0;
-cells[9].textContent = stock.volume || 0;
-
-// 更新止盈标志
-cells[10].innerHTML = `<input type="checkbox" ${stock.profit_triggered ? 'checked' : ''} disabled>`;
-
-// 更新其他数据
-cells[11].textContent = parseFloat(stock.highest_price || 0).toFixed(2);
-cells[12].textContent = parseFloat(stock.stop_loss_price || 0).toFixed(2);
-cells[13].textContent = (stock.open_date || '').split(' ')[0];
-cells[14].textContent = parseFloat(stock.base_cost_price || stock.cost_price || 0).toFixed(2);
-
-// 高亮闪烁更新的单元格
-cells[4].classList.add('highlight-update');
-setTimeout(() => {
-    cells[4].classList.remove('highlight-update');
-}, 1000);
-}
-
-// 创建新的持仓行
-function createStockRow(stock) {
-const row = document.createElement('tr');
-row.className = 'hover:bg-gray-50 even:bg-gray-100';
-row.dataset.stockCode = stock.stock_code; // 添加标识属性
-
-// 计算关键值
-const changePercentage = parseFloat(stock.change_percentage || 0);
-const profitRatio = parseFloat(stock.profit_ratio || 0);
-
-// 构建行内容
-row.innerHTML = `
-    <td class="border p-2"><input type="checkbox" class="holding-checkbox" data-id="${stock.id || stock.stock_code}"></td>
-    <td class="border p-2">${stock.stock_code || '--'}</td>
-    <td class="border p-2">${stock.stock_name || stock.name || '--'}</td>                
-    <td class="border p-2 ${changePercentage >= 0 ? 'text-red-600' : 'text-green-600'}">${changePercentage.toFixed(2)}%</td>
-    <td class="border p-2">${parseFloat(stock.current_price || 0).toFixed(2)}</td>
-    <td class="border p-2">${parseFloat(stock.cost_price || 0).toFixed(2)}</td>
-    <td class="border p-2 ${profitRatio >= 0 ? 'text-red-600' : 'text-green-600'}">${profitRatio.toFixed(2)}%</td>
-    <td class="border p-2">${stock.market_value || '--'}</td>
-    <td class="border p-2">${stock.available || 0}</td>       
-    <td class="border p-2">${stock.volume || 0}</td>         
-    <td class="border p-2 text-center"><input type="checkbox" ${stock.profit_triggered ? 'checked' : ''} disabled></td>
-    <td class="border p-2">${parseFloat(stock.highest_price || 0).toFixed(2)}</td>                
-    <td class="border p-2">${parseFloat(stock.stop_loss_price || 0).toFixed(2)}</td> 
-    <td class="border p-2 whitespace-nowrap">${(stock.open_date || '').split(' ')[0]}</td>                               
-    <td class="border p-2">${parseFloat(stock.base_cost_price || stock.cost_price || 0).toFixed(2)}</td>
-`;
-
-return row;
-}
-
-// 更新持仓表格（增量更新版本）
-function updateHoldingsTable(holdings) {
-// 检查数据是否实际发生变化
-const holdingsStr = JSON.stringify(holdings);
-if (window._lastHoldingsStr === holdingsStr) {
-    console.log("Holdings data unchanged, skipping update");
-    return;
-}
-window._lastHoldingsStr = holdingsStr;
-
-console.log("Updating holdings table - data changed");
-elements.holdingsLoading.classList.add('hidden');
-elements.holdingsError.classList.add('hidden');
-
-if (!Array.isArray(holdings) || holdings.length === 0) {
-    elements.holdingsTableBody.innerHTML = '<tr><td colspan="15" class="text-center p-4 text-gray-500">无持仓数据</td></tr>';
-    return;
-}
-
-// 获取现有行
-const existingRows = {};
-const existingRowElements = elements.holdingsTableBody.querySelectorAll('tr[data-stock-code]');
-existingRowElements.forEach(row => {
-    existingRows[row.dataset.stockCode] = row;
-});
-
-// 临时文档片段，减少DOM重绘
-const fragment = document.createDocumentFragment();
-
-// 记录处理过的股票代码
-const processedStocks = new Set();
-
-// 数据变化标记
-let hasChanges = false;
-
-holdings.forEach(stock => {
-    processedStocks.add(stock.stock_code);
-    
-    // 检查是否已存在此股票行
-    if (existingRows[stock.stock_code]) {
-        // 获取现有数据
-        const oldData = existingRows[stock.stock_code].data || {};
-        
-        // 检查是否需要更新
-        if (shouldUpdateRow(oldData, stock)) {
-            updateExistingRow(existingRows[stock.stock_code], stock);
-            hasChanges = true;
-        }
-        
-        // 更新存储的数据
-        existingRows[stock.stock_code].data = {...stock};
-    } else {
-        // 创建新行
-        const row = createStockRow(stock);
-        // 存储数据引用
-        row.data = {...stock};
-        fragment.appendChild(row);
-        hasChanges = true;
-    }
-});
-
-// 添加新行
-if (fragment.childNodes.length > 0) {
-    elements.holdingsTableBody.appendChild(fragment);
-}
-
-// 移除不再存在的行
-let hasRemovals = false;
-existingRowElements.forEach(row => {
-    if (!processedStocks.has(row.dataset.stockCode)) {
-        row.remove();
-        hasRemovals = true;
-    }
-});
-
-// 只有发生变化时才添加复选框监听器
-if (hasChanges || hasRemovals) {
-    addHoldingCheckboxListeners();
-}
-}
-
-function addHoldingCheckboxListeners() {
-const checkboxes = elements.holdingsTableBody.querySelectorAll('.holding-checkbox');
-checkboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', () => {
-        // 检查是否所有复选框都被选中
-        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-        elements.selectAllHoldings.checked = allChecked;
-    });
-});
-}
-
-function updateLogs(logEntries) {
-// 检查数据是否实际发生变化
-const logsStr = JSON.stringify(logEntries);
-if (window._lastLogsStr === logsStr) {
-    console.log("Logs data unchanged, skipping update");
-    return;
-}
-window._lastLogsStr = logsStr;
-
-// 记住当前滚动位置和是否在底部
-const isAtBottom = elements.orderLog.scrollTop + elements.orderLog.clientHeight >= elements.orderLog.scrollHeight - 10;
-const currentScrollTop = elements.orderLog.scrollTop;
-
-elements.logLoading.classList.add('hidden');
-elements.logError.classList.add('hidden');
-
-// 格式化日志内容
-if (Array.isArray(logEntries)) {
-    // 假设每个 logEntry 是一个对象，我们需要将其转换为字符串
-    const formattedLogs = logEntries.map(entry => {
-        // 根据你的交易记录对象结构调整格式化方式
-        if (typeof entry === 'object' && entry !== null) {
-            // 使用 entry.trade_time, entry.trade_type,  而不是  entry.time, entry.action
-            //  并且没有 stock_name,  trade_type  需要转换一下
-            const action = entry.trade_type === 'BUY' ? '买入' : (entry.trade_type === 'SELL' ? '卖出' : entry.trade_type);
-            return `时间: ${entry.trade_time || ''}, 代码: ${entry.stock_code || ''}, 名称: , 操作: ${action || ''}, 价格: ${entry.price || ''}, 数量: ${entry.volume || ''}, 状态: `;
-
-            //  如果后端返回了 stock_name  字段，  把上面 return 语句中的  名称: ,  改成  名称: ${entry.stock_name || ''},
-
-        } else {
-            return String(entry); // 如果不是对象，直接转换为字符串
-        }
-    });
-    elements.orderLog.value = formattedLogs.join('\n');
-    
-    // 标记数据已更新
-    console.log("Logs updated with new data");
-} else {
-    elements.orderLog.value = "无可识别的日志数据";
-    console.error("未知的日志数据格式:", logEntries);
-}
-
-// 只有当之前在底部时，才自动滚动到底部
-if (isAtBottom) {
-    setTimeout(() => {
-        elements.orderLog.scrollTop = elements.orderLog.scrollHeight;
-    }, 10);
-} else {
-    // 否则保持原来的滚动位置
-    setTimeout(() => {
-        elements.orderLog.scrollTop = currentScrollTop;
-    }, 10);
-}
-}
-
-// --- 数据获取函数 ---
-async function fetchConfig() {
-try {
-    const data = await apiRequest(API_ENDPOINTS.getConfig);
-    if (data.status === 'success') {
-        updateConfigForm(data.data);
-        
-        // 保存参数范围
-        if (data.ranges) {
-            paramRanges = data.ranges;
-            // 添加参数验证监听器
-            addParameterValidationListeners();
-        }
-    } else {
-        showMessage("加载配置失败: " + (data.message || "未知错误"), 'error');
-    }
-} catch (error) {
-    showMessage("加载配置失败", 'error');
-}
-}
-
-async function fetchStatus() {
-// 如果已经有请求在进行中，则跳过
-if (requestLocks.status) {
-    console.log('Status request already in progress, skipping');
-    return;
-}
-
-// 最小刷新间隔检查 - 3秒
-const now = Date.now();
-if (now - lastDataUpdateTimestamps.status < 3000) {
-    console.log('Status data recently updated, skipping');
-    return;
-}
-
-// 标记请求开始
-requestLocks.status = true;
-
-try {
-    const data = await apiRequest(API_ENDPOINTS.getStatus);
-    if (data.status === 'success') {
-        updateStatusDisplay(data);
-        lastDataUpdateTimestamps.status = Date.now();
-    } else {
-        showMessage("加载状态信息失败: " + (data.message || "未知错误"), 'error');
-        updateStatusDisplay({ isMonitoring: false, account: {} });
-    }
-} catch (error) {
-    showMessage("加载状态信息失败", 'error');
-    updateStatusDisplay({ isMonitoring: false, account: {} });
-} finally {
-    // 释放请求锁定，添加小延迟避免立即重复请求
-    setTimeout(() => {
-        requestLocks.status = false;
-    }, 1000);
-}
-}
-
-async function fetchHoldings() {
-// 如果已经有请求在进行中，则跳过
-if (requestLocks.holdings) {
-    console.log('Holdings request already in progress, skipping');
-    return;
-}
-
-// 最小刷新间隔检查 - 3秒
-const now = Date.now();
-if (now - lastDataUpdateTimestamps.holdings < 3000) {
-    console.log('Holdings data recently updated, skipping');
-    return;
-}
-
-// 标记请求开始
-requestLocks.holdings = true;
-
-// 使用延迟显示加载状态，避免短暂操作造成闪烁
-let loadingTimer = null;
-
-// 仅在加载时间超过300ms时才显示加载提示
-if (!elements.holdingsLoading.classList.contains('shown')) {
-    loadingTimer = setTimeout(() => {
-        elements.holdingsLoading.classList.remove('hidden');
-        elements.holdingsLoading.classList.add('shown');
-    }, 300);
-}
-
-try {            
-    const data = await apiRequest(API_ENDPOINTS.getPositionsAll);
-    
-    // 取消加载提示定时器
-    if (loadingTimer) clearTimeout(loadingTimer);
-    
-    // 检查版本是否变化
-    if (data.data_version && data.data_version <= currentDataVersions.holdings) {
-        console.log('Holdings data version unchanged, skipping update');
-        elements.holdingsLoading.classList.add('hidden');
-        elements.holdingsLoading.classList.remove('shown');
-        return;
-    }
-    
-    // 更新版本号
-    if (data.data_version) {
-        currentDataVersions.holdings = data.data_version;
-    }
-    
-    if (data.status === 'success' && Array.isArray(data.data)) {
-        updateHoldingsTable(data.data);
-        lastDataUpdateTimestamps.holdings = Date.now();
-    } else {
-        throw new Error(data.message || '数据格式错误');
-    }
-    
-    // 短暂延迟后隐藏加载提示
-    setTimeout(() => {
-        elements.holdingsLoading.classList.add('hidden');
-        elements.holdingsLoading.classList.remove('shown');
-    }, 300);
-} catch (error) {
-    // 取消加载提示定时器
-    if (loadingTimer) clearTimeout(loadingTimer);
-    
-    elements.holdingsLoading.classList.add('hidden');
-    elements.holdingsLoading.classList.remove('shown');
-    
-    // 显示错误信息
-    elements.holdingsError.classList.remove('hidden');
-    elements.holdingsError.textContent = `加载失败: ${error.message}`;
-    
-    // 5秒后自动隐藏错误信息
-    setTimeout(() => {
-        elements.holdingsError.classList.add('hidden');
-    }, 5000);
-    
-    showMessage("加载持仓数据失败", 'error');
-} finally {
-    // 释放请求锁定，添加小延迟避免立即重复请求
-    setTimeout(() => {
-        requestLocks.holdings = false;
-    }, 1000);
-}
-}
-
-async function fetchLogs() {  
-// 如果已经有请求在进行中，则跳过
-if (requestLocks.logs) {
-    console.log('Logs request already in progress, skipping');
-    return;
-}
-
-// 最小刷新间隔检查 - 3秒
-const now = Date.now();
-if (now - lastDataUpdateTimestamps.logs < 3000) {
-    console.log('Logs data recently updated, skipping');
-    return;
-}
-
-// 标记请求开始
-requestLocks.logs = true;
-
-// 使用延迟显示加载状态
-let loadingTimer = null;
-
-// 仅在加载时间超过300ms时才显示加载提示
-if (!elements.logLoading.classList.contains('shown')) {
-    loadingTimer = setTimeout(() => {
-        elements.logLoading.classList.remove('hidden');
-        elements.logLoading.classList.add('shown');
-    }, 300);
-}
-
-try {
-    const data = await apiRequest(API_ENDPOINTS.getTradeRecords);
-    
-    // 取消加载提示定时器
-    if (loadingTimer) clearTimeout(loadingTimer);
-    
-    if (data.status === 'success' && Array.isArray(data.data)) {
-        // 更新日志内容
-        updateLogs(data.data);
-        lastDataUpdateTimestamps.logs = Date.now();
-    } else {
-        throw new Error(data.message || '数据格式错误');
-    }
-    
-    // 短暂延迟后隐藏加载提示
-    setTimeout(() => {
-        elements.logLoading.classList.add('hidden');
-        elements.logLoading.classList.remove('shown');
-    }, 300);
-} catch (error) {
-    // 取消加载提示定时器
-    if (loadingTimer) clearTimeout(loadingTimer);
-    
-    elements.logLoading.classList.add('hidden');
-    elements.logLoading.classList.remove('shown');
-    
-    // 显示错误信息
-    elements.logError.classList.remove('hidden');
-    elements.logError.textContent = `加载失败: ${error.message}`;
-    
-    // 5秒后自动隐藏错误信息
-    setTimeout(() => {
-        elements.logError.classList.add('hidden');
-    }, 5000);
-    
-    showMessage("加载交易记录失败", 'error');
-} finally {
-    // 释放请求锁定，添加小延迟避免立即重复请求
-    setTimeout(() => {
-        requestLocks.logs = false;
-    }, 1000);
-}
-}
-
-// --- 连接状态检测 ---
-function updateConnectionStatus(isConnected) {
-const statusElement = document.getElementById('connectionStatus');
-if (isConnected) {
-    statusElement.textContent = "API已连接";
-    statusElement.classList.remove('disconnected');
-    statusElement.classList.add('connected');
-} else {
-    statusElement.textContent = "API未连接";
-    statusElement.classList.remove('connected');
-    statusElement.classList.add('disconnected');
-}
-}
-
-// 添加节流的API连接检测
-const throttledCheckApiConnection = throttle(async function() {
-try {
-    console.log("Checking API connection at:", API_ENDPOINTS.checkConnection);
-    const response = await fetch(API_ENDPOINTS.checkConnection);
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    console.log("Connection check response:", data);
-    updateConnectionStatus(data.connected);
-} catch (error) {
-    console.error("Error checking API connection:", error);
-    updateConnectionStatus(false);
-} finally {
-    setTimeout(throttledCheckApiConnection, 5000);
-}
-}, 5000);
-
-
-// 当用户点击"开始/停止执行监控"按钮时，设置一个标志记录用户意图
-let userMonitoringIntent = null;  // null/true/false
-
-// --- 操作处理函数 ---
-async function handleToggleMonitor() {
-    // 先验证表单数据
-    if (!validateForm()) {
-        showMessage("请检查配置参数，修正错误后再启动监控", 'error');
-        return;
     }
 
-    // 用户明确设置了监控状态
-    userMonitoringIntent = !isMonitoring;
-    const endpoint = isMonitoring ? API_ENDPOINTS.stopMonitor : API_ENDPOINTS.startMonitor;
-    const actionText = isMonitoring ? '停止' : '启动';
-    elements.toggleMonitorBtn.disabled = true;
-    showMessage(`${actionText}监控中...`, 'loading', 0);
+    // 通用操作处理
+    async function handleGenericAction(button, endpoint, confirmationMessage) {
+        if (confirmationMessage && !confirm(confirmationMessage)) return;
 
-    try {
-        // 获取所有表单值，构建配置数据
-        const configData = getConfigData();
-        
-        // 确保配置中包含当前的全局监控总开关状态
-        // 但"开始/停止执行监控"按钮不应改变这个状态
-        configData.globalAllowBuySell = elements.globalAllowBuySell.checked;
-        
-        const data = await apiRequest(endpoint, { 
-            method: 'POST',                
-            body: JSON.stringify(configData)
-        });
+        button.disabled = true;
+        const originalText = button.textContent;
+        button.textContent = "处理中...";
+        showMessage("正在执行操作...", 'loading', 0);
 
-        showMessage(`${actionText}监控 ${data.status === 'success' ? '成功' : '失败'}: ${data.message || ''}`, 
-            data.status === 'success' ? 'success' : 'error');
+        try {
+            const data = await apiRequest(endpoint, { method: 'POST' });            
             
-        await fetchStatus();
-    } catch (error) {
-        showMessage(`${actionText}监控失败: ${error.message}`, 'error');
-        await fetchStatus();
-    } finally {
-        elements.toggleMonitorBtn.disabled = false;
-        // 3秒后清除消息
-        setTimeout(() => {
-            elements.messageArea.innerHTML = '';
-        }, 3000);
-    }
-}
-
-// 获取所有配置表单的值
-function getConfigData() {
-return {
-    singleBuyAmount: parseFloat(elements.singleBuyAmount.value) || 35000,
-    firstProfitSell: parseFloat(elements.firstProfitSell.value) || 5.0,
-    firstProfitSellEnabled: elements.firstProfitSellEnabled.checked,
-    stockGainSellPencent: parseFloat(elements.stockGainSellPencent.value) || 60.0,
-    firstProfitSellPencent: elements.firstProfitSellPencent.checked,
-    allowBuy: elements.allowBuy.checked,
-    allowSell: elements.allowSell.checked,
-    stopLossBuy: parseFloat(elements.stopLossBuy.value) || 5.0,
-    stopLossBuyEnabled: elements.stopLossBuyEnabled.checked,
-    stockStopLoss: parseFloat(elements.stockStopLoss.value) || 7.0,
-    StopLossEnabled: elements.StopLossEnabled.checked,
-    singleStockMaxPosition: parseFloat(elements.singleStockMaxPosition.value) || 70000,
-    totalMaxPosition: parseFloat(elements.totalMaxPosition.value) || 400000,
-    connectPort: elements.connectPort.value || '5000',
-    totalAccounts: elements.totalAccounts.value || '127.0.0.1',
-    globalAllowBuySell: elements.globalAllowBuySell.checked,
-    simulationMode: elements.simulationMode.checked            
-};
-}
-
-async function handleSaveConfig() {
-// 先验证表单数据
-if (!validateForm()) {
-    showMessage("请检查配置参数，修正错误后再保存", 'error');
-    return;
-}
-
-const configData = getConfigData();
-console.log("Saving config:", configData);
-showMessage("保存配置中...", 'loading', 0);
-elements.saveConfigBtn.disabled = true;
-
-try {
-    const data = await apiRequest(API_ENDPOINTS.saveConfig, {
-        method: 'POST',                
-        body: JSON.stringify(configData),
-    });
-    
-    if (data.status === 'success') {
-        showMessage(data.message || "配置已保存", 'success');
-        
-        // 更新模拟交易模式状态
-        isSimulationMode = configData.simulationMode;
-        updateSimulationModeUI();
-    } else {
-        showMessage(data.message || "保存失败", 'error');
-        
-        // 如果有验证错误，显示详细信息
-        if (data.errors && Array.isArray(data.errors)) {
-            showMessage(`参数错误: ${data.errors.join(', ')}`, 'error');
+            if (data.status === 'success') {
+                showMessage(data.message || "操作成功", 'success');
+                
+                // 重置请求锁定状态
+                requestLocks.holdings = false;
+                requestLocks.logs = false;
+                
+                // 根据操作类型刷新相关数据
+                if (endpoint === API_ENDPOINTS.clearCurrentData || endpoint === API_ENDPOINTS.clearBuySellData) {
+                    await fetchHoldings(); // 刷新持仓数据
+                }
+                if (endpoint === API_ENDPOINTS.importSavedData) {
+                    await fetchAllData(); // 导入数据后刷新所有数据
+                }
+            } else {
+                showMessage(data.message || "操作失败", 'error');
+            }
+        } catch (error) {
+            // 错误已由apiRequest处理
+        } finally {
+            button.disabled = false;
+            button.textContent = originalText;
+            // 3秒后清除消息
+            setTimeout(() => {
+                elements.messageArea.innerHTML = '';
+            }, 3000);
         }
     }
-} catch (error) {
-    // 错误已由apiRequest处理
-} finally {
-    elements.saveConfigBtn.disabled = false;
-    // 3秒后清除消息
-    setTimeout(() => {
-        elements.messageArea.innerHTML = '';
-    }, 3000);
-}
-}
 
-
-
-// 添加参数即时同步函数
-function syncParameterToBackend(paramName, value) {
-    // 创建只包含变更参数的对象
-    const paramData = {
-        [paramName]: value
-    };
-    
-    console.log(`同步参数到后台: ${paramName} = ${value}`);
-    
-    // 调用保存配置API，只发送变更的参数
-    apiRequest(API_ENDPOINTS.saveConfig, {
-        method: 'POST',
-        body: JSON.stringify(paramData)
-    })
-    .then(data => {
-        if (data.status === 'success') {
-            console.log(`参数 ${paramName} 已同步到后台`);
-        } else {
-            console.error(`参数同步失败: ${data.message}`);
+    async function handleExecuteBuy() {
+        // 先验证交易量
+        const quantity = parseInt(elements.buyQuantity.value) || 0;
+        if (quantity <= 0) {
+            showMessage("请输入有效的买入数量", "error");
+            return;
         }
-    })
-    .catch(error => {
-        console.error(`同步参数时出错: ${error}`);
-    });
-}
-
-// 使用节流防止频繁发送请求
-const throttledSyncParameter = throttle(syncParameterToBackend, 500);
-
-async function handleClearLogs() {
-if (!confirm("确定要清空所有日志吗？此操作不可撤销。")) return;
-showMessage("清空日志中...", 'loading', 0);
-elements.clearLogBtn.disabled = true;
-try {
-    const data = await apiRequest(API_ENDPOINTS.clearLogs, { method: 'POST' });
-    
-    if (data.status === 'success') {
-        showMessage(data.message || "日志已清空", 'success');
-        elements.orderLog.value = ''; // 立即清空前端显示
-        window._lastLogsStr = ''; // 重置日志缓存
-    } else {
-        showMessage(data.message || "清空日志失败", 'error');
-    }
-} catch (error) {
-    // 错误已由apiRequest处理
-} finally {
-    elements.clearLogBtn.disabled = false;
-    // 3秒后清除消息
-    setTimeout(() => {
-        elements.messageArea.innerHTML = '';
-    }, 3000);
-}
-}
-
-// 初始化持仓数据函数
-async function handleInitHoldings() {
-if (!confirm("确定要初始化持仓数据吗？")) return;
-
-// 更新API基础URL
-updateApiBaseUrl();
-
-// 先验证表单数据
-if (!validateForm()) {
-    showMessage("请检查配置参数，修正错误后再初始化持仓", 'error');
-    return;
-}
-
-elements.initHoldingsBtn.disabled = true;
-const originalText = elements.initHoldingsBtn.textContent;
-elements.initHoldingsBtn.textContent = "初始化中...";
-showMessage("正在初始化持仓数据...", 'loading', 0);
-
-try {
-    const configData = getConfigData();
-    const data = await apiRequest(API_ENDPOINTS.initHoldings, {                
-        method: 'POST',
-        body: JSON.stringify(configData),
-    });
-    
-    if (data.status === 'success') {
-        showMessage(data.message || "持仓数据初始化成功", 'success');
         
-        // 重置请求锁定状态
-        requestLocks.holdings = false;
+        const strategy = elements.buyStrategy.value;
         
-        // 强制刷新持仓数据和账户状态
-        await fetchHoldings(); 
-        await fetchStatus();
-    } else {
-        showMessage(data.message || "初始化持仓数据失败", 'error');
-    }
-} catch (error) {
-    // 错误已由apiRequest处理
-} finally {
-    elements.initHoldingsBtn.disabled = false;
-    elements.initHoldingsBtn.textContent = originalText;
-    // 3秒后清除消息
-    setTimeout(() => {
-        elements.messageArea.innerHTML = '';
-    }, 3000);
-}
-}
-
-// 通用操作处理
-async function handleGenericAction(button, endpoint, confirmationMessage) {
-if (confirmationMessage && !confirm(confirmationMessage)) return;
-
-button.disabled = true;
-const originalText = button.textContent;
-button.textContent = "处理中...";
-showMessage("正在执行操作...", 'loading', 0);
-
-try {
-    const data = await apiRequest(endpoint, { method: 'POST' });            
-    
-    if (data.status === 'success') {
-        showMessage(data.message || "操作成功", 'success');
-        
-        // 重置请求锁定状态
-        requestLocks.holdings = false;
-        requestLocks.logs = false;
-        
-        // 根据操作类型刷新相关数据
-        if (endpoint === API_ENDPOINTS.clearCurrentData || endpoint === API_ENDPOINTS.clearBuySellData) {
-            await fetchHoldings(); // 刷新持仓数据
+        // 根据不同策略显示不同对话框
+        if (strategy === 'random_pool') {
+            await handleRandomPoolBuy(quantity);
+        } else if (strategy === 'custom_stock') {
+            handleCustomStockBuy(quantity);
         }
-        if (endpoint === API_ENDPOINTS.importSavedData) {
-            await fetchAllData(); // 导入数据后刷新所有数据
+    }
+
+    // --- 轮询机制 ---
+    function startPolling() {
+        if (pollingIntervalId) {
+            console.log("已存在轮询，停止旧轮询");
+            clearInterval(pollingIntervalId);
+            pollingIntervalId = null;
         }
-    } else {
-        showMessage(data.message || "操作失败", 'error');
-    }
-} catch (error) {
-    // 错误已由apiRequest处理
-} finally {
-    button.disabled = false;
-    button.textContent = originalText;
-    // 3秒后清除消息
-    setTimeout(() => {
-        elements.messageArea.innerHTML = '';
-    }, 3000);
-}
-}
 
-async function handleExecuteBuy() {
-    // 先验证交易量
-    const quantity = parseInt(elements.buyQuantity.value) || 0;
-    if (quantity <= 0) {
-        showMessage("请输入有效的买入数量", "error");
-        return;
-    }
-    
-    const strategy = elements.buyStrategy.value;
-    
-    // 根据不同策略显示不同对话框
-    if (strategy === 'random_pool') {
-        await handleRandomPoolBuy(quantity);
-    } else if (strategy === 'custom_stock') {
-        handleCustomStockBuy(quantity);
-    }
-}
+        // 设置适当的轮询间隔
+        POLLING_INTERVAL = isPageActive ? ACTIVE_POLLING_INTERVAL : INACTIVE_POLLING_INTERVAL;
 
-// --- 轮询机制 ---
-function startPolling() {
-    if (pollingIntervalId) {
-        console.log("已存在轮询，停止旧轮询");
+        // 确保轮询间隔至少为3秒
+        const actualInterval = Math.max(POLLING_INTERVAL, 3000);
+
+        console.log(`Starting data polling with interval: ${actualInterval}ms`);
+
+        // 先立即轮询一次
+        pollData();
+
+        pollingIntervalId = setInterval(pollData, actualInterval);
+
+        console.log(`Polling started with interval: ${actualInterval}ms`);  
+    }
+
+    function stopPolling() {
+        if (!pollingIntervalId) return; // 未在轮询
+        console.log("Stopping data polling.");
         clearInterval(pollingIntervalId);
         pollingIntervalId = null;
     }
 
-    // 设置适当的轮询间隔
-    POLLING_INTERVAL = isPageActive ? ACTIVE_POLLING_INTERVAL : INACTIVE_POLLING_INTERVAL;
+    async function pollData() {
+        console.log("Polling for data updates...");
 
-    // 确保轮询间隔至少为3秒
-    const actualInterval = Math.max(POLLING_INTERVAL, 3000);
-
-    console.log(`Starting data polling with interval: ${actualInterval}ms`);
-
-    // 先立即轮询一次
-    pollData();
-
-    pollingIntervalId = setInterval(pollData, actualInterval);
-
-    console.log(`Polling started with interval: ${actualInterval}ms`);  
-}
-
-function stopPolling() {
-    if (!pollingIntervalId) return; // 未在轮询
-    console.log("Stopping data polling.");
-    clearInterval(pollingIntervalId);
-    pollingIntervalId = null;
-}
-
-async function pollData() {
-    console.log("Polling for data updates...");
-
-    // 如果所有请求都在进行中，则跳过本次轮询
-    if (requestLocks.status && requestLocks.holdings && requestLocks.logs) {
-        console.log("All requests in progress, skipping poll cycle");
-        return;
-    }
-
-    // 添加微妙的刷新指示，而不是明显的加载提示
-    document.body.classList.add('api-refreshing');
-
-    // 根据条件决定是否显示刷新状态
-    const now = Date.now();
-    const allRecentlyUpdated = 
-        (now - lastDataUpdateTimestamps.status < 3000) &&
-        (now - lastDataUpdateTimestamps.holdings < 3000) &&
-        (now - lastDataUpdateTimestamps.logs < 3000);
-        
-    if (!allRecentlyUpdated) {
-        showRefreshStatus();
-    }
-
-    try {
-        const now = Date.now();
-        
-        // 根据各数据类型的刷新间隔决定是否刷新
-        if (!requestLocks.status && now - lastDataUpdateTimestamps.status >= DATA_REFRESH_INTERVALS.status) {
-            await fetchStatus();
-            // 短暂延迟，避免请求过于集中
-            await new Promise(r => setTimeout(r, 200));
-        }
-        
-        if (!requestLocks.holdings && now - lastDataUpdateTimestamps.holdings >= DATA_REFRESH_INTERVALS.holdings) {
-            await fetchHoldings();
-            await new Promise(r => setTimeout(r, 200));
-        }
-        
-        if (!requestLocks.logs && now - lastDataUpdateTimestamps.logs >= DATA_REFRESH_INTERVALS.logs) {
-            await fetchLogs();
-        }
-    } catch (error) {
-        console.error("Poll cycle error:", error);
-    } finally {
-        // 移除刷新状态
-        document.body.classList.remove('api-refreshing');
-    }
-
-    console.log("Polling cycle finished.");
-}
-
-// --- 浏览器性能检测 ---
-function checkBrowserPerformance() {
-// 检测帧率
-let lastTime = performance.now();
-let frames = 0;
-let fps = 0;
-
-function checkFrame() {
-    frames++;
-    const time = performance.now();
-    
-    if (time > lastTime + 1000) {
-        fps = Math.round((frames * 1000) / (time - lastTime));
-        console.log(`Current FPS: ${fps}`);
-        
-        // 根据帧率调整UI更新策略
-        if (fps < 30) {
-            // 低性能模式
-            document.body.classList.add('low-performance-mode');
-            // 减少动画和视觉效果
-            POLLING_INTERVAL = Math.max(POLLING_INTERVAL, 10000); // 降低轮询频率
-            if (pollingIntervalId) {
-                stopPolling();
-                startPolling();
-            }
-        } else {
-            document.body.classList.remove('low-performance-mode');
-        }
-        
-        frames = 0;
-        lastTime = time;
-    }
-    
-    requestAnimationFrame(checkFrame);
-}
-
-requestAnimationFrame(checkFrame);
-}
-
-// --- SSE连接 ---
-function initSSE() {
-if (sseConnection) {
-    sseConnection.close();
-}
-
-const sseURL = `${API_BASE_URL}/api/sse`;
-sseConnection = new EventSource(sseURL);
-
-// SSE节流相关
-let lastSseUpdateTime = 0;
-
-sseConnection.onmessage = function(event) {
-    try {
-        const data = JSON.parse(event.data);
-        console.log('SSE update received:', data);
-        
-        // 确保SSE更新之间至少有3秒间隔
-        const now = Date.now();
-        if (now - lastSseUpdateTime < 3000) {
-            console.log('SSE updates too frequent, throttling');
+        // 如果所有请求都在进行中，则跳过本次轮询
+        if (requestLocks.status && requestLocks.holdings && requestLocks.logs) {
+            console.log("All requests in progress, skipping poll cycle");
             return;
         }
-        lastSseUpdateTime = now;
-        
-        // 更新关键UI元素而不刷新整个页面
-        if (data.account_info) {
-            updateQuickAccountInfo(data.account_info);
+
+        // 添加微妙的刷新指示，而不是明显的加载提示
+        document.body.classList.add('api-refreshing');
+
+        // 根据条件决定是否显示刷新状态
+        const now = Date.now();
+        const allRecentlyUpdated = 
+            (now - lastDataUpdateTimestamps.status < 3000) &&
+            (now - lastDataUpdateTimestamps.holdings < 3000) &&
+            (now - lastDataUpdateTimestamps.logs < 3000);
+            
+        if (!allRecentlyUpdated) {
+            showRefreshStatus();
         }
-        
-        // 更新监控相关信息
-        if (data.monitoring) {
-            updateMonitoringInfo(data.monitoring);
+
+        try {
+            const now = Date.now();
+            
+            // 根据各数据类型的刷新间隔决定是否刷新
+            if (!requestLocks.status && now - lastDataUpdateTimestamps.status >= DATA_REFRESH_INTERVALS.status) {
+                await fetchStatus();
+                // 短暂延迟，避免请求过于集中
+                await new Promise(r => setTimeout(r, 200));
+            }
+            
+            if (!requestLocks.holdings && now - lastDataUpdateTimestamps.holdings >= DATA_REFRESH_INTERVALS.holdings) {
+                await fetchHoldings();
+                await new Promise(r => setTimeout(r, 200));
+            }
+            
+            if (!requestLocks.logs && now - lastDataUpdateTimestamps.logs >= DATA_REFRESH_INTERVALS.logs) {
+                await fetchLogs();
+            }
+        } catch (error) {
+            console.error("Poll cycle error:", error);
+        } finally {
+            // 移除刷新状态
+            document.body.classList.remove('api-refreshing');
         }
-        
-        // 显示轻微的更新提示（但不频繁显示）
-        if (now - lastRefreshStatusShown > 5000) {
-            showUpdatedIndicator();
-        }
-    } catch (e) {
-        console.error('SSE data parse error:', e);
+
+        console.log("Polling cycle finished.");
     }
-};
 
-sseConnection.onerror = function(error) {
-    console.error('SSE connection error:', error);
-    // 60秒后重试
-    setTimeout(() => {
-        initSSE();
-    }, 60000);
-};
-}
+    // --- 浏览器性能检测 ---
+    function checkBrowserPerformance() {
+        // 检测帧率
+        let lastTime = performance.now();
+        let frames = 0;
+        let fps = 0;
 
-// --- 事件监听器 ---
-elements.toggleMonitorBtn.addEventListener('click', handleToggleMonitor);
-elements.saveConfigBtn.addEventListener('click', handleSaveConfig);
-elements.clearLogBtn.addEventListener('click', handleClearLogs);
-elements.clearCurrentDataBtn.addEventListener('click', () => handleGenericAction(
-elements.clearCurrentDataBtn,
-API_ENDPOINTS.clearCurrentData,
-"确定要清空当前数据吗？"
-));
-elements.clearBuySellDataBtn.addEventListener('click', () => handleGenericAction(
-elements.clearBuySellDataBtn,
-API_ENDPOINTS.clearBuySellData,
-"确定要清空买入/卖出数据吗？"
-));
-elements.importDataBtn.addEventListener('click', () => handleGenericAction(
-elements.importDataBtn,
-API_ENDPOINTS.importSavedData,
-"确定要导入已保存的数据吗？当前设置和持仓将被覆盖。"
-));
-elements.initHoldingsBtn.addEventListener('click', handleInitHoldings);
-elements.executeBuyBtn.addEventListener('click', handleExecuteBuy);
+        function checkFrame() {
+            frames++;
+            const time = performance.now();
+            
+            if (time > lastTime + 1000) {
+                fps = Math.round((frames * 1000) / (time - lastTime));
+                console.log(`Current FPS: ${fps}`);
+                
+                // 根据帧率调整UI更新策略
+                if (fps < 30) {
+                    // 低性能模式
+                    document.body.classList.add('low-performance-mode');
+                    // 减少动画和视觉效果
+                    POLLING_INTERVAL = Math.max(POLLING_INTERVAL, 10000); // 降低轮询频率
+                    if (pollingIntervalId) {
+                        stopPolling();
+                        startPolling();
+                    }
+                } else {
+                    document.body.classList.remove('low-performance-mode');
+                }
+                
+                frames = 0;
+                lastTime = time;
+            }
+            
+            requestAnimationFrame(checkFrame);
+        }
 
-// 持仓表格"全选"复选框监听器
-elements.selectAllHoldings.addEventListener('change', (event) => {
-const isChecked = event.target.checked;
-const checkboxes = elements.holdingsTableBody.querySelectorAll('.holding-checkbox');
-checkboxes.forEach(cb => cb.checked = isChecked);
-});
+        requestAnimationFrame(checkFrame);
+    }
 
-// IP/端口变化监听器
-elements.totalAccounts.addEventListener('change', updateApiBaseUrl);
-elements.connectPort.addEventListener('change', updateApiBaseUrl);
+    // --- SSE连接 ---
+    function initSSE() {
+        if (sseConnection) {
+            sseConnection.close();
+        }
 
-// --- 初始数据加载 ---
-async function fetchAllData() {
-// 初始化API基础URL
-updateApiBaseUrl();
+        const sseURL = `${API_BASE_URL}/api/sse`;
+        sseConnection = new EventSource(sseURL);
 
-showMessage("正在加载初始数据...", 'loading', 0);
+        // SSE节流相关
+        let lastSseUpdateTime = 0;
 
-try {
-    // 顺序加载而非并行，避免过多并发请求
-    await fetchConfig();
-    await new Promise(r => setTimeout(r, 200));
-    
-    await fetchStatus();
-    await new Promise(r => setTimeout(r, 200));
-    
-    await fetchHoldings();
-    await new Promise(r => setTimeout(r, 200));
-    
-    await fetchLogs();
-    
-    showMessage("数据加载完成", 'success', 2000);
-} catch (error) {
-    showMessage("部分数据加载失败", 'error', 3000);
-}
+        sseConnection.onmessage = function(event) {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('SSE update received:', data);
+                
+                // 确保SSE更新之间至少有3秒间隔
+                const now = Date.now();
+                if (now - lastSseUpdateTime < 3000) {
+                    console.log('SSE updates too frequent, throttling');
+                    return;
+                }
+                lastSseUpdateTime = now;
+                
+                // 更新关键UI元素而不刷新整个页面
+                if (data.account_info) {
+                    updateQuickAccountInfo(data.account_info);
+                }
+                
+                // 更新监控相关信息
+                if (data.monitoring) {
+                    updateMonitoringInfo(data.monitoring);
+                }
+                
+                // 显示轻微的更新提示（但不频繁显示）
+                if (now - lastRefreshStatusShown > 5000) {
+                    showUpdatedIndicator();
+                }
+            } catch (e) {
+                console.error('SSE data parse error:', e);
+            }
+        };
 
-// 自动启动轮询
-startPolling();
+        sseConnection.onerror = function(error) {
+            console.error('SSE connection error:', error);
+            // 60秒后重试
+            setTimeout(() => {
+                initSSE();
+            }, 60000);
+        };
+    }
 
-// 启动SSE
-setTimeout(() => {
-    initSSE();
-}, 1000);
+    // --- 事件监听器 ---
+    elements.toggleMonitorBtn.addEventListener('click', handleToggleMonitor);
+    elements.saveConfigBtn.addEventListener('click', handleSaveConfig);
+    elements.clearLogBtn.addEventListener('click', handleClearLogs);
+    elements.clearCurrentDataBtn.addEventListener('click', () => handleGenericAction(
+        elements.clearCurrentDataBtn,
+        API_ENDPOINTS.clearCurrentData,
+        "确定要清空当前数据吗？"
+    ));
+    elements.clearBuySellDataBtn.addEventListener('click', () => handleGenericAction(
+        elements.clearBuySellDataBtn,
+        API_ENDPOINTS.clearBuySellData,
+        "确定要清空买入/卖出数据吗？"
+    ));
+    elements.importDataBtn.addEventListener('click', () => handleGenericAction(
+        elements.importDataBtn,
+        API_ENDPOINTS.importSavedData,
+        "确定要导入已保存的数据吗？当前设置和持仓将被覆盖。"
+    ));
+    elements.initHoldingsBtn.addEventListener('click', handleInitHoldings);
+    elements.executeBuyBtn.addEventListener('click', handleExecuteBuy);
 
-// 检测浏览器性能
-setTimeout(checkBrowserPerformance, 5000);
+    // 持仓表格"全选"复选框监听器
+    elements.selectAllHoldings.addEventListener('change', (event) => {
+        const isChecked = event.target.checked;
+        const checkboxes = elements.holdingsTableBody.querySelectorAll('.holding-checkbox');
+        checkboxes.forEach(cb => cb.checked = isChecked);
+    });
 
-// 开始API连接检查
-setTimeout(throttledCheckApiConnection, 2000);
-}
+    // IP/端口变化监听器
+    elements.totalAccounts.addEventListener('change', updateApiBaseUrl);
+    elements.connectPort.addEventListener('change', updateApiBaseUrl);
 
-console.log("Adding event listeners and fetching initial data...");
-fetchAllData(); // 脚本运行时加载初始数据
+    // --- 初始数据加载 ---
+    async function fetchAllData() {
+        // 初始化API基础URL
+        updateApiBaseUrl();
+
+        showMessage("正在加载初始数据...", 'loading', 0);
+
+        try {
+            // 顺序加载而非并行，避免过多并发请求
+            await fetchConfig();
+            await new Promise(r => setTimeout(r, 200));
+            
+            await fetchStatus();
+            await new Promise(r => setTimeout(r, 200));
+            
+            await fetchHoldings();
+            await new Promise(r => setTimeout(r, 200));
+            
+            await fetchLogs();
+            
+            showMessage("数据加载完成", 'success', 2000);
+        } catch (error) {
+            showMessage("部分数据加载失败", 'error', 3000);
+        }
+
+        // 自动启动轮询
+        startPolling();
+
+        // 启动SSE
+        setTimeout(() => {
+            initSSE();
+        }, 1000);
+
+        // 检测浏览器性能
+        setTimeout(checkBrowserPerformance, 5000);
+
+        // 开始API连接检查
+        setTimeout(throttledCheckApiConnection, 2000);
+    }
+
+    console.log("Adding event listeners and fetching initial data...");
+    fetchAllData(); // 脚本运行时加载初始数据
 });
 
 console.log("Script loaded");
