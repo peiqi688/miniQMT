@@ -409,7 +409,7 @@ class DataManager:
             
             self.conn.commit()
 
-            logger.info(f"已保存 {stock_code} 的历史数据到数据库, 共 {len(data_df)} 条记录")
+            # logger.info(f"已保存 {stock_code} 的历史数据到数据库, 共 {len(data_df)} 条记录")
             
         except Exception as e:
             logger.error(f"保存 {stock_code} 的历史数据时出错: {str(e)}")
@@ -549,7 +549,7 @@ class DataManager:
             latest_date = result[0]
             # 从最新日期的下一天开始获取
             start_date = (datetime.strptime(latest_date, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y%m%d')
-            logger.info(f"更新 {stock_code} 的数据，从 {start_date} 开始")
+            # logger.info(f"更新 {stock_code} 的数据，从 {start_date} 开始")
         else:
             # 如果没有历史数据，获取完整的历史数据
             start_date = None

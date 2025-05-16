@@ -1459,7 +1459,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const endpoint = isMonitoring ? API_ENDPOINTS.stopMonitor : API_ENDPOINTS.startMonitor;
         const actionText = isMonitoring ? '停止' : '启动';
         elements.toggleMonitorBtn.disabled = true;
-        showMessage(`${actionText}监控中...`, 'loading', 0);
+        // showMessage(`${actionText}监控中...`, 'loading', 0);
 
         try {
             // 构建仅包含监控状态的数据
@@ -1479,7 +1479,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 更新UI
                 updateMonitoringUI();
                 
-                showMessage(`${actionText}监控成功: ${data.message || ''}（注意：此操作不影响自动交易）`, 'success');
+                // showMessage(`${actionText}监控成功: ${data.message || ''}（注意：此操作不影响自动交易）`, 'success');
             } else {
                 showMessage(`${actionText}监控失败: ${data.message || '未知错误'}`, 'error');
                 // 恢复用户意图，因为操作失败
