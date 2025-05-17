@@ -23,7 +23,9 @@ DIRECTION_BUY = 48   # 买入方向
 DIRECTION_SELL = 49  # 卖出方向
 
 class TradingExecutor:
-    """交易执行类，负责执行交易指令"""
+    """ 交易执行类，负责执行交易指令   """
+    """处理Web页面来的模拟/实盘交易指令"""
+    """维护虚拟账户以实现模拟盘交易功能"""
     
     def __init__(self):
         """初始化交易执行器"""
@@ -876,6 +878,7 @@ class TradingExecutor:
                         # 更新模拟账户资金
                         cost = adjusted_price * volume * 1.0003  # 包含手续费
                         self.simulation_balance -= cost
+                        config.SIMULATION_BALANCE = self.simulation_balance
                         logger.info(f"模拟账户资金更新: -{cost:.2f}, 余额: {self.simulation_balance:.2f}")
                         
                         logger.info(f"[模拟] 买入 {stock_code} 成功，委托号: {sim_order_id}, 价格: {adjusted_price}, 数量: {volume}")
@@ -1015,6 +1018,7 @@ class TradingExecutor:
                     # 更新模拟账户资金
                     revenue = adjusted_price * volume * 0.9987  # 扣除手续费
                     self.simulation_balance += revenue
+                    config.SIMULATION_BALANCE = self.simulation_balance
                     logger.info(f"模拟账户资金更新: +{revenue:.2f}, 余额: {self.simulation_balance:.2f}")
                     
                     logger.info(f"[模拟] 卖出 {stock_code} 成功，委托号: {sim_order_id}, 价格: {adjusted_price}, 数量: {volume}")

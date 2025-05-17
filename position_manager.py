@@ -15,11 +15,13 @@ from logger import get_logger
 from data_manager import get_data_manager
 from easy_qmt_trader import easy_qmt_trader
 
+
 # 获取logger
 logger = get_logger("position_manager")
 
 class PositionManager:
     """持仓管理类，负责跟踪和管理持仓"""
+    """根据自动交易策略，调用easy QMT Trader自动执行交易指令"""
     
     def __init__(self):
         """初始化持仓管理器"""
@@ -593,6 +595,19 @@ class PositionManager:
     def get_account_info(self):
         """获取账户信息"""
         try:
+
+            # 如果是模拟交易模式，直接返回模拟账户信息（由trading_executor模块管理）
+            if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
+                logger.info(f"返回模拟账户信息，余额: {config.SIMULATION_BALANCE}")
+                return {
+                    'account_id': 'SIMULATION',
+                    'account_type': 'SIMULATION',
+                    'balance': config.SIMULATION_BALANCE,
+                    'available':  config.SIMULATION_BALANCE,
+                    'market_value': config.SIMULATION_BALANCE,
+                    'profit_loss': 0
+                }
+
             # 使用qmt_trader获取账户信息
             account_df = self.qmt_trader.balance()
             

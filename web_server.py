@@ -434,23 +434,29 @@ def test_database():
 
 @app.route('/api/logs/clear', methods=['POST'])
 def clear_logs():
-    """清空日志"""
+    """清空当天日志"""
     try:
-        # 执行清空日志的操作
-        # 这里假设交易记录存储在数据库中，我们执行清空操作
+        # 获取当天日期
+        today = datetime.now().strftime('%Y-%m-%d')
+        
+        # 执行清空当天日志的操作
         cursor = data_manager.conn.cursor()
-        cursor.execute("DELETE FROM trade_records")
+        # 修改SQL，添加日期过滤条件
+        cursor.execute("DELETE FROM trade_records WHERE DATE(trade_time) = ?", (today,))
+        affected_rows = cursor.rowcount
         data_manager.conn.commit()
+        
+        logger.info(f"已清除当天({today})的交易记录，共{affected_rows}条")
         
         return jsonify({
             'status': 'success',
-            'message': '日志已清空'
+            'message': f'已清除当天交易记录，共{affected_rows}条'
         })
     except Exception as e:
-        logger.error(f"清空日志时出错: {str(e)}")
+        logger.error(f"清空当天日志时出错: {str(e)}")
         return jsonify({
             'status': 'error',
-            'message': f"清空日志失败: {str(e)}"
+            'message': f"清空当天日志失败: {str(e)}"
         }), 500
 
 @app.route('/api/data/clear_current', methods=['POST'])

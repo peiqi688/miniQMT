@@ -179,25 +179,13 @@ class DataManager:
         '''
         选择数据类型
         '''
-        if stock[:3] in ['110','113','123','127','128','111','118'] or stock[:2] in ['11','12']:
-            return 'bond'
-        elif stock[:3] in ['510','511','512','513','514','515','516','517','518','588','159','501','164'] or stock[:2] in ['16']:
-            return 'fund'
-        else:
-            return 'stock'
+        return Methods.select_data_type(stock)
+    
     def _adjust_stock(self, stock='600031.SH'):
         '''
         调整代码
         '''
-        if stock[-2:]=='SH' or stock[-2:]=='SZ' or stock[-2:]=='sh' or stock[-2:]=='sz':
-            stock=stock.upper()
-        else:
-            if stock[:3] in ['600','601','603','688','510','511',
-                                '512','513','515','113','110','118','501'] or stock[:2] in ['11']:
-                stock=stock+'.SH'
-            else:
-                stock=stock+'.SZ'
-        return stock            
+        return Methods.add_xt_suffix(stock)
 
     def download_history_data(self, stock_code, period=None, start_date=None, end_date=None):
         """

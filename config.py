@@ -40,7 +40,8 @@ INITIAL_DAYS = 365
 # 定时更新间隔（秒）
 UPDATE_INTERVAL = 60
 # 备选池股票文件路径
-STOCK2BUY_FILE = os.path.join(DATA_DIR, "stock_to_buy.json")
+STOCK2BUY_FILE = os.path.join(DATA_DIR, "stock2buy.json")
+
 # ======================= 交易配置 =======================
 # 交易账号信息（从外部文件读取，避免敏感信息硬编码）
 ACCOUNT_CONFIG_FILE = "account_config.json"
