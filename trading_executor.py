@@ -360,11 +360,13 @@ class TradingExecutor:
             
             self.conn.commit()
             logger.info(f"保存交易记录成功: {stock_code}, {trade_type}, 价格: {price}, 数量: {volume}")
-            
+            return True
+        
         except Exception as e:
             logger.error(f"保存交易记录时出错: {str(e)}")
             self.conn.rollback()
-    
+            return False
+        
     def _update_position_after_trade(self, stock_code, trade_type, price, volume):
         """
         交易后更新持仓信息
@@ -717,10 +719,20 @@ class TradingExecutor:
         """
         with self.trade_lock:
             try:
+
+                # 增加详细日志
+                logger.info(f"开始买入处理: {stock_code}, volume={volume}, price={price}, amount={amount}")
+ 
+
                 # 检查是否在交易时间
-                if not config.is_trade_time():
-                    logger.warning("当前不是交易时间，无法下单")
-                    return None
+                is_trade_time = config.is_trade_time()
+                logger.info(f"交易时间检查: {is_trade_time}")
+                if not is_trade_time:
+                    logger.warning("当前不是交易时间，强制允许交易(用于测试)")
+                    # 仅在模拟模式下强制允许
+                    if not hasattr(config, 'ENABLE_SIMULATION_MODE') or not config.ENABLE_SIMULATION_MODE:
+                        logger.warning("非模拟模式，强制拒绝非交易时间交易")
+                        return None
                 
                 # 检查全局监控总开关
                 if hasattr(config, 'ENABLE_AUTO_TRADING') and not config.ENABLE_AUTO_TRADING:
@@ -763,24 +775,34 @@ class TradingExecutor:
                     sim_order_id = self._generate_sim_order_id()
                     trade_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     
-                    # 记录模拟交易
-                    self._save_trade_record(
-                        stock_code=stock_code,
-                        trade_time=trade_time,
-                        trade_type='BUY',
-                        price=adjusted_price,
-                        volume=volume,
-                        amount=adjusted_price * volume,
-                        trade_id=sim_order_id,
-                        commission=adjusted_price * volume * 0.0003,  # 模拟手续费
-                        strategy='simulation'
-                    )
+    
+                    # 详细日志每一步
+                    logger.info(f"模拟交易模式: 生成订单ID: {sim_order_id}")
                     
-                    # 更新持仓
-                    self._update_position_after_trade(stock_code, 'BUY', adjusted_price, volume)
+                    try:
+                        # 记录模拟交易
+                        trade_saved = self._save_trade_record(
+                            stock_code=stock_code,
+                            trade_time=trade_time,
+                            trade_type='BUY',
+                            price=adjusted_price,
+                            volume=volume,
+                            amount=adjusted_price * volume,
+                            trade_id=sim_order_id,
+                            commission=adjusted_price * volume * 0.0003,  # 模拟手续费
+                            strategy='simulation'
+                        )
+                        
+                        if not trade_saved:
+                            logger.error(f"模拟交易记录保存失败: {stock_code}")
                     
-                    logger.info(f"[模拟] 买入 {stock_code} 成功，委托号: {sim_order_id}, 价格: {adjusted_price}, 数量: {volume}")
-                    return sim_order_id
+                        # 更新持仓
+                        self._update_position_after_trade(stock_code, 'BUY', adjusted_price, volume)
+                        
+                        logger.info(f"[模拟] 买入 {stock_code} 成功，委托号: {sim_order_id}, 价格: {adjusted_price}, 数量: {volume}")
+                        return sim_order_id
+                    except Exception as e:
+                            logger.error(f"模拟交易记录保存异常: {str(e)}")
                 
                 # 实盘交易
                 order_id = None

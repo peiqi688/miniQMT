@@ -412,7 +412,26 @@ def debug_status():
             'status': 'error',
             'message': f"获取调试状态失败: {str(e)}"
         }), 500
-    
+
+@app.route('/api/debug/db-test', methods=['GET'])
+def test_database():
+    """测试数据库连接"""
+    try:
+        cursor = data_manager.conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM trade_records")
+        count = cursor.fetchone()[0]
+        return jsonify({
+            'status': 'success',
+            'message': '数据库连接正常',
+            'trade_records_count': count
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f"数据库连接错误: {str(e)}"
+        }), 500
+
+
 @app.route('/api/logs/clear', methods=['POST'])
 def clear_logs():
     """清空日志"""
