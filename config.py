@@ -63,6 +63,7 @@ ACCOUNT_CONFIG = get_account_config()
 POSITION_UNIT = 20000  # 每次买入金额
 MAX_POSITION_VALUE = 50000  # 单只股票最大持仓金额
 MAX_TOTAL_POSITION_RATIO = 0.95  # 最大总持仓比例（占总资金）
+SIMULATION_BALANCE = 1000000 # 模拟持仓
 
 # 买入策略
 BUY_GRID_LEVELS = [1.0, 0.93, 0.86]  # 建仓价格网格（第一个是初次建仓价格比例，后面是补仓价格比例）

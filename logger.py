@@ -21,7 +21,8 @@ log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(me
 
 # 创建日志处理器
 file_handler = RotatingFileHandler(
-    log_file, 
+    log_file,
+    encoding='utf-8',  # 指定编码为 UTF-8
     maxBytes=config.LOG_MAX_SIZE, 
     backupCount=config.LOG_BACKUP_COUNT
 )
