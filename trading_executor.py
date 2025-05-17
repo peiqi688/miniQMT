@@ -380,6 +380,9 @@ class TradingExecutor:
         strategy (str): 策略名称
         """
         try:
+            
+            logger.info(f"保存交易记录: {stock_code} {trade_type} 价格:{price:.2f} 数量:{volume} 金额:{amount:.2f}")
+            
             cursor = self.conn.cursor()
             cursor.execute("""
                 INSERT INTO trade_records 

@@ -360,9 +360,14 @@ class PositionManager:
                 latest_data = self.data_manager.get_latest_data(stock_code)
                 if latest_data:
                     current_price = latest_data.get('lastPrice')
+                    if current_price is not None:
+                        p_current_price = float(current_price)
+                    else:
+                        logger.warning(f"未能获取 {stock_code} 的最新价格，使用成本价, latest_data: {latest_data}")
+                        p_current_price = p_cost_price
                 else:
                     logger.warning(f"未能获取 {stock_code} 的最新行情，使用成本价, latest_data: {latest_data}")
-                    p_current_price = p_cost_price # p_cost_price is already float
+                    p_current_price = p_cost_price
             
             # Ensure p_current_price is a float, default to 0.0 if it's still None
             if p_current_price is None: p_current_price = 0.0
