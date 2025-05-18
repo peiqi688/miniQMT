@@ -477,12 +477,17 @@ def clear_logs():
 
 @app.route('/api/data/clear_current', methods=['POST'])
 def clear_current_data():
-    """清空当前数据"""
     try:
-        # 清空持仓数据
-        cursor = data_manager.conn.cursor()
+        # 修改：清空内存数据库中的持仓数据，而非SQLite
+        cursor = position_manager.memory_conn.cursor()
         cursor.execute("DELETE FROM positions")
-        data_manager.conn.commit()
+        position_manager.memory_conn.commit()
+        
+        # 重置缓存
+        position_manager.positions_cache = None
+        position_manager.last_position_update_time = 0
+        
+        logger.info("内存数据库中的持仓数据已清空")
         
         return jsonify({
             'status': 'success',
