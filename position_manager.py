@@ -83,6 +83,124 @@ class PositionManager:
         self.memory_conn.commit()
         logger.info("内存数据库表结构已创建")
 
+
+    def _sync_real_positions_to_memory(self, real_positions_df):
+        """将实盘持仓数据同步到内存数据库"""
+        try:
+            # 首先检查输入数据
+            if real_positions_df is None or not isinstance(real_positions_df, pd.DataFrame) or real_positions_df.empty:
+                logger.warning("传入的实盘持仓数据无效，跳过同步")
+                return
+                
+            # 确保必要的列存在
+            required_columns = ['证券代码', '股票余额', '可用余额', '成本价', '市值']
+            missing_columns = [col for col in required_columns if col not in real_positions_df.columns]
+            if missing_columns:
+                logger.warning(f"实盘持仓数据缺少必要列: {missing_columns}，无法同步")
+                return
+
+            # 获取内存数据库中所有持仓的股票代码
+            cursor = self.memory_conn.cursor()
+            cursor.execute("SELECT stock_code FROM positions")
+            memory_stock_codes = {row[0] for row in cursor.fetchall() if row[0] is not None}
+            current_positions = set()
+
+            # 遍历实盘持仓数据
+            for _, row in real_positions_df.iterrows():
+                try:
+                    # 安全提取并转换数据
+                    stock_code = str(row['证券代码']) if row['证券代码'] is not None else None
+                    if not stock_code:
+                        continue  # 跳过无效数据
+                        
+                    # 安全提取并转换数值
+                    try:
+                        volume = int(float(row['股票余额'])) if row['股票余额'] is not None else 0
+                    except (ValueError, TypeError):
+                        volume = 0
+                        
+                    try:
+                        available = int(float(row['可用余额'])) if row['可用余额'] is not None else 0
+                    except (ValueError, TypeError):
+                        available = 0
+                        
+                    try:
+                        cost_price = float(row['成本价']) if row['成本价'] is not None else 0.0
+                    except (ValueError, TypeError):
+                        cost_price = 0.0
+                        
+                    try:
+                        market_value = float(row['市值']) if row['市值'] is not None else 0.0
+                    except (ValueError, TypeError):
+                        market_value = 0.0
+                    
+                    # 获取当前价格
+                    current_price = cost_price  # 默认使用成本价
+                    try:
+                        latest_quote = self.data_manager.get_latest_data(stock_code)
+                        if latest_quote and isinstance(latest_quote, dict) and 'lastPrice' in latest_quote and latest_quote['lastPrice'] is not None:
+                            current_price = float(latest_quote['lastPrice'])
+                    except Exception as e:
+                        logger.warning(f"获取 {stock_code} 的最新价格失败: {str(e)}，使用成本价")
+                    
+                    # 查询内存数据库中是否已存在该股票的持仓记录
+                    cursor.execute("SELECT profit_triggered, open_date, highest_price, stop_loss_price FROM positions WHERE stock_code=?", (stock_code,))
+                    result = cursor.fetchone()
+                    
+                    if result:
+                        # 如果存在，则更新持仓信息，但不修改open_date
+                        profit_triggered = result[0] if result[0] is not None else False
+                        open_date = result[1] if result[1] is not None else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        highest_price = result[2] if result[2] is not None else 0.0
+                        stop_loss_price = result[3] if result[3] is not None else 0.0
+                        
+                        # 所有参数都确保有有效值
+                        self.update_position(
+                            stock_code=stock_code, 
+                            volume=volume, 
+                            cost_price=cost_price, 
+                            available=available, 
+                            market_value=market_value, 
+                            current_price=current_price, 
+                            profit_triggered=profit_triggered, 
+                            highest_price=highest_price, 
+                            open_date=open_date, 
+                            stop_loss_price=stop_loss_price
+                        )
+                    else:
+                        # 如果不存在，则新增持仓记录
+                        self.update_position(
+                            stock_code=stock_code, 
+                            volume=volume, 
+                            cost_price=cost_price, 
+                            available=available, 
+                            market_value=market_value, 
+                            current_price=current_price, 
+                            open_date=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        )
+                    
+                    # 添加到当前持仓集合
+                    current_positions.add(stock_code)
+                    memory_stock_codes.discard(stock_code)
+                
+                except Exception as e:
+                    logger.error(f"处理持仓行数据时出错: {str(e)}")
+                    continue  # 跳过这一行，继续处理其他行
+            
+            # 处理内存数据库中存在但实盘已清仓的股票
+            if current_positions:  # 只有当至少有一个有效的当前持仓时才执行删除
+                for stock_code in memory_stock_codes:
+                    if stock_code:  # 确保stock_code不为None
+                        self.remove_position(stock_code)
+
+            # 更新 stock_positions.json
+            self._update_stock_positions_file(current_positions)
+
+        except Exception as e:
+            logger.error(f"同步实盘持仓数据到内存数据库时出错: {str(e)}")
+            self.memory_conn.rollback()
+
+
     def _sync_db_to_memory(self):
         """将数据库数据同步到内存数据库"""
         try:
@@ -184,22 +302,56 @@ class PositionManager:
             # 只在时间间隔到达后更新数据
             if (current_time - self.last_position_update_time) >= self.position_update_interval:
                 # 获取实盘持仓数据
-                real_positions_df = self.qmt_trader.position()
+                try:
+                    real_positions_df = self.qmt_trader.position()
+                    
+                    # 检查实盘数据
+                    if real_positions_df is None:
+                        logger.warning("实盘持仓数据获取失败，返回None")
+                        real_positions_df = pd.DataFrame()  # 使用空DataFrame而不是None
+                    elif not isinstance(real_positions_df, pd.DataFrame):
+                        logger.warning(f"实盘持仓数据类型错误: {type(real_positions_df)}，将转换为DataFrame")
+                        try:
+                            # 尝试转换为DataFrame
+                            real_positions_df = pd.DataFrame(real_positions_df)
+                        except:
+                            real_positions_df = pd.DataFrame()  # 转换失败则使用空DataFrame
+                    
+                    # 同步实盘持仓数据到内存数据库
+                    if not real_positions_df.empty:
+                        self._sync_real_positions_to_memory(real_positions_df)
+                    
+                    # 更新缓存和时间戳
+                    query = "SELECT * FROM positions"
+                    self.positions_cache = pd.read_sql_query(query, self.memory_conn)
+                    
+                    # 确保所有列都有合适的默认值
+                    if not self.positions_cache.empty:
+                        # 确保数值列为数值类型
+                        numeric_columns = ['volume', 'available', 'cost_price', 'current_price', 
+                                            'market_value', 'profit_ratio', 'highest_price', 'stop_loss_price']
+                        for col in numeric_columns:
+                            if col in self.positions_cache.columns:
+                                # 转换为数值，无效值替换为0
+                                self.positions_cache[col] = pd.to_numeric(self.positions_cache[col], errors='coerce').fillna(0)
+                        
+                        # 确保布尔列为布尔类型
+                        if 'profit_triggered' in self.positions_cache.columns:
+                            self.positions_cache['profit_triggered'] = self.positions_cache['profit_triggered'].fillna(False)
+                    
+                    self.last_position_update_time = current_time
+                    logger.debug(f"更新持仓缓存，共 {len(self.positions_cache)} 条记录")
+                except Exception as e:
+                    logger.error(f"获取和处理持仓数据时出错: {str(e)}")
+                    # 如果出错，返回上次的缓存，或者空DataFrame
+                    if self.positions_cache is None:
+                        self.positions_cache = pd.DataFrame()
                 
-                # 同步实盘持仓数据到内存数据库
-                if not real_positions_df.empty:
-                    self._sync_real_positions_to_memory(real_positions_df)
-                
-                # 更新缓存和时间戳
-                query = "SELECT * FROM positions"
-                self.positions_cache = pd.read_sql_query(query, self.memory_conn)
-                self.last_position_update_time = current_time
-                logger.debug(f"更新持仓缓存，共 {len(self.positions_cache)} 条记录")
-            
+            # 返回缓存数据的副本
             return self.positions_cache.copy() if self.positions_cache is not None else pd.DataFrame()
         except Exception as e:
             logger.error(f"获取所有持仓信息时出错: {str(e)}")
-            return pd.DataFrame()
+            return pd.DataFrame()  # 出错时返回空DataFrame
     
     def get_position(self, stock_code):
         """获取指定股票的持仓"""
@@ -235,66 +387,7 @@ class PositionManager:
         # 可以根据需要修改判断逻辑
         return 'unittest' in sys.modules
 
-    
-    def _sync_real_positions_to_memory(self, real_positions_df):
-        """
-        将实盘持仓数据同步到内存数据库
-        
-        参数:
-        real_positions_df (pandas.DataFrame): 实盘持仓数据
-        """
-        try:
-            # 获取内存数据库中所有持仓的股票代码
-            cursor = self.memory_conn.cursor()
-            cursor.execute("SELECT stock_code FROM positions")
-            memory_stock_codes = {row[0] for row in cursor.fetchall()}
-            current_positions = set()
-
-            # 遍历实盘持仓数据
-            for _, row in real_positions_df.iterrows():
-                stock_code = row['证券代码']
-                volume = row['股票余额']
-                available = row['可用余额']
-                cost_price = row['成本价']
-                market_value = row['市值']
-                
-                # 获取当前价格
-                latest_quote = self.data_manager.get_latest_data(stock_code)
-                if latest_quote:
-                    current_price = latest_quote.get('lastPrice')
-                else:
-                    logger.warning(f"未能获取 {stock_code} 的最新价格，使用成本价, latest_quote: {latest_quote}")
-                    current_price = cost_price
-                
-                # 查询内存数据库中是否已存在该股票的持仓记录
-                cursor.execute("SELECT profit_triggered, open_date, highest_price, stop_loss_price FROM positions WHERE stock_code=?", (stock_code,))
-                result = cursor.fetchone()
-                
-                if result:
-                    # 如果存在，则更新持仓信息，但不修改open_date
-                    profit_triggered, open_date, highest_price, stop_loss_price = result
-                    self.update_position(stock_code, volume, cost_price, available, market_value, current_price, profit_triggered, highest_price, open_date, stop_loss_price)
-                else:
-                    # 如果不存在，则新增持仓记录
-                    self.update_position(stock_code, volume, cost_price, available, market_value, current_price, open_date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-                
-                # 从内存数据库股票代码集合中移除已处理的股票代码
-                memory_stock_codes.discard(stock_code)
-                current_positions.add(stock_code)
-
-            # 处理内存数据库中存在但实盘已清仓的股票
-            if not real_positions_df.empty:  # 只有当实盘数据不为空时才执行删除
-                for stock_code in memory_stock_codes - current_positions:
-                    self.remove_position(stock_code)
-
-            # Update stock_positions.json
-            self._update_stock_positions_file(current_positions)
-
-            # logger.info("实盘持仓数据已同步到内存数据库")
-        except Exception as e:
-            logger.error(f"同步实盘持仓数据到内存数据库时出错: {str(e)}")
-            self.memory_conn.rollback()
-
+ 
     def _update_stock_positions_file(self, current_positions):
         """
         更新 stock_positions.json 文件，如果内容有变化则写入。
@@ -324,79 +417,88 @@ class PositionManager:
             logger.error(f"更新出错 {self.stock_positions_file}: {str(e)}")
 
     def update_position(self, stock_code, volume, cost_price, available=None, market_value=None, current_price=None, profit_triggered=False, highest_price=None, open_date=None, stop_loss_price=None):
-        """
-        更新持仓信息
-        
-        参数:
-        stock_code (str): 股票代码
-        volume (int): 持仓数量
-        cost_price (float): 成本价
-        available (int): 可用数量
-        market_value (float): 市值，如果为None，会获取最新行情
-        current_price (float): 当前价格，如果为None，会获取最新行情
-        profit_triggered (bool): 是否已经触发首次止盈
-        highest_price (float): 历史最高价
-        open_date (str): 开仓时间，如果为None，则使用当前时间
-        stop_loss_price (float): 当前止损价格，如果为None，则重新计算
-        
-        返回:
-        bool: 是否更新成功
-        """
+        """更新持仓信息"""
         # Convert inputs to appropriate numeric types at the beginning
         try:
+            # 确保stock_code有效
+            if stock_code is None or stock_code == "":
+                logger.error("股票代码不能为空")
+                return False
+            
             # volume is typically int, but float conversion is safer for general arithmetic
-            p_volume = float(volume) if volume is not None else 0.0
+            p_volume = int(float(volume)) if volume is not None else 0
             p_cost_price = float(cost_price) if cost_price is not None else 0.0
 
             # current_price can be None if it needs to be fetched
             p_current_price = float(current_price) if current_price is not None else None
 
             # available defaults to volume if not provided
-            p_available = float(available) if available is not None else p_volume
+            p_available = int(float(available)) if available is not None else p_volume
             
             # highest_price and stop_loss_price can be None
             p_highest_price = float(highest_price) if highest_price is not None else None
             p_stop_loss_price = float(stop_loss_price) if stop_loss_price is not None else None
+
+            # profit_triggered 布尔值转换
+            if isinstance(profit_triggered, str):
+                p_profit_triggered = profit_triggered.lower() in ['true', '1', 't', 'y', 'yes']
+            else:
+                p_profit_triggered = bool(profit_triggered)
 
         except (ValueError, TypeError) as e:
             logger.error(f"Error converting inputs for {stock_code} to float: {e}. volume='{volume}', cost_price='{cost_price}', current_price='{current_price}'")
             self.memory_conn.rollback() # Ensure rollback on early error
             return False
 
-
         try:
             # 如果当前价格为None，获取最新行情
             if p_current_price is None:
                 # 获取最新数据
                 latest_data = self.data_manager.get_latest_data(stock_code)
-                if latest_data:
-                    current_price = latest_data.get('lastPrice')
-                    if current_price is not None:
-                        p_current_price = float(current_price)
-                    else:
-                        logger.warning(f"未能获取 {stock_code} 的最新价格，使用成本价, latest_data: {latest_data}")
-                        p_current_price = p_cost_price
+                if latest_data and isinstance(latest_data, dict) and 'lastPrice' in latest_data and latest_data['lastPrice'] is not None:
+                    p_current_price = float(latest_data['lastPrice'])
                 else:
-                    logger.warning(f"未能获取 {stock_code} 的最新行情，使用成本价, latest_data: {latest_data}")
+                    logger.debug(f"未能获取 {stock_code} 的最新价格，使用成本价")
                     p_current_price = p_cost_price
             
-            # Ensure p_current_price is a float, default to 0.0 if it's still None
-            if p_current_price is None: p_current_price = 0.0
+            # Ensure p_current_price is a float, default to cost_price if it's still None
+            if p_current_price is None:
+                p_current_price = p_cost_price if p_cost_price is not None else 0.0
                     
             # 计算市值和收益率
             # Use the converted variables (p_volume, p_current_price, p_cost_price)
             p_market_value = round(p_volume * p_current_price, 2)
-            # profit_ratio = 100*round((current_price - cost_price) / cost_price if cost_price > 0 else 0, 4)
-            p_profit_ratio = round(100 * (p_current_price - p_cost_price) / p_cost_price if p_cost_price > 0 else 0, 2)
+            
+            # 防止除零错误
+            if p_cost_price > 0:
+                p_profit_ratio = round(100 * (p_current_price - p_cost_price) / p_cost_price, 2)
+            else:
+                p_profit_ratio = 0.0
             
             # Round the final values before storing or using in DB operations
             final_cost_price = round(p_cost_price, 2)
             final_current_price = round(p_current_price, 2)
-            final_highest_price = round(p_highest_price, 2) if p_highest_price is not None else None
-            final_stop_loss_price = round(p_stop_loss_price, 2) if p_stop_loss_price is not None else None
+            
+            # 处理最高价
+            if p_highest_price is not None:
+                final_highest_price = round(p_highest_price, 2)
+            else:
+                final_highest_price = final_current_price  # 默认使用当前价格
+            
+            # 处理止损价格
+            if p_stop_loss_price is not None:
+                final_stop_loss_price = round(p_stop_loss_price, 2)
+            else:
+                # 计算默认止损价格
+                calculated_slp = self.calculate_stop_loss_price(final_cost_price, final_highest_price, p_profit_triggered)
+                final_stop_loss_price = round(calculated_slp, 2) if calculated_slp is not None else None
             
             # 获取当前时间
             now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            # 处理open_date
+            if open_date is None:
+                open_date = now
             
             # 检查是否已有持仓记录
             cursor = self.memory_conn.cursor()
@@ -578,46 +680,86 @@ class PositionManager:
     def update_all_positions_price(self):
         """更新所有持仓的最新价格"""
         try:
+            # 首先检查是否有持仓数据
             positions = self.get_all_positions()
-            if positions.empty:
+            
+            # 检查positions是否为None或空DataFrame
+            if positions is None or positions.empty:
                 logger.debug("当前没有持仓，无需更新价格")
                 return
             
+            # 检查positions是否含有必要的列
+            required_columns = ['stock_code', 'volume', 'cost_price', 'current_price', 'highest_price']
+            missing_columns = [col for col in required_columns if col not in positions.columns]
+            if missing_columns:
+                logger.warning(f"持仓数据缺少必要列: {missing_columns}，无法更新价格")
+                return
+            
             for _, position in positions.iterrows():
-                stock_code = position['stock_code']
-                # volume = int(position['volume'])
-                # cost_price = float(position['cost_price'])
-                # profit_triggered = position['profit_triggered']
-                # highest_price = float(position['highest_price'])
-                # open_date = position['open_date']
-
-                volume = int(position['volume']) if position['volume'] is not None else 0
-                cost_price = float(position['cost_price']) if position['cost_price'] is not None else 0.0
-                profit_triggered = bool(position['profit_triggered']) if position['profit_triggered'] is not None else False
-                highest_price = float(position['highest_price']) if position['highest_price'] is not None else 0.0
-                open_date = position['open_date'] if position['open_date'] is not None else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                available = float(position['available']) if position['available'] is not None else 0.0
-                market_value = float(position['market_value']) if position['market_value'] is not None else 0.0
-                stop_loss_price = float(position['stop_loss_price']) if position['stop_loss_price'] is not None else 0.0
-           
-                # 获取历史最高价
-                # 获取最新价格
-                latest_quote = self.data_manager.get_latest_data(stock_code)
-                if latest_quote:
-                    current_price = latest_quote.get('lastPrice')
-                    # Only update if the price has changed significantly
-                    old_price = float(position['current_price'])
-                    if abs(current_price - old_price) / old_price > 0.003:  # 0.3% threshold
-                        # 更新持仓信息，传入所有字段
-                        self.update_position(stock_code, volume, cost_price, available, market_value, current_price, profit_triggered, highest_price, open_date, stop_loss_price)
-                        logger.info(f"更新 {stock_code} 的最新价格为 {current_price:.2f}")
-                    # elif current_price != old_price:
-                    #     logger.info(f"{stock_code} 价格变化小于0.3%，但仍更新价格为 {current_price:.2f}")
-                    # else:
-                    #     logger.debug(f"{stock_code} 价格变化小于0.3%，跳过更新")
-                else:
-                    logger.warning(f"未能获取 {stock_code} 的最新价格，跳过更新")
-                
+                try:
+                    # 提取数据并安全转换
+                    stock_code = position['stock_code']
+                    if stock_code is None:
+                        continue  # 跳过无效数据
+                    
+                    # 安全提取和转换所有数值
+                    safe_numeric_values = {}
+                    for field in ['volume', 'cost_price', 'current_price', 'highest_price', 'profit_triggered', 'available', 'market_value', 'stop_loss_price']:
+                        if field in position:
+                            value = position[field]
+                            # 布尔值特殊处理
+                            if field == 'profit_triggered':
+                                safe_numeric_values[field] = bool(value) if value is not None else False
+                            # 数值处理
+                            elif field in ['volume', 'available']:
+                                safe_numeric_values[field] = int(float(value)) if value is not None else 0
+                            else:
+                                safe_numeric_values[field] = float(value) if value is not None else 0.0
+                        else:
+                            # 设置默认值
+                            if field == 'profit_triggered':
+                                safe_numeric_values[field] = False
+                            elif field in ['volume', 'available']:
+                                safe_numeric_values[field] = 0
+                            else:
+                                safe_numeric_values[field] = 0.0
+                    
+                    # 安全处理open_date
+                    open_date = position.get('open_date')
+                    if open_date is None:
+                        open_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    
+                    # 获取最新价格
+                    try:
+                        latest_quote = self.data_manager.get_latest_data(stock_code)
+                        if latest_quote and isinstance(latest_quote, dict) and 'lastPrice' in latest_quote and latest_quote['lastPrice'] is not None:
+                            current_price = float(latest_quote['lastPrice'])
+                            
+                            # 只有价格有显著变化时才更新
+                            old_price = safe_numeric_values['current_price']
+                            if abs(current_price - old_price) / max(old_price, 0.01) > 0.003:  # 防止除零
+                                # 使用安全转换后的值来更新
+                                self.update_position(
+                                    stock_code=stock_code, 
+                                    volume=safe_numeric_values['volume'],
+                                    cost_price=safe_numeric_values['cost_price'],
+                                    available=safe_numeric_values['available'],
+                                    market_value=safe_numeric_values['market_value'],
+                                    current_price=current_price,  # 使用最新价格
+                                    profit_triggered=safe_numeric_values['profit_triggered'],
+                                    highest_price=safe_numeric_values['highest_price'],
+                                    open_date=open_date,
+                                    stop_loss_price=safe_numeric_values['stop_loss_price']
+                                )
+                                logger.debug(f"更新 {stock_code} 的最新价格为 {current_price:.2f}")
+                    except Exception as e:
+                        logger.error(f"获取 {stock_code} 最新价格时出错: {str(e)}")
+                        continue  # 跳过这只股票，继续处理其他股票
+                        
+                except Exception as e:
+                    logger.error(f"处理 {position.get('stock_code', 'unknown')} 持仓数据时出错: {str(e)}")
+                    continue  # 跳过这只股票，继续处理其他股票
+            
         except Exception as e:
             logger.error(f"更新所有持仓价格时出错: {str(e)}")
 
@@ -1077,35 +1219,46 @@ class PositionManager:
             return False, None
 
     def calculate_stop_loss_price(self, cost_price, highest_price, profit_triggered):
-        """
-        计算止损价格
-        
-        参数:
-        cost_price (float): 成本价
-        highest_price (float): 历史最高价
-        profit_triggered (bool): 是否已经触发首次止盈
-        
-        返回:
-        float: 止损价格
-        """
-        if profit_triggered:
-            # 动态止损
-            highest_profit_ratio = (highest_price - cost_price) / cost_price
-            take_profit_coefficient = 0.97  # Default to no take-profit (in case no level is met)
-
-            # Iterate through the DYNAMIC_TAKE_PROFIT levels
-            for profit_level, coefficient in config.DYNAMIC_TAKE_PROFIT:
-                if highest_profit_ratio >= profit_level:
-                    take_profit_coefficient = coefficient
-                    # We don't break here, because we want to find the highest applicable level
-                    # The last level that meets the condition will be used
-
-            # Calculate the dynamic stop-loss price
-            dynamic_take_profit_price = highest_price * take_profit_coefficient
-            return dynamic_take_profit_price
-        else:
-            # 固定止损
-            return cost_price * (1 + config.STOP_LOSS_RATIO)
+        """计算止损价格"""
+        # 确保输入都是有效的数值
+        try:
+            if cost_price is None or cost_price <= 0:
+                return 0.0  # 如果成本价无效，返回0作为止损价
+                
+            if highest_price is None or highest_price <= 0:
+                highest_price = cost_price  # 如果最高价无效，使用成本价
+            
+            # 确保profit_triggered是布尔值
+            if isinstance(profit_triggered, str):
+                profit_triggered = profit_triggered.lower() in ['true', '1', 't', 'y', 'yes']
+            else:
+                profit_triggered = bool(profit_triggered)
+            
+            # 后续计算基本保持不变，但添加额外的安全检查
+            if profit_triggered:
+                # 动态止损
+                if cost_price > 0:  # 防止除零
+                    highest_profit_ratio = (highest_price - cost_price) / cost_price
+                else:
+                    highest_profit_ratio = 0.0
+                    
+                take_profit_coefficient = 0.97  # 默认值
+                
+                # 遍历止盈级别
+                for profit_level, coefficient in config.DYNAMIC_TAKE_PROFIT:
+                    if highest_profit_ratio >= profit_level:
+                        take_profit_coefficient = coefficient
+                
+                # 计算动态止损价
+                dynamic_take_profit_price = highest_price * take_profit_coefficient
+                return dynamic_take_profit_price
+            else:
+                # 固定止损 - 确保STOP_LOSS_RATIO存在且有效
+                stop_loss_ratio = getattr(config, 'STOP_LOSS_RATIO', -0.07)  # 默认-7%
+                return cost_price * (1 + stop_loss_ratio)
+        except Exception as e:
+            logger.error(f"计算止损价格时出错: {str(e)}")
+            return 0.0  # 出错时返回0作为止损价
 
 
     def mark_profit_triggered(self, stock_code):
