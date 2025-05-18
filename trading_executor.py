@@ -258,8 +258,19 @@ class TradingExecutor:
             commission = deal_info.m_dComssion
             trade_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
-            # 保存成交记录到数据库
-            self._save_trade_record(stock_code, trade_time, trade_type, price, volume, amount, trade_id, commission)
+            # 保存交易记录到数据库 - 确保传递正确的策略名称
+            # 在这里处理可能需要从order_cache或其他地方获取strategy信息
+            strategy = 'default'  # 默认值
+            
+            # 查找对应的订单信息
+            order_id = deal_info.m_strOrderID
+            if order_id in self.order_cache:
+                # 如果缓存中有这个订单，尝试获取它的策略标识
+                order_info = self.order_cache[order_id]
+                if hasattr(order_info, 'strategy'):
+                    strategy = order_info.strategy
+            
+            self._save_trade_record(stock_code, trade_time, trade_type, price, volume, amount, trade_id, commission, strategy)
             
             # 更新持仓信息
             self._update_position_after_trade(stock_code, trade_type, price, volume)
@@ -379,11 +390,11 @@ class TradingExecutor:
         amount (float): 成交金额
         trade_id (str): 成交编号
         commission (float): 手续费
-        strategy (str): 策略名称
+        strategy (str): 策略名称，用于标识交易来源
         """
         try:
             
-            logger.info(f"保存交易记录: {stock_code} {trade_type} 价格:{price:.2f} 数量:{volume} 金额:{amount:.2f}")
+            logger.info(f"保存交易记录: {stock_code} {trade_type} 价格:{price:.2f} 数量:{volume} 金额:{amount:.2f} 策略:{strategy}")
             
             cursor = self.conn.cursor()
             cursor.execute("""
@@ -393,7 +404,7 @@ class TradingExecutor:
             """, (stock_code, trade_time, trade_type, price, volume, amount, trade_id, commission, strategy))
             
             self.conn.commit()
-            logger.info(f"保存交易记录成功: {stock_code}, {trade_type}, 价格: {price}, 数量: {volume}")
+            logger.info(f"保存交易记录成功: {stock_code}, {trade_type}, 价格: {price}, 数量: {volume}, 策略: {strategy}")
             return True
         
         except Exception as e:
@@ -777,7 +788,7 @@ class TradingExecutor:
         self.sim_order_counter += 1
         return f"SIM{datetime.now().strftime('%Y%m%d%H%M%S')}{self.sim_order_counter:04d}"
     
-    def buy_stock(self, stock_code, volume=None, price=None, amount=None, price_type=0, callback=None):
+    def buy_stock(self, stock_code, volume=None, price=None, amount=None, price_type=0, callback=None, strategy='default'):
         """
         买入股票
         
@@ -866,7 +877,7 @@ class TradingExecutor:
                             amount=adjusted_price * volume,
                             trade_id=sim_order_id,
                             commission=adjusted_price * volume * 0.0003,  # 模拟手续费
-                            strategy='simu'
+                            strategy=strategy if strategy != 'default' else 'simu'  # 如果没有指定策略，则使用'simu'
                         )
                         
                         if not trade_saved:
@@ -930,7 +941,7 @@ class TradingExecutor:
                 logger.error(f"买入 {stock_code} 时出错: {str(e)}")
                 return None
     
-    def sell_stock(self, stock_code, volume=None, price=None, ratio=None, price_type=0, callback=None):
+    def sell_stock(self, stock_code, volume=None, price=None, ratio=None, price_type=0, callback=None, strategy='default'):
         """
         卖出股票
         
@@ -1009,7 +1020,7 @@ class TradingExecutor:
                         amount=adjusted_price * volume,
                         trade_id=sim_order_id,
                         commission=adjusted_price * volume * 0.0013,  # 模拟手续费(含印花税)
-                        strategy='simu'
+                        strategy=strategy if strategy != 'default' else 'simu'  # 如果没有指定策略，则使用'simu'
                     )
                     
                     # 更新持仓

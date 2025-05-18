@@ -132,7 +132,7 @@ class TradingStrategy:
                 
                 # 执行买入
                 logger.info(f"执行 {stock_code} 网格 {grid_id} 买入，价格: {price}, 数量: {volume}")
-                order_id = self.trading_executor.buy_stock(stock_code, volume, price)
+                order_id = self.trading_executor.buy_stock(stock_code, volume, price, strategy='grid')
                 
                 if order_id:
                     # 更新网格状态为活跃
@@ -157,7 +157,7 @@ class TradingStrategy:
                 
                 # 执行卖出
                 logger.info(f"执行 {stock_code} 网格 {grid_id} 卖出，价格: {price}, 数量: {volume}")
-                order_id = self.trading_executor.sell_stock(stock_code, volume, price)
+                order_id = self.trading_executor.sell_stock(stock_code, volume, price, strategy='grid')
                 
                 if order_id:
                     # 更新网格状态为完成
@@ -203,7 +203,7 @@ class TradingStrategy:
                 
                 # 执行全仓止损
                 logger.warning(f"执行 {stock_code} 全仓止损，数量: {volume}")
-                order_id = self.trading_executor.sell_stock(stock_code, volume, price_type=1)  # 市价卖出
+                order_id = self.trading_executor.sell_stock(stock_code, volume, price_type=1, strategy='dyna')  # 市价卖出
                 
                 if order_id:
                     # 记录已处理信号
@@ -256,7 +256,7 @@ class TradingStrategy:
                     logger.info(f"执行 {stock_code} 动态止盈，卖出全部剩余仓位，数量: {sell_volume}")
                 
                 # 执行卖出
-                order_id = self.trading_executor.sell_stock(stock_code, sell_volume, price_type=0)  # 限价卖出
+                order_id = self.trading_executor.sell_stock(stock_code, sell_volume, price_type=0, strategy='dyna')  # 限价卖出
                 
                 if order_id:
                     # 记录已处理信号
