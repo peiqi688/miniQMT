@@ -815,9 +815,9 @@ class TradingExecutor:
                     return None
                 
                 # 检查全局监控总开关 - 在模拟模式下放宽限制
-                if hasattr(config, 'ENABLE_AUTO_TRADING') and not config.ENABLE_AUTO_TRADING and not is_simulation:
-                    logger.warning("全局监控总开关已关闭，无法买入")
-                    return None
+                # if hasattr(config, 'ENABLE_AUTO_TRADING') and not config.ENABLE_AUTO_TRADING and not is_simulation:
+                #     logger.warning("全局监控总开关已关闭，无法买入")
+                #     return None
                 
                 # 检查买入权限 - 在模拟模式下放宽限制
                 if hasattr(config, 'ENABLE_ALLOW_BUY') and not config.ENABLE_ALLOW_BUY and not is_simulation:
