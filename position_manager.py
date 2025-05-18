@@ -47,6 +47,10 @@ class PositionManager:
         self._create_memory_table()
         self._sync_db_to_memory()
 
+        # 添加模拟交易模式的提示日志
+        if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
+            logger.warning("系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库")
+            
         # 添加缓存机制
         self.last_position_update_time = 0
         self.position_update_interval = 3  # 5秒更新间隔
@@ -93,6 +97,11 @@ class PositionManager:
     def _sync_memory_to_db(self):
         """将内存数据库数据同步到数据库"""
         try:
+            # 添加模拟交易模式检查，模拟模式下不同步到SQLite
+            if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
+                logger.debug("模拟交易模式：跳过内存数据库到SQLite数据库的同步")
+                return
+        
             memory_positions = pd.read_sql_query("SELECT stock_code, open_date, profit_triggered, highest_price, stop_loss_price FROM positions", self.memory_conn)
             if not memory_positions.empty:
                 now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')

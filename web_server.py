@@ -7,11 +7,12 @@ import os
 import time
 import json
 import threading
+import sqlite3
 from datetime import datetime
 from flask import Flask, request, jsonify, send_from_directory, make_response, Response, stream_with_context
 from flask_cors import CORS
 import pandas as pd
-
+import Methods as Methods
 import config
 from logger import get_logger
 from data_manager import get_data_manager
@@ -322,8 +323,23 @@ def save_config():
                 # 如果关闭自动交易，则停止策略线程
                 trading_strategy.stop_strategy_thread()
 
+        # 在处理保存配置的API中添加
         if "simulationMode" in config_data:
-            setattr(config, 'ENABLE_SIMULATION_MODE', bool(config_data["simulationMode"]))
+            old_simulation_mode = getattr(config, 'ENABLE_SIMULATION_MODE', False)
+            new_simulation_mode = bool(config_data["simulationMode"])
+            
+            # 如果模式发生变化
+            if old_simulation_mode != new_simulation_mode:
+                setattr(config, 'ENABLE_SIMULATION_MODE', new_simulation_mode)
+                
+                # 模式变化时重新初始化内存数据库
+                position_manager = get_position_manager()
+                # 创建新的内存连接
+                position_manager.memory_conn = sqlite3.connect(":memory:", check_same_thread=False)
+                position_manager._create_memory_table()
+                position_manager._sync_db_to_memory()  # 从SQLite重新加载数据
+                
+                logger.warning(f"交易模式切换: {'模拟交易' if new_simulation_mode else '实盘交易'}")
         
         logger.info(f"配置已更新: {config_data}")
         
@@ -634,7 +650,6 @@ def get_stock_pool():
             'message': f"获取备选池股票列表失败: {str(e)}"
         }), 500
 
-# 修改原有的execute_buy接口
 @app.route('/api/actions/execute_buy', methods=['POST'])
 def execute_buy():
     """执行买入操作"""
@@ -656,18 +671,42 @@ def execute_buy():
                 'message': '未提供股票列表'
             }), 400
         
+        # 根据当前交易模式调整股票代码格式
+        is_simulation = getattr(config, 'ENABLE_SIMULATION_MODE', False)
+        formatted_stocks = []
+        
+        for stock in stocks:
+            # 移除已有的后缀（如果有）
+            if stock.endswith(('.SH', '.SZ', '.sh', '.sz')):
+                stock_code = stock.split('.')[0]
+            else:
+                stock_code = stock
+                
+            # 根据交易模式决定是否添加后缀
+            if is_simulation:
+                # 模拟交易模式：使用Methods.add_xt_suffix添加市场后缀
+                formatted_stock = Methods.add_xt_suffix(stock_code)
+            else:
+                # 实盘交易模式：使用无后缀格式
+                formatted_stock = stock_code
+                
+            formatted_stocks.append(formatted_stock)
+        
+        # 使用修改后的股票列表
+        logger.info(f"交易模式: {'模拟' if is_simulation else '实盘'}, 股票代码格式化: {stocks} -> {formatted_stocks}")
+        
         # 根据策略选择股票
         selected_stocks = []
         if strategy == 'random_pool':
             # 随机选择指定数量的股票
             import random
-            if quantity <= len(stocks):
-                selected_stocks = random.sample(stocks, quantity)
+            if quantity <= len(formatted_stocks):
+                selected_stocks = random.sample(formatted_stocks, quantity)
             else:
-                selected_stocks = stocks
+                selected_stocks = formatted_stocks
         elif strategy == 'custom_stock':
             # 使用用户提供的股票列表
-            selected_stocks = stocks[:quantity]  # 取指定数量
+            selected_stocks = formatted_stocks[:quantity]  # 取指定数量
         
         # 执行买入
         success_count = 0
