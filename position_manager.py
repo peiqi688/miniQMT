@@ -50,7 +50,7 @@ class PositionManager:
         # 添加模拟交易模式的提示日志
         if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
             logger.warning("系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库")
-            
+
         # 添加缓存机制
         self.last_position_update_time = 0
         self.position_update_interval = 3  # 5秒更新间隔
@@ -608,12 +608,19 @@ class PositionManager:
             # 如果是模拟交易模式，直接返回模拟账户信息（由trading_executor模块管理）
             if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
                 logger.info(f"返回模拟账户信息，余额: {config.SIMULATION_BALANCE}")
+                # 计算持仓市值
+                positions = self.get_all_positions()
+                market_value = 0
+                if not positions.empty:
+                    for _, pos in positions.iterrows():
+                        market_value += float(pos.get('market_value', 0))
+                        
                 return {
                     'account_id': 'SIMULATION',
                     'account_type': 'SIMULATION',
                     'balance': config.SIMULATION_BALANCE,
-                    'available':  config.SIMULATION_BALANCE,
-                    'market_value': config.SIMULATION_BALANCE,
+                    'available': config.SIMULATION_BALANCE - market_value,  # 可用资金减去持仓市值
+                    'market_value': market_value,
                     'profit_loss': 0
                 }
 

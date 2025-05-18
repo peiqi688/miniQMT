@@ -338,6 +338,11 @@ def save_config():
                 position_manager.memory_conn = sqlite3.connect(":memory:", check_same_thread=False)
                 position_manager._create_memory_table()
                 position_manager._sync_db_to_memory()  # 从SQLite重新加载数据
+
+                # 添加这部分代码-切换模式时只重置了内存数据库，但没有更新trading_executor的模拟账户状态
+                # trading_executor = get_trading_executor()
+                # if new_simulation_mode:
+                #     trading_executor.init_simulation_account()  # 初始化模拟账户
                 
                 logger.warning(f"交易模式切换: {'模拟交易' if new_simulation_mode else '实盘交易'}")
         

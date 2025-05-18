@@ -418,8 +418,8 @@ class DataManager:
             #当前是交易时间，先尝试从xtdata接口获取tick数据
             if config.is_trade_time():
                 latest_quote = self.get_latest_xtdata(stock_code=stock_code)
-                if latest_quote is not None:
-                    return latest_quote
+                if latest_quote and isinstance(latest_quote, dict) and 'lastPrice' in latest_quote:
+                     return latest_quote
             
             # 继续尝试从Mootdx获取数据
             # Adjust stock code if necessary
