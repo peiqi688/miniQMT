@@ -1150,17 +1150,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 格式化日志内容
         if (Array.isArray(logEntries)) {
-            // 假设每个 logEntry 是一个对象，我们需要将其转换为字符串
+            // 新的格式化逻辑，符合要求的格式
             const formattedLogs = logEntries.map(entry => {
-                // 根据你的交易记录对象结构调整格式化方式
                 if (typeof entry === 'object' && entry !== null) {
-                    // 使用 entry.trade_time, entry.trade_type,  而不是  entry.time, entry.action
-                    //  并且没有 stock_name,  trade_type  需要转换一下
-                    const action = entry.trade_type === 'BUY' ? '买入' : (entry.trade_type === 'SELL' ? '卖出' : entry.trade_type);
-                    return `时间: ${entry.trade_time || ''}, 代码: ${entry.stock_code || ''}, 名称: , 操作: ${action || ''}, 价格: ${entry.price || ''}, 数量: ${entry.volume || ''}, 状态: `;
-
-                    //  如果后端返回了 stock_name  字段，  把上面 return 语句中的  名称: ,  改成  名称: ${entry.stock_name || ''},
-
+                    // 转换日期格式为 MM-DD
+                    const dateStr = entry.trade_time ? new Date(entry.trade_time).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }).replace(/\//g, '-') : '';
+                    
+                    // 转换交易类型
+                    const actionType = entry.trade_type === 'BUY' ? '买入' : 
+                                    (entry.trade_type === 'SELL' ? '卖出' : entry.trade_type);
+                    
+                    // 格式化为要求的格式
+                    return `${dateStr}, ${entry.stock_code || ''}, ${entry.stock_name || ''}, ${actionType}, 价格: ${entry.price || ''}, 数量: ${entry.volume || ''}, 策略: ${entry.strategy || ''}`;
                 } else {
                     return String(entry); // 如果不是对象，直接转换为字符串
                 }
@@ -1410,11 +1411,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 只更新UI显示，不影响监控状态
         if (isConnected) {
-            elements.connectionStatus.textContent = "API已连接";
+            elements.connectionStatus.textContent = "QMT已连接";
             elements.connectionStatus.classList.remove('disconnected');
             elements.connectionStatus.classList.add('connected');
         } else {
-            elements.connectionStatus.textContent = "API未连接";
+            elements.connectionStatus.textContent = "QMT未连接";
             elements.connectionStatus.classList.remove('connected');
             elements.connectionStatus.classList.add('disconnected');
         }

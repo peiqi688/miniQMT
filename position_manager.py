@@ -67,6 +67,7 @@ class PositionManager:
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS positions (
             stock_code TEXT PRIMARY KEY,
+            stock_name TEXT,
             volume INTEGER,
             available REAL,           
             cost_price REAL,
@@ -416,7 +417,7 @@ class PositionManager:
         except Exception as e:
             logger.error(f"更新出错 {self.stock_positions_file}: {str(e)}")
 
-    def update_position(self, stock_code, volume, cost_price, available=None, market_value=None, current_price=None, profit_triggered=False, highest_price=None, open_date=None, stop_loss_price=None):
+    def update_position(self, stock_code, volume, cost_price, available=None, market_value=None, current_price=None, profit_triggered=False, highest_price=None, open_date=None, stop_loss_price=None, stock_name=None):
         """更新持仓信息"""
         # Convert inputs to appropriate numeric types at the beginning
         try:
@@ -424,7 +425,18 @@ class PositionManager:
             if stock_code is None or stock_code == "":
                 logger.error("股票代码不能为空")
                 return False
-            
+
+            if stock_name is None:
+                try:
+                    # 使用data_manager获取股票名称
+                    from data_manager import get_data_manager
+                    data_manager = get_data_manager()
+                    stock_name = data_manager.get_stock_name(stock_code)
+                except Exception as e:
+                    logger.warning(f"获取股票 {stock_code} 名称时出错: {str(e)}")
+                    stock_name = stock_code  # 如果无法获取名称，使用代码代替
+        
+
             # volume is typically int, but float conversion is safer for general arithmetic
             p_volume = int(float(volume)) if volume is not None else 0
             p_cost_price = float(cost_price) if cost_price is not None else 0.0
@@ -523,13 +535,22 @@ class PositionManager:
                     if calculated_slp is not None:
                         final_stop_loss_price = min(final_stop_loss_price, calculated_slp)
                         final_stop_loss_price = round(final_stop_loss_price, 2)
-
+            
                 cursor.execute("""
                     UPDATE positions 
                     SET volume=?, cost_price=?, current_price=?, market_value=?, available=?,
-                        profit_ratio=?, last_update=?, highest_price=?, stop_loss_price=?, profit_triggered=?
+                        profit_ratio=?, last_update=?, highest_price=?, stop_loss_price=?, profit_triggered=?, stock_name=?
                     WHERE stock_code=?
-                """, (int(p_volume), final_cost_price, final_current_price, p_market_value, int(p_available), p_profit_ratio, now, final_highest_price, final_stop_loss_price, profit_triggered, stock_code))
+                """, (int(p_volume), final_cost_price, final_current_price, p_market_value, int(p_available), 
+                    p_profit_ratio, now, final_highest_price, final_stop_loss_price, profit_triggered, stock_name, stock_code))
+                    
+
+                # cursor.execute("""
+                #     UPDATE positions 
+                #     SET volume=?, cost_price=?, current_price=?, market_value=?, available=?,
+                #         profit_ratio=?, last_update=?, highest_price=?, stop_loss_price=?, profit_triggered=?
+                #     WHERE stock_code=?
+                # """, (int(p_volume), final_cost_price, final_current_price, p_market_value, int(p_available), p_profit_ratio, now, final_highest_price, final_stop_loss_price, profit_triggered, stock_code))
 
                 if profit_triggered != result[1]:
                     logger.info(f"更新 {stock_code} 持仓: 首次止盈触发: 从 {result[1]} 到 {profit_triggered}")
@@ -548,12 +569,20 @@ class PositionManager:
                 # 计算止损价格
                 calculated_slp = self.calculate_stop_loss_price(final_cost_price, final_highest_price, profit_triggered)
                 final_stop_loss_price = round(calculated_slp, 2) if calculated_slp is not None else None
+
                 cursor.execute("""
                     INSERT INTO positions 
-                    (stock_code, volume, cost_price, current_price, market_value, available, profit_ratio, last_update, open_date, profit_triggered, highest_price, stop_loss_price)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (stock_code, int(p_volume), final_cost_price, final_current_price, p_market_value, int(p_available), p_profit_ratio, now, open_date, profit_triggered, final_highest_price, final_stop_loss_price))
-                logger.info(f"新增 {stock_code} 持仓: 数量: {int(p_volume)}, 成本价: {final_cost_price}, 当前价: {final_current_price}, 首次止盈触发: {profit_triggered}, 最高价: {final_highest_price}, 止损价: {final_stop_loss_price}")
+                    (stock_code, stock_name, volume, cost_price, current_price, market_value, available, profit_ratio, last_update, open_date, profit_triggered, highest_price, stop_loss_price)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (stock_code, stock_name, int(p_volume), final_cost_price, final_current_price, p_market_value, 
+                    int(p_available), p_profit_ratio, now, open_date, profit_triggered, final_highest_price, final_stop_loss_price))
+        
+                # cursor.execute("""
+                #     INSERT INTO positions 
+                #     (stock_code, volume, cost_price, current_price, market_value, available, profit_ratio, last_update, open_date, profit_triggered, highest_price, stop_loss_price)
+                #     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                # """, (stock_code, int(p_volume), final_cost_price, final_current_price, p_market_value, int(p_available), p_profit_ratio, now, open_date, profit_triggered, final_highest_price, final_stop_loss_price))
+                # logger.info(f"新增 {stock_code} 持仓: 数量: {int(p_volume)}, 成本价: {final_cost_price}, 当前价: {final_current_price}, 首次止盈触发: {profit_triggered}, 最高价: {final_highest_price}, 止损价: {final_stop_loss_price}")
             
             self.memory_conn.commit()
             return True

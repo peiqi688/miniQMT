@@ -195,7 +195,18 @@ def get_trade_records():
         # 如果没有交易记录，返回空列表
         if trades_df.empty:
             return jsonify({'status': 'success', 'data': []})
-        
+
+
+        # 确保包含股票名称字段，如果没有则尝试获取
+        if 'stock_name' not in trades_df.columns or trades_df['stock_name'].isnull().any():
+            data_manager = get_data_manager()
+            def get_name(code):
+                try:
+                    return data_manager.get_stock_name(code)
+                except:
+                    return code
+            trades_df['stock_name'] = trades_df['stock_code'].apply(get_name)
+
         # Format 'trade_time' to 'YYYY-MM-DD'
         if 'trade_time' in trades_df.columns:
             trades_df['trade_time'] = pd.to_datetime(trades_df['trade_time']).dt.strftime('%Y-%m-%d')
@@ -434,23 +445,23 @@ def debug_status():
             'message': f"获取调试状态失败: {str(e)}"
         }), 500
 
-@app.route('/api/debug/db-test', methods=['GET'])
-def test_database():
-    """测试数据库连接"""
-    try:
-        cursor = data_manager.conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM trade_records")
-        count = cursor.fetchone()[0]
-        return jsonify({
-            'status': 'success',
-            'message': '数据库连接正常',
-            'trade_records_count': count
-        })
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': f"数据库连接错误: {str(e)}"
-        }), 500
+# @app.route('/api/debug/db-test', methods=['GET'])
+# def test_database():
+#     """测试数据库连接"""
+#     try:
+#         cursor = data_manager.conn.cursor()
+#         cursor.execute("SELECT COUNT(*) FROM trade_records")
+#         count = cursor.fetchone()[0]
+#         return jsonify({
+#             'status': 'success',
+#             'message': '数据库连接正常',
+#             'trade_records_count': count
+#         })
+#     except Exception as e:
+#         return jsonify({
+#             'status': 'error',
+#             'message': f"数据库连接错误: {str(e)}"
+#         }), 500
 
 
 @app.route('/api/logs/clear', methods=['POST'])

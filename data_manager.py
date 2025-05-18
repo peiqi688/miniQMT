@@ -58,6 +58,7 @@ class DataManager:
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS stock_daily_data (
             stock_code TEXT,
+            stock_name TEXT,            
             date TEXT,
             open REAL,
             high REAL,
@@ -370,6 +371,96 @@ class DataManager:
         except Exception as e:
             logger.error(f"下载 {stock_code} 的历史数据时出错: {str(e)}")
             return None
+        
+    def get_stock_name(self, stock_code):
+        """
+        获取股票名称
+        
+        参数:
+        stock_code (str): 股票代码
+        
+        返回:
+        str: 股票名称，如果未找到则返回股票代码
+        """
+        try:
+            # 初始化名称缓存（如果不存在）
+            if not hasattr(self, 'stock_names_cache'):
+                self.stock_names_cache = {}
+                
+            # 尝试从缓存获取名称
+            if stock_code in self.stock_names_cache:
+                return self.stock_names_cache[stock_code]
+            
+            # 从QMT交易接口获取
+            try:
+                from position_manager import get_position_manager
+                position_manager = get_position_manager()
+                
+                if hasattr(position_manager, 'qmt_trader') and position_manager.qmt_trader:
+                    positions_df = position_manager.qmt_trader.position()
+                    if not positions_df.empty and '证券代码' in positions_df.columns and '证券名称' in positions_df.columns:
+                        # 简化股票代码以匹配
+                        stock_code_simple = stock_code.split('.')[0] if '.' in stock_code else stock_code
+                        stock_info = positions_df[positions_df['证券代码'] == stock_code_simple]
+                        if not stock_info.empty:
+                            stock_name = stock_info.iloc[0]['证券名称']
+                            # 保存到缓存
+                            self.stock_names_cache[stock_code] = stock_name
+                            return stock_name
+            except Exception as e:
+                logger.debug(f"通过qmt_trader获取股票名称出错: {str(e)}")
+            
+            # 尝试使用baostock查询
+            try:
+                import baostock as bs
+                lg = bs.login()
+                if lg.error_code != '0':
+                    logger.warning(f"baostock登录失败: {lg.error_msg}")
+                    return stock_code
+                
+                # 调整股票代码格式
+                if '.' in stock_code:
+                    formatted_code = stock_code  # 假设已经是bs格式
+                else:
+                    # 转换为baostock格式
+                    if stock_code.startswith(('600', '601', '603', '688', '510')):
+                        formatted_code = f"sh.{stock_code}"
+                    else:
+                        formatted_code = f"sz.{stock_code}"
+                
+                # 查询股票基本信息
+                rs = bs.query_stock_basic(code=formatted_code)
+                if rs.error_code != '0':
+                    logger.warning(f"查询股票基本信息失败: {rs.error_msg}")
+                    bs.logout()
+                    return stock_code
+                
+                # 获取结果
+                data_list = []
+                while (rs.error_code == '0') & rs.next():
+                    data_list.append(rs.get_row_data())
+                bs.logout()
+                
+                if data_list:
+                    # 股票名称通常是结果的第二列
+                    stock_name = data_list[0][1] if len(data_list[0]) > 1 else stock_code
+                    
+                    # 保存到缓存
+                    self.stock_names_cache[stock_code] = stock_name
+                    return stock_name
+                
+                return stock_code
+                
+            except ImportError:
+                logger.warning("未安装baostock，无法获取股票名称")
+                return stock_code
+            except Exception as e:
+                logger.error(f"获取股票 {stock_code} 名称时出错: {str(e)}")
+                return stock_code
+                
+        except Exception as e:
+            logger.error(f"获取股票 {stock_code} 名称时出错: {str(e)}")
+            return stock_code
     
     def save_history_data(self, stock_code, data_df):
         """

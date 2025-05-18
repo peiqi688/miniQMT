@@ -378,33 +378,22 @@ class TradingExecutor:
             logger.error(f"处理错误回调时出错: {str(e)}")
     
     def _save_trade_record(self, stock_code, trade_time, trade_type, price, volume, amount, trade_id, commission, strategy='default'):
-        """
-        保存交易记录到数据库
-        
-        参数:
-        stock_code (str): 股票代码
-        trade_time (str): 交易时间
-        trade_type (str): 交易类型（BUY/SELL）
-        price (float): 成交价格
-        volume (int): 成交数量
-        amount (float): 成交金额
-        trade_id (str): 成交编号
-        commission (float): 手续费
-        strategy (str): 策略名称，用于标识交易来源
-        """
+        """保存交易记录到数据库"""
         try:
+            # 获取股票名称
+            stock_name = self.data_manager.get_stock_name(stock_code)
             
-            logger.info(f"保存交易记录: {stock_code} {trade_type} 价格:{price:.2f} 数量:{volume} 金额:{amount:.2f} 策略:{strategy}")
+            logger.info(f"保存交易记录: {stock_code}({stock_name}) {trade_type} 价格:{price:.2f} 数量:{volume} 金额:{amount:.2f} 策略:{strategy}")
             
             cursor = self.conn.cursor()
             cursor.execute("""
                 INSERT INTO trade_records 
-                (stock_code, trade_time, trade_type, price, volume, amount, trade_id, commission, strategy)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (stock_code, trade_time, trade_type, price, volume, amount, trade_id, commission, strategy))
+                (stock_code, stock_name, trade_time, trade_type, price, volume, amount, trade_id, commission, strategy)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (stock_code, stock_name, trade_time, trade_type, price, volume, amount, trade_id, commission, strategy))
             
             self.conn.commit()
-            logger.info(f"保存交易记录成功: {stock_code}, {trade_type}, 价格: {price}, 数量: {volume}, 策略: {strategy}")
+            logger.info(f"保存交易记录成功: {stock_code}({stock_name}), {trade_type}, 价格: {price}, 数量: {volume}, 策略: {strategy}")
             return True
         
         except Exception as e:
@@ -428,6 +417,7 @@ class TradingExecutor:
                 
             # 获取当前持仓
             position = self.position_manager.get_position(stock_code)
+            stock_name = self.data_manager.get_stock_name(stock_code)
             
             if trade_type == 'BUY':
                 if position:
@@ -438,12 +428,13 @@ class TradingExecutor:
                     new_cost = (old_volume * old_cost + volume * price) / new_volume
                     
                     # 更新持仓
-                    result = self.position_manager.update_position(stock_code, new_volume, new_cost, price)
-                    logger.info(f"更新持仓成功: {stock_code}, 新数量: {new_volume}, 新成本: {new_cost}, 结果: {result}")
+                    result = self.position_manager.update_position(stock_code, new_volume, new_cost, price, stock_name=stock_name)
+                    logger.info(f"更新持仓成功: {stock_code}({stock_name}), 新数量: {new_volume}, 新成本: {new_cost}, 结果: {result}")
                 else:
                     # 新建持仓
-                    result = self.position_manager.update_position(stock_code, volume, price, price)
-                    logger.info(f"新建持仓成功: {stock_code}, 数量: {volume}, 成本: {price}, 结果: {result}")
+                    result = self.position_manager.update_position(stock_code, volume, price, price, stock_name=stock_name)
+                    logger.info(f"新建持仓成功: {stock_code}({stock_name}), 数量: {volume}, 成本: {price}, 结果: {result}")
+
             else:  # SELL
                 if position:
                     # 减少持仓
