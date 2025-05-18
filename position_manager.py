@@ -499,14 +499,26 @@ class PositionManager:
 
             for _, position in positions.iterrows():
                 stock_code = position['stock_code']
-                open_date_str = position['open_date']
-                highest_price = position['highest_price']
 
-                # Convert open_date to datetime object if it's a string
-                if isinstance(open_date_str, str):
-                    open_date = datetime.strptime(open_date_str, '%Y-%m-%d %H:%M:%S')
-                else:
-                    open_date = open_date_str
+                # 安全获取最高价，确保不为None
+                current_highest_price = 0.0
+                if position['highest_price'] is not None:
+                    try:
+                        current_highest_price = float(position['highest_price'])
+                    except (ValueError, TypeError):
+                        current_highest_price = 0.0
+                
+                # 安全获取开仓日期
+                open_date_str = position['open_date']
+                try:
+                    if isinstance(open_date_str, str):
+                        open_date = datetime.strptime(open_date_str, '%Y-%m-%d %H:%M:%S')
+                    else:
+                        open_date = datetime.now()
+                    
+                    open_date_formatted = open_date.strftime('%Y-%m-%d')
+                except (ValueError, TypeError):
+                    open_date_formatted = datetime.now().strftime('%Y-%m-%d')
 
                 # Format open_date to YYYY-MM-DD for getStockData
                 open_date_formatted = open_date.strftime('%Y-%m-%d')
@@ -533,6 +545,7 @@ class PositionManager:
                     # 找到开仓后日线数据最高价
                     highest_price = history_data['high'].astype(float).max()
                 else:
+                    highest_price = 0.0
                     logger.warning(f"未能获取 {stock_code} 从 {open_date_formatted} 到 {today_formatted} 的历史数据，跳过更新最高价")
 
                 # 开盘时间，获取最新tick数据
@@ -544,7 +557,7 @@ class PositionManager:
                         if current_high_price > highest_price:
                             highest_price = current_high_price
                 
-                if highest_price > position['highest_price']:
+                if highest_price > current_highest_price:
                     # 更新持仓"最高价”信息
                     self.update_position(
                         stock_code=stock_code,
@@ -572,15 +585,22 @@ class PositionManager:
             
             for _, position in positions.iterrows():
                 stock_code = position['stock_code']
-                volume = int(position['volume'])
-                cost_price = float(position['cost_price'])
-                profit_triggered = position['profit_triggered']
-                highest_price = float(position['highest_price'])
-                open_date = position['open_date']
+                # volume = int(position['volume'])
+                # cost_price = float(position['cost_price'])
+                # profit_triggered = position['profit_triggered']
+                # highest_price = float(position['highest_price'])
+                # open_date = position['open_date']
 
+                volume = int(position['volume']) if position['volume'] is not None else 0
+                cost_price = float(position['cost_price']) if position['cost_price'] is not None else 0.0
+                profit_triggered = bool(position['profit_triggered']) if position['profit_triggered'] is not None else False
+                highest_price = float(position['highest_price']) if position['highest_price'] is not None else 0.0
+                open_date = position['open_date'] if position['open_date'] is not None else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                available = float(position['available']) if position['available'] is not None else 0.0
+                market_value = float(position['market_value']) if position['market_value'] is not None else 0.0
+                stop_loss_price = float(position['stop_loss_price']) if position['stop_loss_price'] is not None else 0.0
+           
                 # 获取历史最高价
-
-
                 # 获取最新价格
                 latest_quote = self.data_manager.get_latest_data(stock_code)
                 if latest_quote:
@@ -589,7 +609,7 @@ class PositionManager:
                     old_price = float(position['current_price'])
                     if abs(current_price - old_price) / old_price > 0.003:  # 0.3% threshold
                         # 更新持仓信息，传入所有字段
-                        self.update_position(stock_code, volume, cost_price, float(position['available']), float(position['market_value']), current_price, profit_triggered, highest_price, open_date, float(position['stop_loss_price']))
+                        self.update_position(stock_code, volume, cost_price, available, market_value, current_price, profit_triggered, highest_price, open_date, stop_loss_price)
                         logger.info(f"更新 {stock_code} 的最新价格为 {current_price:.2f}")
                     # elif current_price != old_price:
                     #     logger.info(f"{stock_code} 价格变化小于0.3%，但仍更新价格为 {current_price:.2f}")
@@ -613,15 +633,22 @@ class PositionManager:
                 market_value = 0
                 if not positions.empty:
                     for _, pos in positions.iterrows():
-                        market_value += float(pos.get('market_value', 0))
-                        
+                        pos_market_value = pos.get('market_value')
+                        if pos_market_value is not None:
+                            try:
+                                market_value += float(pos_market_value)
+                            except (ValueError, TypeError):
+                                # 忽略无效值
+                                pass
+                
+                # 确保返回的所有值都是有效数值
                 return {
                     'account_id': 'SIMULATION',
                     'account_type': 'SIMULATION',
-                    'balance': config.SIMULATION_BALANCE,
-                    'available': config.SIMULATION_BALANCE - market_value,  # 可用资金减去持仓市值
-                    'market_value': market_value,
-                    'profit_loss': 0
+                    'balance': float(config.SIMULATION_BALANCE),
+                    'available': float(config.SIMULATION_BALANCE) - market_value,
+                    'market_value': float(market_value),
+                    'profit_loss': 0.0
                 }
 
             # 使用qmt_trader获取账户信息

@@ -262,8 +262,25 @@ class DataManager:
             return df
 
         except Exception as e:
-            logger.error(f"使用Mootdx下载 {stock_code} 的历史数据时出错: {str(e)}")
-            return None
+            # 检查是否是长度不匹配错误
+            if "Length mismatch" in str(e):
+                logger.warning(f"下载 {stock_code} 数据时发生长度不匹配错误，使用默认数据")
+                
+                # 创建包含默认值的DataFrame
+                df = pd.DataFrame({
+                    'date': [datetime.now().strftime('%Y-%m-%d')],
+                    'open': [0.0],
+                    'high': [0.0],
+                    'low': [0.0],
+                    'close': [0.0],
+                    'volume': [0],
+                    'amount': [0],
+                    'stock_code': [stock_code]
+                })
+            else:
+                # 其他错误，记录并返回None
+                logger.error(f"下载 {stock_code} 的历史数据时出错: {str(e)}")
+                return None
 
 
     def download_history_xtdata(self, stock_code, period=None, start_date=None, end_date=None):
