@@ -790,13 +790,13 @@ class TradingExecutor:
         amount (float): 买入金额，与volume二选一
         price_type (int): 价格类型，默认为5（特定的限价类型）
         callback (function): 成交回调函数
+        strategy (str): 策略标识
         
         返回:
         str: 委托编号，失败返回None
         """
         with self.trade_lock:
             try:
-                # 增加详细日志
                 logger.info(f"开始买入处理: {stock_code}, volume={volume}, price={price}, amount={amount}, price_type={price_type}")
         
                 # 检查qmt_trader是否初始化
@@ -807,7 +807,6 @@ class TradingExecutor:
                 # 确保股票代码格式正确（添加市场后缀）
                 formatted_stock_code = stock_code
                 if '.' not in stock_code:
-                    # 使用qmt_trader的adjust_stock方法来格式化股票代码
                     formatted_stock_code = self.position_manager.qmt_trader.adjust_stock(stock=stock_code)
                     logger.info(f"股票代码格式化: {stock_code} -> {formatted_stock_code}")
                     
@@ -826,27 +825,19 @@ class TradingExecutor:
                     logger.warning("当前不是交易时间，交易取消")
                     return None
                 
-                # 检查买入权限 - 在模拟模式下放宽限制
-                if hasattr(config, 'ENABLE_ALLOW_BUY') and not config.ENABLE_ALLOW_BUY and not is_simulation:
-                    logger.warning("系统当前不允许买入操作")
-                    return None
-                
-                # 如果未提供价格，获取卖三价（提高成交概率）
+                # 如果未提供价格，获取卖三价
                 if price is None:
                     try:
                         from xtquant import xtdata
                         ticks = xtdata.get_full_tick([formatted_stock_code])
                         if ticks and formatted_stock_code in ticks:
                             tick = ticks[formatted_stock_code]
-                            # 尝试获取卖三价
                             if hasattr(tick, 'askPrice') and len(tick.askPrice) >= 3:
                                 price = tick.askPrice[2]
                                 logger.info(f"获取到 {formatted_stock_code} 卖三价: {price}")
-                            # 如果无法获取卖三价，尝试获取卖一价
                             elif hasattr(tick, 'askPrice') and len(tick.askPrice) >= 1:
                                 price = tick.askPrice[0]
                                 logger.info(f"获取到 {formatted_stock_code} 卖一价: {price}")
-                            # 尝试从字典格式获取
                             elif isinstance(tick, dict) and 'askPrice' in tick:
                                 ask_prices = tick['askPrice']
                                 if len(ask_prices) >= 3:
@@ -855,16 +846,11 @@ class TradingExecutor:
                                 elif len(ask_prices) >= 1:
                                     price = ask_prices[0]
                                     logger.info(f"获取到 {formatted_stock_code} 卖一价: {price}")
-                        
-                        # 如果仍然没有获取到价格，尝试使用最新行情
-                        if price is None:
-                            latest_quote = self.data_manager.get_latest_data(stock_code)
-                            if latest_quote:
-                                price = latest_quote.get('lastPrice') or 0
-                                logger.info(f"使用 {formatted_stock_code} 最新价: {price}")
                     except Exception as e:
-                        logger.warning(f"获取 {formatted_stock_code} 卖三价时出错: {str(e)}")
-                        # 尝试获取最新行情价格作为备选
+                        logger.warning(f"获取 {formatted_stock_code} 价格时出错: {str(e)}")
+                        
+                    # 如果仍然没有获取到价格，尝试使用最新行情
+                    if price is None:
                         latest_quote = self.data_manager.get_latest_data(stock_code)
                         if latest_quote:
                             price = latest_quote.get('lastPrice') or 0
@@ -885,11 +871,38 @@ class TradingExecutor:
                     logger.error(f"买入数量必须大于0: {volume}")
                     return None
                 
+                # 模拟交易模式处理
+                if is_simulation:
+                    # 检查模拟账户资金是否足够
+                    cost = price * volume * 1.0003  # 包含手续费
+                    if hasattr(self, 'simulation_balance') and self.simulation_balance >= cost:
+                        # 更新模拟账户资金
+                        self.simulation_balance -= cost
+                        config.SIMULATION_BALANCE = self.simulation_balance
+                        logger.info(f"【模拟】买入 {formatted_stock_code}, 价格: {price}, 数量: {volume}, 成本: {cost:.2f}")
+                        
+                        # 更新持仓信息
+                        self.position_manager.update_position(
+                            stock_code=stock_code,
+                            volume=volume,
+                            cost_price=price,
+                            current_price=price
+                        )
+                        
+                        # 生成模拟订单ID
+                        order_id = self._generate_sim_order_id()
+                        logger.info(f"【模拟】生成买入委托号: {order_id}")
+                        return order_id
+                    else:
+                        logger.error(f"【模拟】账户资金不足，买入取消")
+                        return None
+                
+                # 实盘交易模式处理
                 # 使用qmt_trader检查股票是否可买入
                 can_buy = True
                 try:
                     can_buy = self.position_manager.qmt_trader.check_stock_is_av_buy(
-                        stock=formatted_stock_code,  # 使用格式化后的股票代码
+                        stock=formatted_stock_code,
                         price=price, 
                         amount=volume
                     )
@@ -897,7 +910,7 @@ class TradingExecutor:
                     logger.warning(f"检查股票是否可买入时出错: {str(e)}，将继续尝试买入")
                     can_buy = True  # 如果检查失败，仍然尝试买入
                 
-                if not can_buy and not is_simulation:
+                if not can_buy:
                     logger.error(f"买入 {formatted_stock_code} 未通过可买入检查")
                     return None
                 
@@ -910,10 +923,10 @@ class TradingExecutor:
                     try:
                         # 使用position_manager中的easy_qmt_trader进行买入
                         order_id = self.position_manager.qmt_trader.buy(
-                            security=formatted_stock_code,  # 使用带后缀的股票代码
-                            price=price,                   # 直接使用卖三价或指定价格
+                            security=formatted_stock_code,
+                            price=price,
                             amount=volume, 
-                            price_type=price_type,         # 使用指定的价格类型
+                            price_type=price_type,
                             strategy_name=strategy, 
                             order_remark=f"auto_{strategy}"
                         )
@@ -933,13 +946,6 @@ class TradingExecutor:
                 if not order_id:
                     logger.error(f"买入 {formatted_stock_code} 经过 {max_retries} 次尝试后仍然失败")
                     return None
-                
-                # 如果是模拟交易模式，需要更新模拟账户资金
-                if is_simulation:
-                    cost = price * volume * 1.0003  # 包含手续费
-                    self.simulation_balance -= cost
-                    config.SIMULATION_BALANCE = self.simulation_balance
-                    logger.info(f"模拟账户资金更新: -{cost:.2f}, 余额: {self.simulation_balance:.2f}")
                 
                 # 注册回调
                 if callback:
@@ -962,6 +968,7 @@ class TradingExecutor:
         ratio (float): 卖出比例，0-1之间，与volume二选一
         price_type (int): 价格类型，默认为5（特定的限价类型）
         callback (function): 成交回调函数
+        strategy (str): 策略标识
         
         返回:
         str: 委托编号，失败返回None
@@ -978,7 +985,6 @@ class TradingExecutor:
                 # 确保股票代码格式正确（添加市场后缀）
                 formatted_stock_code = stock_code
                 if '.' not in stock_code:
-                    # 使用qmt_trader的adjust_stock方法来格式化股票代码
                     formatted_stock_code = self.position_manager.qmt_trader.adjust_stock(stock=stock_code)
                     logger.info(f"股票代码格式化: {stock_code} -> {formatted_stock_code}")
                     
@@ -988,7 +994,6 @@ class TradingExecutor:
                 
                 # 检查是否在交易时间
                 is_trade_time = config.is_trade_time()
-                logger.info(f"交易时间检查: {is_trade_time}")
                 
                 if not is_trade_time and not is_simulation:
                     logger.warning("当前不是交易时间，无法下单")
@@ -1006,37 +1011,26 @@ class TradingExecutor:
                         ticks = xtdata.get_full_tick([formatted_stock_code])
                         if ticks and formatted_stock_code in ticks:
                             tick = ticks[formatted_stock_code]
-                            # 尝试获取买三价
                             if hasattr(tick, 'bidPrice') and len(tick.bidPrice) >= 3:
                                 price = tick.bidPrice[2]
                                 logger.info(f"获取到 {formatted_stock_code} 买三价: {price}")
-                            # 如果无法获取买三价，尝试获取买一价
                             elif hasattr(tick, 'bidPrice') and len(tick.bidPrice) >= 1:
                                 price = tick.bidPrice[0]
                                 logger.info(f"获取到 {formatted_stock_code} 买一价: {price}")
-                            # 尝试从字典格式获取
                             elif isinstance(tick, dict) and 'bidPrice' in tick:
                                 bid_prices = tick['bidPrice']
                                 if len(bid_prices) >= 3:
                                     price = bid_prices[2]
-                                    logger.info(f"获取到 {formatted_stock_code} 买三价: {price}")
                                 elif len(bid_prices) >= 1:
                                     price = bid_prices[0]
-                                    logger.info(f"获取到 {formatted_stock_code} 买一价: {price}")
-                        
-                        # 如果仍然没有获取到价格，尝试使用最新行情
-                        if price is None:
-                            latest_quote = self.data_manager.get_latest_data(stock_code)
-                            if latest_quote:
-                                price = latest_quote.get('lastPrice') or 0
-                                logger.info(f"使用 {formatted_stock_code} 最新价: {price}")
                     except Exception as e:
-                        logger.warning(f"获取 {formatted_stock_code} 买三价时出错: {str(e)}")
-                        # 尝试获取最新行情价格作为备选
+                        logger.warning(f"获取 {formatted_stock_code} 价格时出错: {str(e)}")
+                    
+                    # 如果仍然没有获取到价格，尝试使用最新行情
+                    if price is None:
                         latest_quote = self.data_manager.get_latest_data(stock_code)
                         if latest_quote:
                             price = latest_quote.get('lastPrice') or 0
-                            logger.info(f"使用 {formatted_stock_code} 最新价: {price}")
                 
                 # 确保价格有效
                 if price is None or price <= 0:
@@ -1045,55 +1039,69 @@ class TradingExecutor:
                 
                 # 如果指定了比例而不是数量，计算数量
                 if volume is None and ratio is not None:
-                    try:
-                        # 使用qmt_trader获取持仓信息
-                        position_df = self.position_manager.qmt_trader.position()
-                        
-                        if position_df.empty:
-                            logger.error(f"未获取到持仓信息，无法根据比例计算卖出数量")
-                            return None
-                        
-                        # 提取股票代码（去掉可能的后缀）
-                        stock_code_base = stock_code.split('.')[0]
-                        
-                        # 筛选指定股票的持仓
-                        stock_positions = position_df[position_df['证券代码'] == stock_code_base]
-                        if stock_positions.empty:
-                            logger.error(f"未持有 {stock_code}，无法卖出")
-                            return None
-                        
-                        # 获取持仓量和可用数量
-                        total_volume = stock_positions['股票余额'].iloc[0]
-                        available_volume = stock_positions['可用余额'].iloc[0]
-                        
-                        # 确保可用余额充足
-                        if available_volume < 100:  # 至少要有100股才能卖出
-                            logger.error(f"{stock_code} 可用余额不足: {available_volume}，最少需要100股")
-                            return None
-                        
-                        # 计算卖出数量，确保不超过可用数量
-                        volume = min(int(total_volume * ratio), available_volume)
-                        volume = (volume // 100) * 100  # 向下取整到100的倍数
-                    except Exception as e:
-                        logger.error(f"计算卖出数量时出错: {str(e)}")
+                    position = self.position_manager.get_position(stock_code)
+                    if not position:
+                        logger.error(f"未持有 {stock_code}，无法卖出")
+                        return None
+                    
+                    total_volume = position['volume']
+                    volume = int(total_volume * ratio / 100) * 100  # 转换为100的整数倍
+                    
+                    if volume <= 0:
+                        logger.error(f"计算的卖出数量必须大于0: {volume}")
                         return None
                 
                 if volume <= 0:
                     logger.error(f"卖出数量必须大于0: {volume}")
                     return None
                 
+                # 模拟交易模式处理
+                if is_simulation:
+                    # 检查模拟持仓是否足够
+                    position = self.position_manager.get_position(stock_code)
+                    if position and position['volume'] >= volume:
+                        # 计算卖出金额（扣除手续费）
+                        revenue = price * volume * 0.9987  # 含手续费和印花税
+                        
+                        # 更新模拟账户资金
+                        self.simulation_balance += revenue
+                        config.SIMULATION_BALANCE = self.simulation_balance
+                        
+                        # 更新持仓信息
+                        new_volume = position['volume'] - volume
+                        if new_volume > 0:
+                            self.position_manager.update_position(
+                                stock_code=stock_code,
+                                volume=new_volume,
+                                cost_price=position['cost_price'],
+                                current_price=price
+                            )
+                        else:
+                            self.position_manager.remove_position(stock_code)
+                        
+                        logger.info(f"【模拟】卖出 {formatted_stock_code}, 价格: {price}, 数量: {volume}, 收入: {revenue:.2f}")
+                        
+                        # 生成模拟订单ID
+                        order_id = self._generate_sim_order_id()
+                        logger.info(f"【模拟】生成卖出委托号: {order_id}")
+                        return order_id
+                    else:
+                        logger.error(f"【模拟】持仓不足，卖出取消")
+                        return None
+                
+                # 实盘交易模式处理
                 # 使用qmt_trader检查股票是否可卖出
                 can_sell = True
                 try:
                     can_sell = self.position_manager.qmt_trader.check_stock_is_av_sell(
-                        stock=formatted_stock_code,  # 使用格式化后的股票代码
+                        stock=formatted_stock_code,
                         amount=volume
                     )
                 except Exception as e:
                     logger.warning(f"检查股票是否可卖出时出错: {str(e)}，将继续尝试卖出")
                     can_sell = True  # 如果检查失败，仍然尝试卖出
                 
-                if not can_sell and not is_simulation:
+                if not can_sell:
                     logger.error(f"卖出 {formatted_stock_code} 未通过可卖出检查")
                     return None
                 
@@ -1106,10 +1114,10 @@ class TradingExecutor:
                     try:
                         # 使用position_manager中的easy_qmt_trader进行卖出
                         order_id = self.position_manager.qmt_trader.sell(
-                            security=formatted_stock_code,  # 使用带后缀的股票代码
-                            price=price,                   # 直接使用买三价或指定价格
+                            security=formatted_stock_code,
+                            price=price,
                             amount=volume, 
-                            price_type=price_type,         # 使用指定的价格类型
+                            price_type=price_type,
                             strategy_name=strategy, 
                             order_remark=f"auto_{strategy}"
                         )
@@ -1129,13 +1137,6 @@ class TradingExecutor:
                 if not order_id:
                     logger.error(f"卖出 {formatted_stock_code} 经过 {max_retries} 次尝试后仍然失败")
                     return None
-                
-                # 如果是模拟交易模式，需要更新模拟账户资金
-                if is_simulation:
-                    revenue = price * volume * 0.9987  # 扣除手续费(含印花税)
-                    self.simulation_balance += revenue
-                    config.SIMULATION_BALANCE = self.simulation_balance
-                    logger.info(f"模拟账户资金更新: +{revenue:.2f}, 余额: {self.simulation_balance:.2f}")
                 
                 # 注册回调
                 if callback:
