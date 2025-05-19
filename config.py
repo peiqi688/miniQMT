@@ -8,7 +8,7 @@ from datetime import datetime
 # ======================= 系统配置 =======================
 # 调试开关
 DEBUG = False
-DEBUG_SIMU_STOCK_DATA= True
+DEBUG_SIMU_STOCK_DATA= False
 LOG_LEVEL = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
 LOG_FILE = "qmt_trading.log"
 LOG_MAX_SIZE = 10 * 1024 * 1024  # 10MB
@@ -23,8 +23,8 @@ ENABLE_ALLOW_SELL = True  # 是否允许卖出
 ENABLE_DATA_SYNC = True  # 是否启用数据同步
 ENABLE_POSITION_MONITOR = True  # 是否启用持仓监控
 ENABLE_LOG_CLEANUP = True  # 是否启用日志清理
-ENABLE_GRID_TRADING = True  # 是否启用网格交易
-ENABLE_DYNAMIC_STOP_PROFIT = True  # 是否启用动态止盈
+ENABLE_GRID_TRADING = True  # 是否启用网格交易(自动交易)
+ENABLE_DYNAMIC_STOP_PROFIT = True  # 是否启用动态止盈(自动交易)
 
 # ======================= 数据配置 =======================
 # 历史数据存储路径

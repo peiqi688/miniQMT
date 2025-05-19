@@ -1163,7 +1163,7 @@ class PositionManager:
             # 检查是否达到止损条件
             if stop_loss_price > 0 and current_price <= stop_loss_price:
                 stock_code = position['stock_code']
-                logger.warning(f"{stock_code} 触发止损条件，当前价格: {current_price:.2f}, 止损价格: {stop_loss_price:.2f}")
+                logger.warning(f"{stock_code} 触发止损条件，当前价格:: {current_price:.2f}, 止损价格: {stop_loss_price:.2f}")
                 return True
             
             return False
@@ -1407,9 +1407,10 @@ class PositionManager:
                         
                         # 记录信号到日志
                         if stop_loss_triggered:
-                            logger.warning(f"{stock_code} 触发止损信号 $$$$$$$$$$$$$$$$$$$$----------------------------")
-                        
-                        if take_profit_triggered:
+                            # 这里要触发卖出操作，清仓 —— TODO
+                            logger.warning(f"{stock_code} 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------")
+                        elif take_profit_triggered:
+                            # 这里要触发止盈操作 —— TODO
                             logger.info(f"{stock_code} 触发止盈信号，类型: {take_profit_type} $$$$$$$$$$$$$$$$$$$$+++++")
                             
                             # 根据止盈类型更新持仓状态
