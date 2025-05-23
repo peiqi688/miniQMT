@@ -9982,3 +9982,1254 @@ Exception: 无法连接xtquant服务，请检查QMT-投研版或QMT-极简版是
 2025-05-19 23:49:35,961 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
 2025-05-19 23:49:36,567 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
 2025-05-19 23:49:37,294 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-22 10:51:14,322 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-05-22 10:51:14,344 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-05-22 10:51:18,405 - qmt_trading.data_manager - ERROR - 初始化迅投行情接口出错: 无法连接xtquant服务，请检查QMT-投研版或QMT-极简版是否开启
+2025-05-22 10:51:21,501 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-22 10:51:21,530 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-22 10:51:21,534 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-05-22 10:51:21,535 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-05-22 10:51:21,536 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-05-22 10:51:21,551 - qmt_trading.main - INFO - ==================================================
+2025-05-22 10:51:21,557 - qmt_trading.main - INFO - = QMT量化交易系统启动 - 2025-05-22 10:51:21 
+2025-05-22 10:51:21,557 - qmt_trading.main - INFO - ==================================================
+2025-05-22 10:51:21,558 - qmt_trading.main - INFO - 开始初始化系统...
+2025-05-22 10:51:21,558 - qmt_trading.main - INFO - 系统初始化完成
+2025-05-22 10:51:21,559 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-05-22 10:51:21,560 - qmt_trading.main - INFO - 下载 300250 的历史数据
+2025-05-22 10:51:25,397 - qmt_trading.main - INFO - 下载 300277 的历史数据
+2025-05-22 10:51:27,761 - qmt_trading.main - INFO - 下载 301252 的历史数据
+2025-05-22 10:51:30,236 - qmt_trading.main - INFO - 下载 600571 的历史数据
+2025-05-22 10:51:33,691 - qmt_trading.main - INFO - 下载 603883 的历史数据
+2025-05-22 10:51:36,111 - qmt_trading.main - INFO - 初始数据下载完成
+2025-05-22 10:51:36,122 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-05-22 10:51:36,181 - qmt_trading.indicator_calculator - INFO - 成功计算 300250 的技术指标，共 3 条记录
+2025-05-22 10:51:36,221 - qmt_trading.indicator_calculator - INFO - 成功计算 300277 的技术指标，共 3 条记录
+2025-05-22 10:51:36,254 - qmt_trading.indicator_calculator - INFO - 成功计算 301252 的技术指标，共 3 条记录
+2025-05-22 10:51:36,279 - qmt_trading.indicator_calculator - INFO - 成功计算 600571 的技术指标，共 3 条记录
+2025-05-22 10:51:36,304 - qmt_trading.indicator_calculator - INFO - 成功计算 603883 的技术指标，共 3 条记录
+2025-05-22 10:51:36,305 - qmt_trading.main - INFO - 初始指标计算完成
+2025-05-22 10:51:36,305 - qmt_trading.main - INFO - 启动数据更新线程
+2025-05-22 10:51:36,320 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-22 10:51:36,320 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-05-22 10:51:36,324 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-05-22 10:51:36,326 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-05-22 10:51:36,330 - qmt_trading.main - INFO - 启动日志清理线程
+2025-05-22 10:51:36,342 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-05-22 10:51:36,343 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-05-22 10:51:36,344 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-05-22 10:51:40,353 - qmt_trading.data_manager - ERROR - xtdata: 获取 513100.SH 的最新行情时出错: 无法连接xtquant服务，请检查QMT-投研版或QMT-极简版是否开启
+Traceback (most recent call last):
+  File "c:\github_repo\miniQMT\data_manager.py", line 575, in get_latest_xtdata
+    latest_quote = xt.get_full_tick([stock_code])
+  File "c:\github_repo\miniQMT\xtquant\xtdata.py", line 852, in get_full_tick
+    client = get_client()
+  File "c:\github_repo\miniQMT\xtquant\xtdata.py", line 166, in get_client
+    __client = connect(ip, port, False)
+  File "c:\github_repo\miniQMT\xtquant\xtdata.py", line 124, in connect
+    raise Exception("无法连接xtquant服务，请检查QMT-投研版或QMT-极简版是否开启")
+Exception: 无法连接xtquant服务，请检查QMT-投研版或QMT-极简版是否开启
+2025-05-22 10:51:40,563 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:51:43,625 - qmt_trading.data_manager - WARNING - xtdata:未获取到 513100.SH 的tick行情，返回值: {}
+2025-05-22 10:51:45,130 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-05-22 10:51:45,133 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-05-22 10:51:45,157 - qmt_trading.data_manager - WARNING - xtdata:未获取到 600571.SH 的tick行情，返回值: {}
+2025-05-22 10:51:45,978 - qmt_trading.data_manager - WARNING - xtdata:未获取到 600571.SH 的tick行情，返回值: {}
+2025-05-22 10:51:45,985 - qmt_trading.data_manager - WARNING - xtdata:未获取到 600787.SH 的tick行情，返回值: {}
+2025-05-22 10:51:46,403 - qmt_trading.position_manager - ERROR - 更新所有持仓的最高价时出错: '<' not supported between instances of 'float' and 'NoneType'
+2025-05-22 10:51:46,417 - qmt_trading.data_manager - WARNING - xtdata:未获取到 513100.SH 的tick行情，返回值: {}
+2025-05-22 10:51:47,817 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-05-22 10:51:48,179 - qmt_trading.data_manager - WARNING - xtdata:未获取到 600571.SH 的tick行情，返回值: {}
+2025-05-22 10:51:49,507 - qmt_trading.data_manager - WARNING - xtdata:未获取到 603883.SH 的tick行情，返回值: {}
+2025-05-22 10:51:50,865 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-22 10:51:51,423 - qmt_trading.data_manager - WARNING - xtdata:未获取到 300277.SZ 的tick行情，返回值: {}
+2025-05-22 10:51:52,224 - qmt_trading.data_manager - WARNING - xtdata:未获取到 301252.SZ 的tick行情，返回值: {}
+2025-05-22 10:51:53,963 - qmt_trading.data_manager - WARNING - xtdata:未获取到 300250.SZ 的tick行情，返回值: {}
+2025-05-22 10:51:54,952 - qmt_trading.position_manager - INFO - 更新 300250 持仓: 止损价: 从 14.18 到 0.0
+2025-05-22 10:51:54,961 - qmt_trading.data_manager - WARNING - xtdata:未获取到 513100.SH 的tick行情，返回值: {}
+2025-05-22 10:51:54,966 - qmt_trading.data_manager - WARNING - xtdata:未获取到 600571.SH 的tick行情，返回值: {}
+2025-05-22 10:51:54,968 - qmt_trading.data_manager - WARNING - xtdata:未获取到 600787.SH 的tick行情，返回值: {}
+2025-05-22 10:51:54,969 - qmt_trading.data_manager - WARNING - xtdata:未获取到 603883.SH 的tick行情，返回值: {}
+2025-05-22 10:51:54,970 - qmt_trading.data_manager - WARNING - xtdata:未获取到 300277.SZ 的tick行情，返回值: {}
+2025-05-22 10:51:54,971 - qmt_trading.data_manager - WARNING - xtdata:未获取到 301252.SZ 的tick行情，返回值: {}
+2025-05-22 10:51:54,972 - qmt_trading.data_manager - WARNING - xtdata:未获取到 300250.SZ 的tick行情，返回值: {}
+2025-05-22 10:51:56,071 - qmt_trading.data_manager - WARNING - xtdata:未获取到 600787.SH 的tick行情，返回值: {}
+2025-05-22 10:51:56,495 - qmt_trading.data_manager - WARNING - xtdata:未获取到 603883.SH 的tick行情，返回值: {}
+2025-05-22 10:51:56,905 - qmt_trading.data_manager - WARNING - xtdata:未获取到 300277.SZ 的tick行情，返回值: {}
+2025-05-22 10:51:57,338 - qmt_trading.data_manager - WARNING - xtdata:未获取到 301252.SZ 的tick行情，返回值: {}
+2025-05-22 10:51:57,993 - qmt_trading.data_manager - WARNING - xtdata:未获取到 513100.SH 的tick行情，返回值: {}
+2025-05-22 10:51:58,872 - qmt_trading.position_manager - INFO - 301252 触发动态止盈，当前价格: 34.88, 止盈位: 36.45, 最高价: 36.45
+2025-05-22 10:51:58,973 - qmt_trading.position_manager - INFO - 301252 触发止盈信号，类型: FULL $$$$$$$$$$$$$$$$$$$$+++++
+2025-05-22 10:51:59,328 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-05-22 10:52:09,820 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:52:14,963 - qmt_trading.position_manager - INFO - 301252 触发动态止盈，当前价格: 34.86, 止盈位: 36.45, 最高价: 36.45
+2025-05-22 10:52:14,964 - qmt_trading.position_manager - INFO - 301252 触发止盈信号，类型: FULL $$$$$$$$$$$$$$$$$$$$+++++
+2025-05-22 10:52:26,282 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:52:28,309 - qmt_trading.position_manager - INFO - 301252 触发动态止盈，当前价格: 34.86, 止盈位: 36.45, 最高价: 36.45
+2025-05-22 10:52:28,357 - qmt_trading.position_manager - INFO - 301252 触发止盈信号，类型: FULL $$$$$$$$$$$$$$$$$$$$+++++
+2025-05-22 10:52:36,493 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-22 10:52:36,493 - qmt_trading.main - INFO - 开始清理资源...
+2025-05-22 10:52:36,496 - qmt_trading.main - INFO - 停止 data_thread...
+2025-05-22 10:52:37,193 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-22 10:52:42,718 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-05-22 10:52:42,737 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-05-22 10:52:44,859 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-05-22 10:52:44,867 - qmt_trading.data_manager - INFO - 股票 300250.SZ 数据获取成功
+2025-05-22 10:52:44,897 - qmt_trading.data_manager - INFO - 股票 300277.SZ 数据获取成功
+2025-05-22 10:52:44,954 - qmt_trading.data_manager - INFO - 股票 301252.SZ 数据获取成功
+2025-05-22 10:52:45,043 - qmt_trading.data_manager - INFO - 股票 600571.SH 数据获取成功
+2025-05-22 10:52:45,131 - qmt_trading.data_manager - INFO - 股票 603883.SH 数据获取成功
+2025-05-22 10:52:45,138 - qmt_trading.data_manager - INFO - 成功验证 5 只股票可获取数据
+2025-05-22 10:52:45,352 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-22 10:52:45,360 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-22 10:52:45,361 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-05-22 10:52:45,376 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-05-22 10:52:45,382 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-05-22 10:52:45,443 - qmt_trading.main - INFO - ==================================================
+2025-05-22 10:52:45,542 - qmt_trading.main - INFO - = QMT量化交易系统启动 - 2025-05-22 10:52:45 
+2025-05-22 10:52:45,681 - qmt_trading.main - INFO - ==================================================
+2025-05-22 10:52:45,689 - qmt_trading.main - INFO - 开始初始化系统...
+2025-05-22 10:52:45,690 - qmt_trading.main - INFO - 系统初始化完成
+2025-05-22 10:52:45,691 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-05-22 10:52:45,691 - qmt_trading.main - INFO - 下载 300250 的历史数据
+2025-05-22 10:52:47,140 - qmt_trading.main - INFO - 下载 300277 的历史数据
+2025-05-22 10:52:48,575 - qmt_trading.main - INFO - 下载 301252 的历史数据
+2025-05-22 10:52:50,036 - qmt_trading.main - INFO - 下载 600571 的历史数据
+2025-05-22 10:52:51,533 - qmt_trading.main - INFO - 下载 603883 的历史数据
+2025-05-22 10:52:53,504 - qmt_trading.main - INFO - 初始数据下载完成
+2025-05-22 10:52:53,530 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-05-22 10:52:53,548 - qmt_trading.main - INFO - 初始指标计算完成
+2025-05-22 10:52:53,574 - qmt_trading.main - INFO - 启动数据更新线程
+2025-05-22 10:52:53,693 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-22 10:52:53,693 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-05-22 10:52:53,699 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-05-22 10:52:53,863 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-05-22 10:52:53,869 - qmt_trading.main - INFO - 启动日志清理线程
+2025-05-22 10:52:53,911 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-05-22 10:52:54,231 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-05-22 10:52:54,459 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-05-22 10:52:57,150 - qmt_trading.data_manager - WARNING - 查询股票基本信息失败: 网络接收错误。
+2025-05-22 10:52:57,537 - qmt_trading.position_manager - INFO - 更新 300277 持仓: 止损价: 从 12.07 到 11.35
+2025-05-22 10:52:58,968 - qmt_trading.data_manager - WARNING - 查询股票基本信息失败: 网络接收错误。
+2025-05-22 10:52:59,566 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:52:59,927 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:01,104 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:53:04,798 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:05,913 - qmt_trading.position_manager - INFO - 300277 触发初次止盈，当前盈利: 6.39%, 初次止盈阈值: 5.00%
+2025-05-22 10:53:05,913 - qmt_trading.position_manager - INFO - 300277 触发止盈信号，类型: HALF $$$$$$$$$$$$$$$$$$$$+++++
+2025-05-22 10:53:05,919 - qmt_trading.position_manager - INFO - 更新 300277 持仓: 首次止盈触发: 从 0 到 True
+2025-05-22 10:53:08,486 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:10,688 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-22 10:53:11,617 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:14,802 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:16,296 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:53:18,118 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:18,478 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:53:18,479 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:53:18,479 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:53:21,489 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:24,652 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:28,108 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:28,998 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:53:31,669 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:33,240 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.98, 止损价格: 13.17
+2025-05-22 10:53:33,241 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.98, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:53:33,241 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:53:34,975 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:39,371 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:40,598 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:53:42,849 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:53:42,867 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:43,581 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:53:44,890 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:53:46,894 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:53:47,107 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:47,242 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:53:47,256 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:53:47,261 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:53:49,231 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:53:50,681 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:51,249 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:53:53,252 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:53:54,219 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:55,255 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:53:57,260 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:53:57,312 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:57,445 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:53:57,657 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:53:58,911 - qmt_trading.position_manager - WARNING - 未能获取 600571 从 2025-04-26 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:53:59,345 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:01,230 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:01,361 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:02,689 - qmt_trading.position_manager - WARNING - 未能获取 301252 从 2025-04-23 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:54:03,237 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 13.00, 止损价格: 13.17
+2025-05-22 10:54:03,238 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 13.00, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:54:03,239 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:54:03,366 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:05,387 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:05,441 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:07,451 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:09,171 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:09,454 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:11,458 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:12,384 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:12,719 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-22 10:54:13,455 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:54:13,476 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:15,485 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:15,535 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:15,618 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:17,547 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:17,672 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.98, 止损价格: 13.17
+2025-05-22 10:54:17,673 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.98, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:54:17,674 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:54:18,800 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:19,551 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:21,602 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:22,131 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:23,606 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:25,577 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:25,666 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:27,720 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:27,764 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-22 10:54:28,023 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:54:28,835 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:29,723 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:30,145 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:54:30,146 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:54:30,146 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:54:31,726 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:31,772 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:33,794 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:35,211 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:35,810 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:37,814 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:38,680 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:39,817 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:41,708 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:54:41,821 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:41,866 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:43,392 - qmt_trading.position_manager - WARNING - 未能获取 300277 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:54:43,906 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:44,086 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 13.00, 止损价格: 13.17
+2025-05-22 10:54:44,087 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 13.00, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:54:44,091 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:54:45,910 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:45,965 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:54:47,977 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:54:49,566 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-22 10:54:49,572 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-22 10:54:49,573 - qmt_trading.web_server - WARNING - 交易模式切换: 实盘交易
+2025-05-22 10:54:49,574 - qmt_trading.web_server - INFO - 配置已更新: {'simulationMode': False}
+2025-05-22 10:54:49,869 - qmt_trading.position_manager - INFO - 更新 300277 持仓: 止损价: 从 12.07 到 11.35
+2025-05-22 10:54:49,887 - qmt_trading.position_manager - INFO - 已删除 513100 的持仓记录
+2025-05-22 10:54:49,889 - qmt_trading.position_manager - INFO - 已删除 600787 的持仓记录
+2025-05-22 10:54:50,400 - qmt_trading.position_manager - INFO - 更新内存数据库的 300277 到sql数据库
+2025-05-22 10:54:57,367 - qmt_trading.position_manager - INFO - 300277 触发初次止盈，当前盈利: 6.56%, 初次止盈阈值: 5.00%
+2025-05-22 10:54:57,372 - qmt_trading.position_manager - INFO - 300277 触发止盈信号，类型: HALF $$$$$$$$$$$$$$$$$$$$+++++
+2025-05-22 10:54:57,535 - qmt_trading.position_manager - INFO - 更新 300277 持仓: 首次止盈触发: 从 0 到 True
+2025-05-22 10:55:00,492 - qmt_trading.web_server - INFO - UI监控状态变更: False -> True (通过API)
+2025-05-22 10:55:00,734 - qmt_trading.position_manager - INFO - 更新内存数据库的 300277 到sql数据库
+2025-05-22 10:55:09,149 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 13.00, 止损价格: 13.17
+2025-05-22 10:55:09,150 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 13.00, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:55:09,151 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:55:22,612 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:55:22,613 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:55:22,613 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:55:27,957 - qmt_trading.web_server - INFO - 配置已更新: {'singleBuyAmount': 2000}
+2025-05-22 10:55:28,117 - qmt_trading.web_server - INFO - 自动交易状态变更: False -> False (通过保存配置)
+2025-05-22 10:55:28,119 - qmt_trading.web_server - INFO - 配置已更新: {'singleBuyAmount': 2000, 'firstProfitSell': 5, 'firstProfitSellEnabled': True, 'stockGainSellPencent': 50, 'firstProfitSellPencent': True, 'allowBuy': True, 'allowSell': True, 'stopLossBuy': 6.999999999999995, 'stopLossBuyEnabled': True, 'stockStopLoss': 7.000000000000001, 'StopLossEnabled': True, 'singleStockMaxPosition': 50000, 'totalMaxPosition': 950000, 'connectPort': '5000', 'totalAccounts': '127.0.0.1', 'globalAllowBuySell': False, 'simulationMode': False}
+2025-05-22 10:55:28,960 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-22 10:55:36,460 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-22 10:55:37,243 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 13.00, 止损价格: 13.17
+2025-05-22 10:55:37,271 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 13.00, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:55:37,272 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:55:40,677 - qmt_trading.web_server - INFO - 交易模式: 实盘, 股票代码格式化: ['300250'] -> ['300250']
+2025-05-22 10:55:40,680 - qmt_trading.trading_executor - INFO - 开始买入处理: 300250, volume=None, price=None, amount=2000.0, price_type=5
+2025-05-22 10:55:40,729 - qmt_trading.trading_executor - INFO - 股票代码格式化: 300250 -> 300250.SZ
+2025-05-22 10:55:40,790 - qmt_trading.trading_executor - INFO - 是否为模拟交易模式: False
+2025-05-22 10:55:40,896 - qmt_trading.trading_executor - INFO - 交易时间检查: True
+2025-05-22 10:55:41,028 - qmt_trading.trading_executor - INFO - 获取到 300250.SZ 卖三价: 15
+2025-05-22 10:55:41,054 - qmt_trading.trading_executor - INFO - 买入 300250.SZ 下单成功，委托号: 275235475, 价格: 15, 数量: 100, 价格类型: 5
+2025-05-22 10:55:41,054 - qmt_trading.strategy - INFO - 手动买入 300250 成功，委托号: 275235475
+2025-05-22 10:55:45,376 - qmt_trading.position_manager - INFO - 更新 300250 持仓: 止损价: 从 14.18 到 14.1
+2025-05-22 10:55:46,347 - qmt_trading.position_manager - INFO - 更新内存数据库的 300250 到sql数据库
+2025-05-22 10:55:51,554 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:55:51,554 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:55:51,555 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:56:03,802 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:56:03,806 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:56:03,807 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:56:17,421 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:56:17,421 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:56:17,422 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:56:29,020 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:56:29,021 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:56:29,021 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:56:36,617 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-22 10:56:41,238 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:56:41,244 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:56:41,302 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:56:44,083 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-22 10:56:53,651 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:56:53,652 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:56:53,652 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:57:05,359 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:57:05,359 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:57:05,360 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:57:11,862 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-22 10:57:11,868 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-22 10:57:11,871 - qmt_trading.web_server - WARNING - 交易模式切换: 模拟交易
+2025-05-22 10:57:11,937 - qmt_trading.web_server - INFO - 配置已更新: {'simulationMode': True}
+2025-05-22 10:57:13,039 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:13,852 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:14,398 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:15,889 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:15,960 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:57:17,892 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:17,990 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:18,059 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:18,274 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 13.00, 止损价格: 13.17
+2025-05-22 10:57:18,277 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 13.00, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:57:18,277 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:18,279 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:57:19,055 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:20,183 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:21,489 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:22,186 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:24,192 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:24,644 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:25,038 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:26,268 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:27,805 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:28,279 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:28,647 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:57:30,406 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:31,090 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:31,714 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:32,011 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:32,011 - qmt_trading.position_manager - ERROR - 更新 603883 持仓Error: cannot commit - no transaction is active
+2025-05-22 10:57:32,155 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:32,247 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:57:32,249 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:57:32,250 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:57:32,622 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:34,631 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:35,669 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:36,635 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:37,590 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:38,640 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-22 10:57:39,115 - qmt_trading.web_server - INFO - 交易模式: 模拟, 股票代码格式化: ['300250'] -> ['300250.SZ']
+2025-05-22 10:57:39,123 - qmt_trading.position_manager - ERROR - 更新 603883 持仓Error: not an error
+2025-05-22 10:57:39,132 - qmt_trading.trading_executor - INFO - 开始买入处理: 300250.SZ, volume=None, price=None, amount=2000.0, price_type=5
+2025-05-22 10:57:39,140 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:39,142 - qmt_trading.trading_executor - INFO - 是否为模拟交易模式: True
+2025-05-22 10:57:39,153 - qmt_trading.trading_executor - INFO - 交易时间检查: True
+2025-05-22 10:57:39,154 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:39,208 - qmt_trading.trading_executor - INFO - 模拟交易模式，强制允许交易
+2025-05-22 10:57:39,283 - qmt_trading.trading_executor - INFO - 获取到 300250.SZ 卖三价: 14.97
+2025-05-22 10:57:39,434 - qmt_trading.trading_executor - INFO - 模拟交易模式: 生成订单ID: SIM202505221057390001
+2025-05-22 10:57:39,905 - qmt_trading.trading_executor - INFO - 保存交易记录: 300250.SZ(初灵信息) BUY 价格:14.97 数量:100 金额:1497.00 策略:simu
+2025-05-22 10:57:39,916 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 300250.SZ(初灵信息), BUY, 价格: 14.97, 数量: 100, 策略: simu
+2025-05-22 10:57:39,916 - qmt_trading.trading_executor - INFO - 更新持仓: stock_code=300250.SZ, trade_type=BUY, price=14.97, volume=100
+2025-05-22 10:57:39,937 - qmt_trading.trading_executor - INFO - 新建持仓成功: 300250.SZ(初灵信息), 数量: 100, 成本: 14.97, 结果: True
+2025-05-22 10:57:39,938 - qmt_trading.trading_executor - INFO - 模拟账户资金更新: -1497.45, 余额: 998502.55
+2025-05-22 10:57:39,939 - qmt_trading.trading_executor - INFO - [模拟] 买入 300250.SZ 成功，委托号: SIM202505221057390001, 价格: 14.97, 数量: 100
+2025-05-22 10:57:39,939 - qmt_trading.strategy - INFO - 手动买入 300250.SZ 成功，委托号: SIM202505221057390001
+2025-05-22 10:57:41,421 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:57:42,305 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:42,750 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:57:43,491 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:57:44,326 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:57:44,899 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-22 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:57:44,902 - qmt_trading.position_manager - INFO - 更新 300250.SZ 持仓: 最高价: 从 14.95 到 15.25
+2025-05-22 10:57:44,903 - qmt_trading.position_manager - INFO - 更新 300250.SZ 的最高价为 15.25
+2025-05-22 10:57:44,928 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-22 10:57:45,029 - qmt_trading.strategy - WARNING - 300250.SZ 持仓量不足，无法创建有效的网格交易
+2025-05-22 10:57:45,031 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 13.00, 止损价格: 13.17
+2025-05-22 10:57:45,052 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 13.00, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:57:45,082 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:57:45,500 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:57:45,641 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:47,653 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:57:49,680 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:57:49,866 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:50,322 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:57:51,894 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:57:53,376 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:53,666 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-22 10:57:53,908 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:57:55,644 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:57:55,926 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:57:56,322 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:57:56,500 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:57:57,955 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:57:59,959 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:00,089 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:58:01,242 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-22 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:58:01,364 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 13.00, 止损价格: 13.17
+2025-05-22 10:58:01,365 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 13.00, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:58:01,365 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:58:02,123 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:02,670 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:03,609 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:58:04,135 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:06,138 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:07,148 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:58:08,144 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:09,824 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:10,146 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:10,242 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:58:11,605 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:58:12,260 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:13,436 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:58:13,817 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-22 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:58:13,896 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 13.00, 止损价格: 13.17
+2025-05-22 10:58:13,897 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 13.00, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:58:13,897 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:58:14,265 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:14,980 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:16,269 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:16,624 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:58:18,279 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:19,808 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:58:20,328 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:20,979 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:22,338 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:22,965 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:58:24,140 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:58:24,359 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:26,081 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:58:26,363 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:26,595 - qmt_trading.web_server - INFO - UI监控状态变更: True -> False (通过API)
+2025-05-22 10:58:27,408 - qmt_trading.web_server - INFO - UI监控状态变更: False -> True (通过API)
+2025-05-22 10:58:27,558 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:27,971 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-22 到 2025-05-22 的历史数据，跳过更新最高价
+2025-05-22 10:58:28,147 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:58:28,148 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:58:28,149 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:58:28,498 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:29,377 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-22 10:58:30,519 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998502.5509
+2025-05-22 10:58:30,522 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-22 10:58:30,532 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-22 10:58:30,547 - qmt_trading.web_server - WARNING - 交易模式切换: 实盘交易
+2025-05-22 10:58:30,554 - qmt_trading.web_server - INFO - 配置已更新: {'simulationMode': False}
+2025-05-22 10:58:32,587 - qmt_trading.position_manager - INFO - 已删除 513100 的持仓记录
+2025-05-22 10:58:32,596 - qmt_trading.position_manager - INFO - 已删除 600787 的持仓记录
+2025-05-22 10:58:34,018 - qmt_trading.web_server - INFO - UI监控状态变更: True -> False (通过API)
+2025-05-22 10:58:35,206 - qmt_trading.web_server - INFO - UI监控状态变更: False -> True (通过API)
+2025-05-22 10:58:39,892 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.99, 止损价格: 13.17
+2025-05-22 10:58:39,892 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.99, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:58:39,893 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:58:51,557 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 13.00, 止损价格: 13.17
+2025-05-22 10:58:51,559 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 13.00, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:58:51,559 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:58:54,785 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-22 10:59:02,503 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-22 10:59:04,009 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-22 10:59:04,010 - qmt_trading.main - INFO - 开始清理资源...
+2025-05-22 10:59:04,012 - qmt_trading.main - INFO - 停止 data_thread...
+2025-05-22 10:59:04,659 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 13.00, 止损价格: 13.17
+2025-05-22 10:59:04,660 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 13.00, 止盈位: 13.17, 最高价: 13.86
+2025-05-22 10:59:04,660 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-22 10:59:04,737 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-22 10:59:04,739 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-23 10:01:15,334 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-05-23 10:01:15,350 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-05-23 10:01:17,458 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-05-23 10:01:17,465 - qmt_trading.data_manager - INFO - 股票 300250.SZ 数据获取成功
+2025-05-23 10:01:17,529 - qmt_trading.data_manager - INFO - 股票 300277.SZ 数据获取成功
+2025-05-23 10:01:17,584 - qmt_trading.data_manager - INFO - 股票 301252.SZ 数据获取成功
+2025-05-23 10:01:17,643 - qmt_trading.data_manager - INFO - 股票 600571.SH 数据获取成功
+2025-05-23 10:01:17,682 - qmt_trading.data_manager - INFO - 股票 603883.SH 数据获取成功
+2025-05-23 10:01:17,685 - qmt_trading.data_manager - INFO - 成功验证 5 只股票可获取数据
+2025-05-23 10:01:17,856 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-23 10:01:17,946 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-23 10:01:17,947 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-05-23 10:01:17,949 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-05-23 10:01:17,953 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-05-23 10:01:17,993 - qmt_trading.main - INFO - ==================================================
+2025-05-23 10:01:18,011 - qmt_trading.main - INFO - = QMT量化交易系统启动 - 2025-05-23 10:01:18 
+2025-05-23 10:01:18,059 - qmt_trading.main - INFO - ==================================================
+2025-05-23 10:01:18,060 - qmt_trading.main - INFO - 开始初始化系统...
+2025-05-23 10:01:18,061 - qmt_trading.main - INFO - 系统初始化完成
+2025-05-23 10:01:18,064 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-05-23 10:01:18,065 - qmt_trading.main - INFO - 下载 300250 的历史数据
+2025-05-23 10:01:19,616 - qmt_trading.main - INFO - 下载 300277 的历史数据
+2025-05-23 10:01:21,087 - qmt_trading.main - INFO - 下载 301252 的历史数据
+2025-05-23 10:01:22,523 - qmt_trading.main - INFO - 下载 600571 的历史数据
+2025-05-23 10:01:24,938 - qmt_trading.main - INFO - 下载 603883 的历史数据
+2025-05-23 10:01:26,354 - qmt_trading.main - INFO - 初始数据下载完成
+2025-05-23 10:01:26,354 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-05-23 10:01:26,410 - qmt_trading.indicator_calculator - INFO - 成功计算 300250 的技术指标，共 1 条记录
+2025-05-23 10:01:26,440 - qmt_trading.indicator_calculator - INFO - 成功计算 300277 的技术指标，共 1 条记录
+2025-05-23 10:01:26,469 - qmt_trading.indicator_calculator - INFO - 成功计算 301252 的技术指标，共 1 条记录
+2025-05-23 10:01:26,517 - qmt_trading.indicator_calculator - INFO - 成功计算 600571 的技术指标，共 1 条记录
+2025-05-23 10:01:26,553 - qmt_trading.indicator_calculator - INFO - 成功计算 603883 的技术指标，共 1 条记录
+2025-05-23 10:01:26,555 - qmt_trading.main - INFO - 初始指标计算完成
+2025-05-23 10:01:26,556 - qmt_trading.main - INFO - 启动数据更新线程
+2025-05-23 10:01:26,569 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-23 10:01:26,569 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-05-23 10:01:26,580 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-05-23 10:01:26,609 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-05-23 10:01:26,611 - qmt_trading.main - INFO - 启动日志清理线程
+2025-05-23 10:01:26,621 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-05-23 10:01:26,681 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-05-23 10:01:26,716 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-05-23 10:01:27,350 - qmt_trading.data_manager - WARNING - 查询股票基本信息失败: 网络接收错误。
+2025-05-23 10:01:29,813 - qmt_trading.position_manager - INFO - 更新 300277 持仓: 止损价: 从 13.17 到 12.89
+2025-05-23 10:01:30,199 - qmt_trading.position_manager - INFO - 更新 301252 持仓: 止损价: 从 34.63 到 33.9
+2025-05-23 10:01:30,202 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:01:30,204 - qmt_trading.data_manager - WARNING - 查询股票基本信息失败: 网络接收错误。
+2025-05-23 10:01:30,208 - qmt_trading.position_manager - INFO - 更新 stock_pool.json with new positions.
+2025-05-23 10:01:30,208 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:01:30,449 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:01:30,686 - qmt_trading.position_manager - WARNING - 未能获取 600571 从 2025-04-26 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:01:31,565 - qmt_trading.position_manager - WARNING - 未能获取 603883 从 2025-05-06 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:01:32,807 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:01:32,820 - qmt_trading.position_manager - INFO - 更新 601606 持仓: 最高价: 从 13.74 到 13.97
+2025-05-23 10:01:32,820 - qmt_trading.position_manager - INFO - 更新 601606 的最高价为 13.97
+2025-05-23 10:01:32,937 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:01:33,068 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.84, 止损价格: 12.89
+2025-05-23 10:01:33,075 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.84, 止盈位: 12.89, 最高价: 13.86
+2025-05-23 10:01:33,082 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:01:34,126 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-23 10:01:37,620 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:01:40,726 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:01:43,539 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:01:43,955 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:01:45,579 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:01:45,599 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.85, 止损价格: 12.89
+2025-05-23 10:01:45,600 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.85, 止盈位: 12.89, 最高价: 13.86
+2025-05-23 10:01:45,601 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:01:47,592 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:01:51,374 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:01:55,612 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:01:55,928 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:01:56,151 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:01:59,185 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:01:59,185 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:01:59,557 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:01:59,631 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.84, 止损价格: 12.89
+2025-05-23 10:01:59,632 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.84, 止盈位: 12.89, 最高价: 13.86
+2025-05-23 10:01:59,633 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:02:03,151 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:02:07,464 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:02:10,401 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:02:10,402 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:02:10,537 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:02:10,668 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:02:13,226 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:02:13,311 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.82, 止损价格: 12.89
+2025-05-23 10:02:13,313 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.82, 止盈位: 12.89, 最高价: 13.86
+2025-05-23 10:02:13,314 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:02:13,649 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:02:13,716 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:02:15,737 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:02:17,606 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:02:17,753 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:02:19,777 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:02:20,847 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:02:21,781 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:02:23,313 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-23 10:02:23,320 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-23 10:02:23,320 - qmt_trading.web_server - WARNING - 交易模式切换: 实盘交易
+2025-05-23 10:02:23,321 - qmt_trading.web_server - INFO - 配置已更新: {'simulationMode': False}
+2025-05-23 10:02:23,601 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:02:24,061 - qmt_trading.position_manager - INFO - 更新 300277 持仓: 止损价: 从 13.17 到 12.89
+2025-05-23 10:02:24,075 - qmt_trading.position_manager - INFO - 更新 301252 持仓: 止损价: 从 34.63 到 33.9
+2025-05-23 10:02:24,115 - qmt_trading.position_manager - INFO - 已删除 600787 的持仓记录
+2025-05-23 10:02:24,128 - qmt_trading.position_manager - INFO - 已删除 513100 的持仓记录
+2025-05-23 10:02:24,755 - qmt_trading.position_manager - INFO - 更新内存数据库的 300277 到sql数据库
+2025-05-23 10:02:24,756 - qmt_trading.position_manager - INFO - 更新内存数据库的 301252 到sql数据库
+2025-05-23 10:02:24,757 - qmt_trading.position_manager - WARNING - 在数据库中未找到 601606 的记录
+2025-05-23 10:02:24,757 - qmt_trading.position_manager - INFO - 在数据库中插入新的 601606 记录，使用当前日期 2025-05-23 10:02:24 作为 open_date
+2025-05-23 10:02:26,522 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:02:26,624 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.82, 止损价格: 12.89
+2025-05-23 10:02:26,625 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.82, 止盈位: 12.89, 最高价: 13.86
+2025-05-23 10:02:26,626 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:02:27,321 - qmt_trading.web_server - INFO - UI监控状态变更: False -> True (通过API)
+2025-05-23 10:02:29,783 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:02:35,017 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:02:36,030 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-23 10:02:38,548 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:02:38,566 - qmt_trading.position_manager - INFO - 更新 601606 持仓: 最高价: 从 13.72 到 13.97
+2025-05-23 10:02:38,568 - qmt_trading.position_manager - INFO - 更新 601606 的最高价为 13.97
+2025-05-23 10:02:38,716 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.82, 止损价格: 12.89
+2025-05-23 10:02:38,716 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.82, 止盈位: 12.89, 最高价: 13.86
+2025-05-23 10:02:38,717 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:02:40,065 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:02:43,318 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-23 10:02:45,090 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:02:50,156 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:02:50,641 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:02:50,713 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.83, 止损价格: 12.89
+2025-05-23 10:02:50,714 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.83, 止盈位: 12.89, 最高价: 13.86
+2025-05-23 10:02:50,714 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:02:55,319 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:00,337 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:02,407 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:03:02,509 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.83, 止损价格: 12.89
+2025-05-23 10:03:02,510 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.83, 止盈位: 12.89, 最高价: 13.86
+2025-05-23 10:03:02,524 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:03:05,355 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:07,338 - qmt_trading.web_server - INFO - 配置已更新: {'singleBuyAmount': 2000}
+2025-05-23 10:03:07,471 - qmt_trading.web_server - INFO - 自动交易状态变更: False -> False (通过保存配置)
+2025-05-23 10:03:07,474 - qmt_trading.web_server - INFO - 配置已更新: {'singleBuyAmount': 2000, 'firstProfitSell': 5, 'firstProfitSellEnabled': True, 'stockGainSellPencent': 50, 'firstProfitSellPencent': True, 'allowBuy': True, 'allowSell': True, 'stopLossBuy': 6.999999999999995, 'stopLossBuyEnabled': True, 'stockStopLoss': 7.000000000000001, 'StopLossEnabled': True, 'singleStockMaxPosition': 50000, 'totalMaxPosition': 950000, 'connectPort': '5000', 'totalAccounts': '127.0.0.1', 'globalAllowBuySell': False, 'simulationMode': False}
+2025-05-23 10:03:10,386 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:15,026 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:03:15,064 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.82, 止损价格: 12.89
+2025-05-23 10:03:15,065 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.82, 止盈位: 12.89, 最高价: 13.86
+2025-05-23 10:03:15,066 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:03:15,414 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:20,493 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:22,071 - qmt_trading.web_server - INFO - 交易模式: 实盘, 股票代码格式化: ['300250'] -> ['300250']
+2025-05-23 10:03:22,074 - qmt_trading.trading_executor - INFO - 开始买入处理: 300250, volume=None, price=None, amount=2000.0, price_type=5
+2025-05-23 10:03:22,122 - qmt_trading.trading_executor - INFO - 股票代码格式化: 300250 -> 300250.SZ
+2025-05-23 10:03:22,148 - qmt_trading.trading_executor - INFO - 是否为模拟交易模式: False
+2025-05-23 10:03:22,174 - qmt_trading.trading_executor - INFO - 交易时间检查: True
+2025-05-23 10:03:22,206 - qmt_trading.trading_executor - INFO - 获取到 300250.SZ 卖三价: 14.7
+2025-05-23 10:03:22,396 - qmt_trading.trading_executor - INFO - 保存交易记录: 300250(初灵信息) BUY 价格:14.70 数量:100 金额:1470.00 策略:default
+2025-05-23 10:03:22,443 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 300250(初灵信息), BUY, 价格: 14.7, 数量: 100, 策略: default
+2025-05-23 10:03:22,512 - qmt_trading.trading_executor - INFO - 实盘买入订单已下达并记录: 300250, 订单号: 447333794
+2025-05-23 10:03:22,527 - qmt_trading.strategy - INFO - 手动买入 300250 成功，委托号: 447333794
+2025-05-23 10:03:24,703 - qmt_trading.position_manager - INFO - 更新 300250 持仓: 止损价: 从 14.1 到 13.99
+2025-05-23 10:03:25,572 - qmt_trading.position_manager - INFO - 更新内存数据库的 300250 到sql数据库
+2025-05-23 10:03:25,861 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:27,014 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:03:27,103 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.83, 止损价格: 12.89
+2025-05-23 10:03:27,111 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.83, 止盈位: 12.89, 最高价: 13.86
+2025-05-23 10:03:27,113 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:03:31,153 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:36,201 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:38,816 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:03:38,897 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.83, 止损价格: 12.89
+2025-05-23 10:03:38,906 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.83, 止盈位: 12.89, 最高价: 13.86
+2025-05-23 10:03:38,908 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:03:41,221 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:43,921 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-23 10:03:46,236 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:50,619 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:03:50,636 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.82, 止损价格: 12.89
+2025-05-23 10:03:50,636 - qmt_trading.position_manager - INFO - 300277 触发动态止盈，当前价格: 12.82, 止盈位: 12.89, 最高价: 13.86
+2025-05-23 10:03:50,637 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:03:51,255 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:52,192 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-23 10:03:56,290 - qmt_trading.position_manager - INFO - 更新内存数据库的 601606 到sql数据库
+2025-05-23 10:03:57,637 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-23 10:03:57,638 - qmt_trading.main - INFO - 开始清理资源...
+2025-05-23 10:03:57,641 - qmt_trading.main - INFO - 停止 data_thread...
+2025-05-23 10:03:58,252 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-23 10:33:14,983 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-05-23 10:33:15,349 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-05-23 10:33:17,562 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-05-23 10:33:17,565 - qmt_trading.data_manager - INFO - 股票 300250.SZ 数据获取成功
+2025-05-23 10:33:17,569 - qmt_trading.data_manager - INFO - 股票 300277.SZ 数据获取成功
+2025-05-23 10:33:17,577 - qmt_trading.data_manager - INFO - 股票 301252.SZ 数据获取成功
+2025-05-23 10:33:17,585 - qmt_trading.data_manager - INFO - 股票 600571.SH 数据获取成功
+2025-05-23 10:33:17,598 - qmt_trading.data_manager - INFO - 股票 601606.SH 数据获取成功
+2025-05-23 10:33:17,633 - qmt_trading.data_manager - INFO - 股票 603883.SH 数据获取成功
+2025-05-23 10:33:17,634 - qmt_trading.data_manager - INFO - 成功验证 6 只股票可获取数据
+2025-05-23 10:33:17,825 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-23 10:33:17,899 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-23 10:33:18,548 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-05-23 10:33:18,598 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-05-23 10:33:18,601 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-05-23 10:33:18,629 - qmt_trading.main - INFO - ==================================================
+2025-05-23 10:33:18,674 - qmt_trading.main - INFO - = QMT量化交易系统启动 - 2025-05-23 10:33:18 
+2025-05-23 10:33:18,733 - qmt_trading.main - INFO - ==================================================
+2025-05-23 10:33:18,739 - qmt_trading.main - INFO - 开始初始化系统...
+2025-05-23 10:33:18,774 - qmt_trading.main - INFO - 系统初始化完成
+2025-05-23 10:33:18,944 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-05-23 10:33:18,990 - qmt_trading.main - INFO - 下载 300250 的历史数据
+2025-05-23 10:33:20,580 - qmt_trading.main - INFO - 下载 300277 的历史数据
+2025-05-23 10:33:22,006 - qmt_trading.main - INFO - 下载 301252 的历史数据
+2025-05-23 10:33:23,405 - qmt_trading.main - INFO - 下载 600571 的历史数据
+2025-05-23 10:33:24,865 - qmt_trading.main - INFO - 下载 601606 的历史数据
+2025-05-23 10:33:27,468 - qmt_trading.main - INFO - 下载 603883 的历史数据
+2025-05-23 10:33:28,924 - qmt_trading.main - INFO - 初始数据下载完成
+2025-05-23 10:33:28,925 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-05-23 10:33:28,981 - qmt_trading.indicator_calculator - INFO - 成功计算 601606 的技术指标，共 60 条记录
+2025-05-23 10:33:28,985 - qmt_trading.main - INFO - 初始指标计算完成
+2025-05-23 10:33:28,986 - qmt_trading.main - INFO - 启动数据更新线程
+2025-05-23 10:33:28,987 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-23 10:33:28,988 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-05-23 10:33:28,990 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-05-23 10:33:28,994 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-05-23 10:33:28,995 - qmt_trading.main - INFO - 启动日志清理线程
+2025-05-23 10:33:29,012 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-05-23 10:33:29,022 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-05-23 10:33:29,083 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-05-23 10:33:31,656 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:33:31,790 - qmt_trading.data_manager - WARNING - baostock登录失败: 网络接收错误。
+2025-05-23 10:33:32,763 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:33:33,765 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:33:33,920 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:33:34,117 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:33:34,190 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:33:34,363 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:33:34,365 - qmt_trading.position_manager - WARNING - 未能获取 600571 从 2025-04-26 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:33:35,238 - qmt_trading.position_manager - WARNING - 未能获取 603883 从 2025-05-06 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:33:36,280 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:33:36,337 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:33:36,451 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:33:37,602 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:33:37,678 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:33:37,689 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:33:38,540 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:33:40,431 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:33:41,229 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-23 10:33:41,793 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:33:42,052 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:33:42,115 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:33:43,749 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:33:45,365 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:33:45,753 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:33:47,757 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:33:48,103 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-23 10:33:48,109 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-23 10:33:48,110 - qmt_trading.web_server - WARNING - 交易模式切换: 实盘交易
+2025-05-23 10:33:48,119 - qmt_trading.web_server - INFO - 配置已更新: {'simulationMode': False}
+2025-05-23 10:33:48,615 - qmt_trading.position_manager - INFO - 已删除 600787 的持仓记录
+2025-05-23 10:33:48,670 - qmt_trading.position_manager - INFO - 已删除 513100 的持仓记录
+2025-05-23 10:33:48,755 - qmt_trading.position_manager - WARNING - 未找到 600787 的持仓记录，无需删除
+2025-05-23 10:33:48,767 - qmt_trading.position_manager - WARNING - 未找到 513100 的持仓记录，无需删除
+2025-05-23 10:33:50,554 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:33:51,708 - qmt_trading.web_server - INFO - 配置已更新: {'singleBuyAmount': 2000}
+2025-05-23 10:33:51,878 - qmt_trading.web_server - INFO - 自动交易状态变更: False -> False (通过保存配置)
+2025-05-23 10:33:51,886 - qmt_trading.web_server - INFO - 配置已更新: {'singleBuyAmount': 2000, 'firstProfitSell': 5, 'firstProfitSellEnabled': True, 'stockGainSellPencent': 50, 'firstProfitSellPencent': True, 'allowBuy': True, 'allowSell': True, 'stopLossBuy': 6.999999999999995, 'stopLossBuyEnabled': True, 'stockStopLoss': 7.000000000000001, 'StopLossEnabled': True, 'singleStockMaxPosition': 50000, 'totalMaxPosition': 950000, 'connectPort': '5000', 'totalAccounts': '127.0.0.1', 'globalAllowBuySell': False, 'simulationMode': False}
+2025-05-23 10:33:54,571 - qmt_trading.web_server - INFO - UI监控状态变更: False -> True (通过API)
+2025-05-23 10:34:02,525 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:34:14,380 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:34:25,581 - qmt_trading.web_server - INFO - 交易模式: 实盘, 股票代码格式化: ['300250'] -> ['300250']
+2025-05-23 10:34:25,591 - qmt_trading.trading_executor - INFO - 开始买入处理: 300250, volume=None, price=None, amount=2000.0, price_type=5
+2025-05-23 10:34:25,592 - qmt_trading.trading_executor - INFO - 股票代码格式化: 300250 -> 300250.SZ
+2025-05-23 10:34:25,593 - qmt_trading.trading_executor - INFO - 是否为模拟交易模式: False
+2025-05-23 10:34:25,594 - qmt_trading.trading_executor - INFO - 交易时间检查: True
+2025-05-23 10:34:25,599 - qmt_trading.trading_executor - INFO - 获取到 300250.SZ 卖三价: 14.89
+2025-05-23 10:34:25,962 - qmt_trading.trading_executor - INFO - 保存交易记录: 300250(初灵信息) BUY 价格:14.89 数量:100 金额:1489.00 策略:manual
+2025-05-23 10:34:26,041 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 300250(初灵信息), BUY, 价格: 14.89, 数量: 100, 策略: manual
+2025-05-23 10:34:26,089 - qmt_trading.trading_executor - INFO - 实盘买入订单已下达并记录: 300250, 订单号: 265359749, 策略: manual
+2025-05-23 10:34:26,145 - qmt_trading.strategy - INFO - 手动买入 300250 成功，委托号: 265359749
+2025-05-23 10:34:26,595 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:34:38,879 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:34:42,402 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-23 10:34:50,643 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:34:52,262 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-23 10:34:55,862 - qmt_trading.position_manager - INFO - 更新 300250 持仓: 止损价: 从 13.99 到 13.96
+2025-05-23 10:35:00,742 - qmt_trading.position_manager - INFO - 更新内存数据库的 300250 到sql数据库
+2025-05-23 10:35:02,382 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:35:02,401 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.89, 止损价格: 12.89
+2025-05-23 10:35:02,402 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:35:14,113 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:35:14,157 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.89, 止损价格: 12.89
+2025-05-23 10:35:14,162 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:35:25,604 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-23 10:35:25,612 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-23 10:35:25,613 - qmt_trading.web_server - WARNING - 交易模式切换: 模拟交易
+2025-05-23 10:35:25,616 - qmt_trading.web_server - INFO - 配置已更新: {'simulationMode': True}
+2025-05-23 10:35:25,805 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:35:25,872 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.89, 止损价格: 12.89
+2025-05-23 10:35:25,873 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:35:26,460 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:35:27,022 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:35:27,449 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:35:28,466 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:35:30,437 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:35:30,586 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:35:32,656 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:35:33,571 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:35:34,108 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:35:34,281 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:35:34,660 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:35:36,316 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:35:36,666 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:35:37,488 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:35:38,795 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:35:38,863 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.89, 止损价格: 12.89
+2025-05-23 10:35:38,863 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:35:38,864 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:35:40,624 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:35:40,749 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:35:40,875 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:35:42,201 - qmt_trading.web_server - INFO - 交易模式: 模拟, 股票代码格式化: ['300250'] -> ['300250.SZ']
+2025-05-23 10:35:42,205 - qmt_trading.trading_executor - INFO - 开始买入处理: 300250.SZ, volume=None, price=None, amount=2000.0, price_type=5
+2025-05-23 10:35:42,255 - qmt_trading.trading_executor - INFO - 是否为模拟交易模式: True
+2025-05-23 10:35:42,261 - qmt_trading.trading_executor - INFO - 交易时间检查: True
+2025-05-23 10:35:42,263 - qmt_trading.trading_executor - INFO - 模拟交易模式，强制允许交易
+2025-05-23 10:35:42,279 - qmt_trading.trading_executor - INFO - 获取到 300250.SZ 卖三价: 14.89
+2025-05-23 10:35:42,280 - qmt_trading.trading_executor - INFO - 模拟交易模式: 生成订单ID: SIM202505231035420001
+2025-05-23 10:35:42,308 - qmt_trading.trading_executor - INFO - 保存交易记录: 300250.SZ(初灵信息) BUY 价格:14.89 数量:100 金额:1489.00 策略:manual
+2025-05-23 10:35:42,369 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 300250.SZ(初灵信息), BUY, 价格: 14.89, 数量: 100, 策略: manual
+2025-05-23 10:35:42,371 - qmt_trading.trading_executor - INFO - 更新持仓: stock_code=300250.SZ, trade_type=BUY, price=14.89, volume=100
+2025-05-23 10:35:42,376 - qmt_trading.trading_executor - INFO - 新建持仓成功: 300250.SZ(初灵信息), 数量: 100, 成本: 14.89, 结果: True
+2025-05-23 10:35:42,382 - qmt_trading.trading_executor - INFO - 模拟账户资金更新: -1489.45, 余额: 998510.55
+2025-05-23 10:35:42,389 - qmt_trading.trading_executor - INFO - [模拟] 买入 300250.SZ 成功，委托号: SIM202505231035420001, 价格: 14.89, 数量: 100
+2025-05-23 10:35:42,392 - qmt_trading.strategy - INFO - 手动买入 300250.SZ 成功，委托号: SIM202505231035420001
+2025-05-23 10:35:42,901 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:35:43,929 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:35:44,904 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:35:46,696 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:35:46,907 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:35:47,175 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:35:47,313 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:35:47,432 - qmt_trading.strategy - WARNING - 300250.SZ 持仓量不足，无法创建有效的网格交易
+2025-05-23 10:35:49,076 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:35:49,386 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:35:50,654 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:35:51,226 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:35:51,444 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:35:51,446 - qmt_trading.position_manager - INFO - 更新 300250.SZ 持仓: 最高价: 从 14.86 到 14.93
+2025-05-23 10:35:51,447 - qmt_trading.position_manager - INFO - 更新 300250.SZ 的最高价为 14.93
+2025-05-23 10:35:51,473 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:35:51,509 - qmt_trading.position_manager - WARNING - 300277 触发止损条件，当前价格:: 12.89, 止损价格: 12.89
+2025-05-23 10:35:51,512 - qmt_trading.position_manager - WARNING - 300277 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------
+2025-05-23 10:35:51,516 - qmt_trading.position_manager - INFO - 更新 300250.SZ 持仓: 最高价: 从 14.93 到 14.87
+2025-05-23 10:35:52,656 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-23 10:35:52,914 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:35:53,532 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:35:53,875 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:35:55,567 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:35:57,080 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:35:57,573 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:35:58,924 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:35:59,582 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:00,321 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:01,435 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-23 10:36:01,590 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:01,723 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:03,477 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:03,607 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:04,146 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:04,213 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:04,294 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:04,313 - qmt_trading.position_manager - INFO - 更新 300250.SZ 持仓: 最高价: 从 14.87 到 14.93
+2025-05-23 10:36:04,313 - qmt_trading.position_manager - INFO - 更新 300250.SZ 的最高价为 14.93
+2025-05-23 10:36:05,620 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:06,687 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:07,625 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:09,628 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:09,732 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:10,166 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:11,741 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:12,905 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:13,747 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:14,932 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:15,750 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:16,061 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:16,206 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:17,112 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:17,258 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:17,755 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:19,243 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:19,772 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:21,779 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:22,170 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:22,431 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:23,782 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:25,788 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:25,885 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:27,579 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:27,898 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:28,167 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:29,140 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:29,506 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:29,662 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:29,924 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:31,927 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:32,280 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:33,930 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:34,168 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:35,466 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:35,933 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:37,937 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:38,642 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:39,941 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:39,950 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:40,173 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:41,801 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:42,259 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:42,345 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:42,533 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:44,349 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:45,534 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:45,886 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:46,361 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:48,368 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:48,720 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:50,372 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:51,839 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:36:52,379 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998510.5533
+2025-05-23 10:36:52,860 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:36:53,485 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-23 10:36:53,486 - qmt_trading.main - INFO - 开始清理资源...
+2025-05-23 10:36:53,488 - qmt_trading.main - INFO - 停止 data_thread...
+2025-05-23 10:36:54,368 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-23 10:39:38,653 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-05-23 10:39:38,722 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-05-23 10:39:40,859 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-05-23 10:39:40,895 - qmt_trading.data_manager - INFO - 股票 300250.SZ 数据获取成功
+2025-05-23 10:39:40,972 - qmt_trading.data_manager - INFO - 股票 300277.SZ 数据获取成功
+2025-05-23 10:39:41,006 - qmt_trading.data_manager - INFO - 股票 301252.SZ 数据获取成功
+2025-05-23 10:39:41,062 - qmt_trading.data_manager - INFO - 股票 600571.SH 数据获取成功
+2025-05-23 10:39:41,120 - qmt_trading.data_manager - INFO - 股票 601606.SH 数据获取成功
+2025-05-23 10:39:41,193 - qmt_trading.data_manager - INFO - 股票 603883.SH 数据获取成功
+2025-05-23 10:39:41,194 - qmt_trading.data_manager - INFO - 成功验证 6 只股票可获取数据
+2025-05-23 10:39:41,457 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-23 10:39:41,499 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-23 10:39:41,501 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-05-23 10:39:41,511 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-05-23 10:39:41,512 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-05-23 10:39:41,529 - qmt_trading.main - INFO - ==================================================
+2025-05-23 10:39:41,531 - qmt_trading.main - INFO - = QMT量化交易系统启动 - 2025-05-23 10:39:41 
+2025-05-23 10:39:41,532 - qmt_trading.main - INFO - ==================================================
+2025-05-23 10:39:41,533 - qmt_trading.main - INFO - 开始初始化系统...
+2025-05-23 10:39:41,534 - qmt_trading.main - INFO - 系统初始化完成
+2025-05-23 10:39:41,535 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-05-23 10:39:41,535 - qmt_trading.main - INFO - 下载 300250 的历史数据
+2025-05-23 10:39:43,171 - qmt_trading.main - INFO - 下载 300277 的历史数据
+2025-05-23 10:39:44,607 - qmt_trading.main - INFO - 下载 301252 的历史数据
+2025-05-23 10:39:46,086 - qmt_trading.main - INFO - 下载 600571 的历史数据
+2025-05-23 10:39:47,538 - qmt_trading.main - INFO - 下载 601606 的历史数据
+2025-05-23 10:39:48,989 - qmt_trading.main - INFO - 下载 603883 的历史数据
+2025-05-23 10:39:50,428 - qmt_trading.main - INFO - 初始数据下载完成
+2025-05-23 10:39:50,508 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-05-23 10:39:50,566 - qmt_trading.main - INFO - 初始指标计算完成
+2025-05-23 10:39:50,627 - qmt_trading.main - INFO - 启动数据更新线程
+2025-05-23 10:39:50,634 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-23 10:39:50,634 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-05-23 10:39:50,648 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-05-23 10:39:50,667 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-05-23 10:39:50,678 - qmt_trading.main - INFO - 启动日志清理线程
+2025-05-23 10:39:50,698 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-05-23 10:39:50,722 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-05-23 10:39:50,745 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-05-23 10:39:53,391 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:39:53,933 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:39:53,987 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:39:54,077 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:39:54,078 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:39:55,519 - qmt_trading.position_manager - WARNING - 未能获取 603883 从 2025-05-06 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:39:55,787 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:39:55,872 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:39:56,054 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:39:56,458 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:39:56,955 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:39:57,938 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:39:59,395 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:39:59,450 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:39:59,675 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-23 10:40:00,007 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:01,462 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:03,465 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:03,532 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:04,394 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:05,561 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:06,397 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:06,723 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:07,465 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:07,478 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:07,968 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:08,328 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:08,407 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:08,489 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:40:10,642 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:11,216 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:11,217 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:11,540 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:12,030 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:40:13,120 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:14,627 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:15,126 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:17,131 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:17,813 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:19,134 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:20,996 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:21,209 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:22,284 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:40:23,290 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:23,821 - qmt_trading.web_server - INFO - UI监控状态变更: False -> True (通过API)
+2025-05-23 10:40:23,979 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:24,232 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:24,297 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:40:25,338 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:27,342 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:27,430 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:29,440 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:29,847 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:30,915 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:31,443 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:33,446 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:34,169 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:34,930 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:40:35,380 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:35,762 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:37,162 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:40:37,230 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:37,806 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:40:39,169 - qmt_trading.web_server - INFO - 交易模式: 模拟, 股票代码格式化: ['300250'] -> ['300250.SZ']
+2025-05-23 10:40:39,177 - qmt_trading.trading_executor - INFO - 开始买入处理: 300250.SZ, volume=None, price=None, amount=20000, price_type=5
+2025-05-23 10:40:39,177 - qmt_trading.trading_executor - INFO - 是否为模拟交易模式: True
+2025-05-23 10:40:39,178 - qmt_trading.trading_executor - INFO - 交易时间检查: True
+2025-05-23 10:40:39,179 - qmt_trading.trading_executor - INFO - 模拟交易模式，强制允许交易
+2025-05-23 10:40:39,198 - qmt_trading.trading_executor - INFO - 获取到 300250.SZ 卖三价: 14.91
+2025-05-23 10:40:39,199 - qmt_trading.trading_executor - INFO - 模拟交易模式: 生成订单ID: SIM202505231040390001
+2025-05-23 10:40:39,200 - qmt_trading.trading_executor - INFO - 保存交易记录: 300250.SZ(初灵信息) BUY 价格:14.91 数量:1300 金额:19383.00 策略:manual
+2025-05-23 10:40:39,215 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 300250.SZ(初灵信息), BUY, 价格: 14.91, 数量: 1300, 策略: manual
+2025-05-23 10:40:39,216 - qmt_trading.trading_executor - INFO - 更新持仓: stock_code=300250.SZ, trade_type=BUY, price=14.91, volume=1300
+2025-05-23 10:40:39,245 - qmt_trading.trading_executor - INFO - 新建持仓成功: 300250.SZ(初灵信息), 数量: 1300, 成本: 14.91, 结果: True
+2025-05-23 10:40:39,247 - qmt_trading.trading_executor - INFO - 模拟账户资金更新: -19388.81, 余额: 980611.19
+2025-05-23 10:40:39,248 - qmt_trading.trading_executor - INFO - [模拟] 买入 300250.SZ 成功，委托号: SIM202505231040390001, 价格: 14.91, 数量: 1300
+2025-05-23 10:40:39,249 - qmt_trading.strategy - INFO - 手动买入 300250.SZ 成功，委托号: SIM202505231040390001
+2025-05-23 10:40:39,810 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:40,470 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:41,367 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:41,813 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:43,638 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:43,824 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:44,258 - qmt_trading.strategy - WARNING - 300250.SZ 持仓量不足，无法创建有效的网格交易
+2025-05-23 10:40:45,828 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:46,804 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:47,474 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:47,715 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:40:48,340 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:50,006 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:50,356 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:50,717 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:40:50,858 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:40:50,870 - qmt_trading.position_manager - INFO - 更新 300250.SZ 持仓: 最高价: 从 14.89 到 14.93
+2025-05-23 10:40:50,871 - qmt_trading.position_manager - INFO - 更新 300250.SZ 的最高价为 14.93
+2025-05-23 10:40:52,367 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:53,237 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:54,371 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:54,652 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:56,377 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:40:56,401 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:58,445 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:40:59,569 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:41:00,449 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:41:00,655 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:41:01,372 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-23 10:41:01,467 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:41:02,452 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:41:02,693 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:41:03,961 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:41:04,258 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:41:04,727 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:41:05,849 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:41:06,777 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:41:08,181 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:41:08,839 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 980611.1851
+2025-05-23 10:41:09,639 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:41:09,809 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:41:10,375 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-23 10:41:10,377 - qmt_trading.main - INFO - 开始清理资源...
+2025-05-23 10:41:10,378 - qmt_trading.main - INFO - 停止 data_thread...
+2025-05-23 10:41:10,640 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-23 10:41:10,642 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-23 10:48:29,873 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-05-23 10:48:29,901 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-05-23 10:48:32,035 - qmt_trading.data_manager - INFO - 行情服务连接成功
+2025-05-23 10:48:32,038 - qmt_trading.data_manager - INFO - 股票 300250.SZ 数据获取成功
+2025-05-23 10:48:32,046 - qmt_trading.data_manager - INFO - 股票 300277.SZ 数据获取成功
+2025-05-23 10:48:32,050 - qmt_trading.data_manager - INFO - 股票 301252.SZ 数据获取成功
+2025-05-23 10:48:32,065 - qmt_trading.data_manager - INFO - 股票 600571.SH 数据获取成功
+2025-05-23 10:48:32,338 - qmt_trading.data_manager - INFO - 股票 601606.SH 数据获取成功
+2025-05-23 10:48:32,492 - qmt_trading.data_manager - INFO - 股票 603883.SH 数据获取成功
+2025-05-23 10:48:32,506 - qmt_trading.data_manager - INFO - 成功验证 6 只股票可获取数据
+2025-05-23 10:48:32,642 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-23 10:48:32,705 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-23 10:48:32,705 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-05-23 10:48:32,708 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-05-23 10:48:32,710 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-05-23 10:48:32,729 - qmt_trading.main - INFO - ==================================================
+2025-05-23 10:48:32,739 - qmt_trading.main - INFO - = QMT量化交易系统启动 - 2025-05-23 10:48:32 
+2025-05-23 10:48:32,740 - qmt_trading.main - INFO - ==================================================
+2025-05-23 10:48:32,744 - qmt_trading.main - INFO - 开始初始化系统...
+2025-05-23 10:48:32,765 - qmt_trading.main - INFO - 系统初始化完成
+2025-05-23 10:48:32,808 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-05-23 10:48:32,850 - qmt_trading.main - INFO - 下载 300250 的历史数据
+2025-05-23 10:48:34,409 - qmt_trading.main - INFO - 下载 300277 的历史数据
+2025-05-23 10:48:35,856 - qmt_trading.main - INFO - 下载 301252 的历史数据
+2025-05-23 10:48:37,357 - qmt_trading.main - INFO - 下载 600571 的历史数据
+2025-05-23 10:48:38,848 - qmt_trading.main - INFO - 下载 601606 的历史数据
+2025-05-23 10:48:40,267 - qmt_trading.main - INFO - 下载 603883 的历史数据
+2025-05-23 10:48:41,741 - qmt_trading.main - INFO - 初始数据下载完成
+2025-05-23 10:48:41,768 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-05-23 10:48:41,798 - qmt_trading.main - INFO - 初始指标计算完成
+2025-05-23 10:48:41,804 - qmt_trading.main - INFO - 启动数据更新线程
+2025-05-23 10:48:41,843 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-23 10:48:41,844 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-05-23 10:48:41,862 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-05-23 10:48:41,899 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-05-23 10:48:41,980 - qmt_trading.main - INFO - 启动日志清理线程
+2025-05-23 10:48:42,047 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-05-23 10:48:42,088 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-05-23 10:48:42,146 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-05-23 10:48:42,626 - qmt_trading.data_manager - WARNING - 查询股票基本信息失败: 网络接收错误。
+2025-05-23 10:48:42,763 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:48:44,429 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:48:45,272 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:48:45,302 - qmt_trading.data_manager - WARNING - 查询股票基本信息失败: 网络接收错误。
+2025-05-23 10:48:45,304 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:48:45,307 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:48:45,805 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:48:46,496 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:48:46,591 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:48:47,621 - qmt_trading.position_manager - WARNING - 未能获取 600571 从 2025-04-26 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:48:47,627 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:48:48,079 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:48:48,997 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:48:50,244 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:48:50,245 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:48:50,936 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:48:52,007 - qmt_trading.position_manager - WARNING - 未能获取 301252 从 2025-04-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:48:52,733 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:48:52,956 - qmt_trading.position_manager - WARNING - 未能获取 300250 从 2025-05-19 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:48:53,171 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:48:53,247 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:48:53,328 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:48:53,400 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:48:54,148 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-23 10:48:54,801 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:48:56,434 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:48:56,807 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:48:58,810 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:48:59,628 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:49:00,823 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:49:02,815 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:49:02,898 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:49:03,670 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:49:04,081 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-23 10:49:04,090 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-23 10:49:04,094 - qmt_trading.web_server - WARNING - 交易模式切换: 实盘交易
+2025-05-23 10:49:04,169 - qmt_trading.web_server - INFO - 配置已更新: {'simulationMode': False}
+2025-05-23 10:49:06,007 - qmt_trading.position_manager - INFO - 已删除 513100 的持仓记录
+2025-05-23 10:49:06,008 - qmt_trading.position_manager - INFO - 已删除 600787 的持仓记录
+2025-05-23 10:49:06,421 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:49:11,035 - qmt_trading.web_server - INFO - UI监控状态变更: False -> True (通过API)
+2025-05-23 10:49:18,093 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:49:30,126 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:49:31,335 - qmt_trading.web_server - INFO - UI监控状态变更: True -> False (通过API)
+2025-05-23 10:49:42,603 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:49:54,323 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:49:54,640 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-23 10:49:59,734 - qmt_trading.web_server - INFO - 配置已更新: {'singleBuyAmount': 2000}
+2025-05-23 10:49:59,846 - qmt_trading.web_server - INFO - 自动交易状态变更: False -> False (通过保存配置)
+2025-05-23 10:49:59,892 - qmt_trading.web_server - INFO - 配置已更新: {'singleBuyAmount': 2000, 'firstProfitSell': 5, 'firstProfitSellEnabled': True, 'stockGainSellPencent': 50, 'firstProfitSellPencent': True, 'allowBuy': True, 'allowSell': True, 'stopLossBuy': 6.999999999999995, 'stopLossBuyEnabled': True, 'stockStopLoss': 7.000000000000001, 'StopLossEnabled': True, 'singleStockMaxPosition': 50000, 'totalMaxPosition': 950000, 'connectPort': '5000', 'totalAccounts': '127.0.0.1', 'globalAllowBuySell': False, 'simulationMode': False}
+2025-05-23 10:50:04,367 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-23 10:50:05,934 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:50:18,000 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:50:19,655 - qmt_trading.web_server - INFO - 交易模式: 实盘, 股票代码格式化: ['300250'] -> ['300250']
+2025-05-23 10:50:19,656 - qmt_trading.trading_executor - INFO - 开始买入处理: 300250, volume=None, price=None, amount=2000.0, price_type=5
+2025-05-23 10:50:19,656 - qmt_trading.trading_executor - INFO - 股票代码格式化: 300250 -> 300250.SZ
+2025-05-23 10:50:19,657 - qmt_trading.trading_executor - INFO - 是否为模拟交易模式: False
+2025-05-23 10:50:19,658 - qmt_trading.trading_executor - INFO - 交易时间检查: True
+2025-05-23 10:50:19,660 - qmt_trading.trading_executor - INFO - 获取到 300250.SZ 卖三价: 14.95
+2025-05-23 10:50:19,998 - qmt_trading.trading_executor - INFO - 保存交易记录: 300250(初灵信息) BUY 价格:14.95 数量:100 金额:1495.00 策略:manual
+2025-05-23 10:50:20,016 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 300250(初灵信息), BUY, 价格: 14.95, 数量: 100, 策略: manual
+2025-05-23 10:50:20,025 - qmt_trading.trading_executor - INFO - 实盘买入订单已下达并记录: 300250, 订单号: 464762929, 策略: manual
+2025-05-23 10:50:20,049 - qmt_trading.strategy - INFO - 手动买入 300250 成功，委托号: 464762929
+2025-05-23 10:50:21,727 - qmt_trading.position_manager - INFO - 更新 300250 持仓: 止损价: 从 13.96 到 13.94
+2025-05-23 10:50:24,171 - qmt_trading.position_manager - INFO - 更新内存数据库的 300250 到sql数据库
+2025-05-23 10:50:29,949 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:50:31,686 - qmt_trading.web_server - INFO - UI监控状态变更: False -> True (通过API)
+2025-05-23 10:50:37,494 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-05-23 10:50:37,506 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-05-23 10:50:37,561 - qmt_trading.web_server - WARNING - 交易模式切换: 模拟交易
+2025-05-23 10:50:37,566 - qmt_trading.web_server - INFO - 配置已更新: {'simulationMode': True}
+2025-05-23 10:50:37,662 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:50:37,781 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:39,382 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:40,294 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:50:41,244 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:50:41,391 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:42,444 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:50:43,396 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:43,844 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:44,412 - qmt_trading.web_server - INFO - UI监控状态变更: True -> False (通过API)
+2025-05-23 10:50:44,714 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:50:45,401 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:46,315 - qmt_trading.web_server - INFO - UI监控状态变更: False -> True (通过API)
+2025-05-23 10:50:47,404 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:47,975 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:50:49,328 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:49,413 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:51,122 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:50:51,433 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:52,701 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:50:53,466 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:54,289 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:50:55,251 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:50:55,333 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:55,471 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:57,441 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:50:57,522 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:50:59,543 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:51:00,684 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:51:01,334 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:51:01,551 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:51:03,558 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:51:03,875 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:51:05,458 - qmt_trading.data_manager - INFO - 开始更新所有股票数据
+2025-05-23 10:51:05,485 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:51:05,570 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 1000000
+2025-05-23 10:51:06,187 - qmt_trading.web_server - INFO - 交易模式: 模拟, 股票代码格式化: ['300250'] -> ['300250.SZ']
+2025-05-23 10:51:06,189 - qmt_trading.trading_executor - INFO - 开始买入处理: 300250.SZ, volume=None, price=None, amount=2000.0, price_type=5
+2025-05-23 10:51:06,194 - qmt_trading.trading_executor - INFO - 是否为模拟交易模式: True
+2025-05-23 10:51:06,368 - qmt_trading.trading_executor - INFO - 交易时间检查: True
+2025-05-23 10:51:06,372 - qmt_trading.trading_executor - INFO - 模拟交易模式，强制允许交易
+2025-05-23 10:51:06,381 - qmt_trading.trading_executor - INFO - 获取到 300250.SZ 卖三价: 14.95
+2025-05-23 10:51:06,394 - qmt_trading.trading_executor - INFO - 模拟交易模式: 生成订单ID: SIM202505231051060001
+2025-05-23 10:51:06,424 - qmt_trading.trading_executor - INFO - 保存交易记录: 300250.SZ(初灵信息) BUY 价格:14.95 数量:100 金额:1495.00 策略:simu
+2025-05-23 10:51:06,440 - qmt_trading.trading_executor - INFO - 保存交易记录成功: 300250.SZ(初灵信息), BUY, 价格: 14.95, 数量: 100, 策略: simu
+2025-05-23 10:51:06,440 - qmt_trading.trading_executor - INFO - 更新持仓: stock_code=300250.SZ, trade_type=BUY, price=14.95, volume=100
+2025-05-23 10:51:06,455 - qmt_trading.trading_executor - INFO - 新建持仓成功: 300250.SZ(初灵信息), 数量: 100, 成本: 14.95, 结果: True
+2025-05-23 10:51:06,465 - qmt_trading.trading_executor - INFO - 模拟账户资金更新: -1495.45, 余额: 998504.55
+2025-05-23 10:51:06,488 - qmt_trading.trading_executor - INFO - [模拟] 买入 300250.SZ 成功，委托号: SIM202505231051060001, 价格: 14.95, 数量: 100
+2025-05-23 10:51:06,564 - qmt_trading.strategy - INFO - 手动买入 300250.SZ 成功，委托号: SIM202505231051060001
+2025-05-23 10:51:07,051 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:51:07,605 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:07,628 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:08,816 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:51:09,790 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:10,843 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:51:11,622 - qmt_trading.strategy - WARNING - 300250.SZ 持仓量不足，无法创建有效的网格交易
+2025-05-23 10:51:11,757 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:11,852 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:13,870 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:13,931 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:51:14,747 - qmt_trading.data_manager - INFO - 股票数据更新完成
+2025-05-23 10:51:15,942 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:17,099 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:51:17,946 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:19,333 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:19,504 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:51:19,951 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:20,410 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:51:21,465 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:51:21,606 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:51:21,608 - qmt_trading.position_manager - INFO - 更新 300250.SZ 持仓: 最高价: 从 14.93 到 14.95
+2025-05-23 10:51:21,608 - qmt_trading.position_manager - INFO - 更新 300250.SZ 的最高价为 14.95
+2025-05-23 10:51:21,996 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:23,544 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:51:24,000 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:25,330 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:26,004 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:26,805 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:51:28,007 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:30,193 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:30,218 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:51:30,805 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:51:31,862 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:51:32,706 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-05-23 10:51:32,707 - qmt_trading.main - INFO - 开始清理资源...
+2025-05-23 10:51:32,710 - qmt_trading.main - INFO - 停止 data_thread...
+2025-05-23 10:51:32,815 - qmt_trading.position_manager - INFO - 返回模拟账户信息，余额: 998504.5515
+2025-05-23 10:51:32,828 - qmt_trading.data_manager - INFO - 数据更新线程已停止
+2025-05-23 10:51:32,830 - qmt_trading.main - INFO - 停止 position_thread...
+2025-05-23 10:51:33,837 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-05-23 10:51:34,368 - qmt_trading.position_manager - WARNING - 未能获取 601606 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:51:34,500 - qmt_trading.position_manager - WARNING - 未能获取 300250.SZ 从 2025-05-23 到 2025-05-23 的历史数据，跳过更新最高价
+2025-05-23 10:51:34,590 - qmt_trading.main - INFO - 接收到退出信号，开始清理...

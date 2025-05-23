@@ -1098,7 +1098,9 @@ class PositionManager:
                         logger.info(f"{stock_code} 触发初次止盈，当前盈利: {profit_ratio:.2%}, 初次止盈阈值: {config.INITIAL_TAKE_PROFIT_RATIO:.2%}")
                         # 计算止损价格
                         stop_loss_price = self.calculate_stop_loss_price(cost_price, highest_price, True)
-                        self.update_position(stock_code=stock_code, volume=position['volume'] / 2, cost_price=position['cost_price'], current_price=position['current_price'], profit_triggered=True, highest_price=highest_price, open_date=position['open_date'], stop_loss_price=stop_loss_price)
+                        # TODO - 问题：这实际上是在"更新持仓"而不是"执行卖出"
+                        # 应该通过trading_executor执行真实的卖出操作
+                        # self.update_position(stock_code=stock_code, volume=position['volume'] / 2, cost_price=position['cost_price'], current_price=position['current_price'], profit_triggered=True, highest_price=highest_price, open_date=position['open_date'], stop_loss_price=stop_loss_price)
                         return True, 'HALF'
                 
                 # 检查动态止盈
@@ -1120,9 +1122,10 @@ class PositionManager:
                     # 如果当前价格小于动态止盈位，触发止盈
                     if current_price is not None and current_price < dynamic_take_profit_price:
                         logger.info(f"{stock_code} 触发动态止盈，当前价格: {current_price:.2f}, 动态止盈位: {dynamic_take_profit_price:.2f}, 最高价: {highest_price:.2f}")
-                        # 清仓
+                        # TODO - 问题：这实际上是在"更新持仓"而不是"执行卖出"
+                        # 应该通过trading_executor执行真实的卖出操作
                         stop_loss_price = self.calculate_stop_loss_price(cost_price, highest_price, True)
-                        self.update_position(stock_code=stock_code, volume=0, cost_price=position['cost_price'], current_price=position['current_price'], profit_triggered=True, highest_price=highest_price, open_date=position['open_date'], stop_loss_price=stop_loss_price)
+                        # self.update_position(stock_code=stock_code, volume=0, cost_price=position['cost_price'], current_price=position['current_price'], profit_triggered=True, highest_price=highest_price, open_date=position['open_date'], stop_loss_price=stop_loss_price)
                         return True, 'FULL'
                     else:
                         #更新最高价和止损价

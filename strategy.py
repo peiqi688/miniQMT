@@ -249,6 +249,7 @@ class TradingStrategy:
                 if take_profit_type == 'HALF':
                     # 首次盈利5%卖出半仓
                     sell_volume = int(volume * config.INITIAL_TAKE_PROFIT_RATIO_PERCENTAGE / 100) * 100
+                    sell_volume = max(sell_volume, 100)  # 至少100股
                     logger.info(f"执行 {stock_code} 首次止盈，卖出半仓，数量: {sell_volume}")
                 else:  # 'FULL'
                     # 动态止盈卖出剩余仓位
