@@ -188,11 +188,15 @@ class PositionManager:
                     logger.error(f"处理持仓行数据时出错: {str(e)}")
                     continue  # 跳过这一行，继续处理其他行
             
-            # 处理内存数据库中存在但实盘已清仓的股票
-            if current_positions:  # 只有当至少有一个有效的当前持仓时才执行删除
-                for stock_code in memory_stock_codes:
-                    if stock_code:  # 确保stock_code不为None
-                        self.remove_position(stock_code)
+            # 修改：在模拟交易模式下，不删除内存中存在但实盘中不存在的持仓记录
+            if not hasattr(config, 'ENABLE_SIMULATION_MODE') or not config.ENABLE_SIMULATION_MODE:
+                # 只在非模拟交易模式下执行删除操作
+                if current_positions:  # 只有当至少有一个有效的当前持仓时才执行删除
+                    for stock_code in memory_stock_codes:
+                        if stock_code:  # 确保stock_code不为None
+                            self.remove_position(stock_code)
+            else:
+                logger.info(f"模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除")
 
             # 更新 stock_positions.json
             self._update_stock_positions_file(current_positions)

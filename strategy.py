@@ -503,7 +503,14 @@ class TradingStrategy:
         str: 委托编号，失败返回None
         """
         try:
-            order_id = self.trading_executor.buy_stock(stock_code, volume, price, amount)
+
+             # 检查是否为模拟交易模式
+            is_simulation = hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE
+
+            if is_simulation:
+                order_id = self.trading_executor.buy_stock(stock_code, volume, price, amount, strategy='simu')
+            else:
+                order_id = self.trading_executor.buy_stock(stock_code, volume, price, amount, strategy='manual')
             
             if order_id:
                 logger.info(f"手动买入 {stock_code} 成功，委托号: {order_id}")
@@ -535,7 +542,13 @@ class TradingStrategy:
         str: 委托编号，失败返回None
         """
         try:
-            order_id = self.trading_executor.sell_stock(stock_code, volume, price, ratio)
+             # 检查是否为模拟交易模式
+            is_simulation = hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE
+
+            if is_simulation:
+                order_id = self.trading_executor.sell_stock(stock_code, volume, price, ratio, strategy='simu')
+            else:
+                order_id = self.trading_executor.sell_stock(stock_code, volume, price, ratio, strategy='manual')
             
             if order_id:
                 logger.info(f"手动卖出 {stock_code} 成功，委托号: {order_id}")

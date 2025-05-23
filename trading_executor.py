@@ -957,7 +957,36 @@ class TradingExecutor:
                         )
                         
                         if order_id:
-                            logger.info(f"买入 {formatted_stock_code} 下单成功，委托号: {order_id}, 价格: {price}, 数量: {volume}, 价格类型: {price_type}")
+                            # ✅ 添加：实盘下单成功后也立即保存交易记录
+                            trade_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            trade_saved= self._save_trade_record(
+                                stock_code=stock_code,
+                                trade_time=trade_time,
+                                trade_type='BUY',
+                                price=price,
+                                volume=volume,
+                                amount=price * volume,
+                                trade_id=f"ORDER_{order_id}",  # 使用订单ID作为交易ID
+                                commission=price * volume * 0.0003,  # 预估手续费
+                                strategy=strategy
+                            )
+                            if trade_saved:
+                                # ✅ 缓存订单信息，供回调使用
+                                self.order_cache[order_id] = {
+                                    'stock_code': stock_code,
+                                    'strategy': strategy,
+                                    'trade_type': 'BUY',
+                                    'price': price,
+                                    'volume': volume,
+                                    'order_time': datetime.now(),
+                                    'amount': amount
+                                }
+                                
+                                logger.info(f"实盘买入订单已下达并记录: {stock_code}, 订单号: {order_id}, 策略: {strategy}")
+                                
+                                # 注册回调
+                                if callback:
+                                    self.callbacks[order_id] = callback
                             break
                         else:
                             logger.warning(f"买入 {formatted_stock_code} 下单失败，尝试重试 ({retry_count + 1}/{max_retries})")
