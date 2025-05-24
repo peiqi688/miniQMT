@@ -56,10 +56,22 @@ class PositionManager:
         self.position_update_interval = 3  # 3秒更新间隔
         self.positions_cache = None        
 
+        # ✅ 新增，持仓数据版本控制
+        self.data_version = 0
+        self.data_changed = False
+        self.version_lock = threading.Lock()
+
         # 定时同步线程
         self.sync_thread = None
         self.sync_stop_flag = False
         self.start_sync_thread()
+
+    def _increment_data_version(self):
+        """递增数据版本号"""
+        with self.version_lock:
+            self.data_version += 1
+            self.data_changed = True
+            logger.debug(f"持仓数据版本更新: v{self.data_version}")
 
     def _create_memory_table(self):
         """创建内存数据库表结构"""
@@ -228,7 +240,31 @@ class PositionManager:
                 logger.debug("模拟交易模式：跳过内存数据库到SQLite数据库的同步")
                 return
         
+            # 获取内存数据库中的所有股票代码
             memory_positions = pd.read_sql_query("SELECT stock_code, stock_name, open_date, profit_triggered, highest_price, stop_loss_price FROM positions", self.memory_conn)
+            memory_stock_codes = set(memory_positions['stock_code'].tolist()) if not memory_positions.empty else set()
+            
+            # ✅ 获取SQLite数据库中的所有股票代码
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT stock_code FROM positions")
+            sqlite_stock_codes = {row[0] for row in cursor.fetchall() if row[0] is not None}
+            
+            # ✅ 删除SQLite中存在但内存数据库中不存在的记录
+            stocks_to_delete = sqlite_stock_codes - memory_stock_codes
+            if stocks_to_delete:
+                deleted_count = 0
+                for stock_code in stocks_to_delete:
+                    try:
+                        cursor.execute("DELETE FROM positions WHERE stock_code=?", (stock_code,))
+                        if cursor.rowcount > 0:
+                            deleted_count += 1
+                            logger.info(f"从SQLite删除持仓记录: {stock_code}")
+                    except Exception as e:
+                        logger.error(f"删除SQLite中的 {stock_code} 记录时出错: {str(e)}")
+                
+                if deleted_count > 0:
+                    logger.info(f"SQLite同步：删除了 {deleted_count} 个过期的持仓记录")
+
             if not memory_positions.empty:
                 now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 for _, row in memory_positions.iterrows():
@@ -582,6 +618,9 @@ class PositionManager:
                     int(p_available), p_profit_ratio, now, open_date, profit_triggered, final_highest_price, final_stop_loss_price))
             
             self.memory_conn.commit()
+
+            # ✅ 触发持仓数据版本更新
+            self._increment_data_version()
             return True
             
         except Exception as e:
@@ -605,6 +644,8 @@ class PositionManager:
             self.memory_conn.commit()
             
             if cursor.rowcount > 0:
+                # ✅ 触发持仓数据版本更新
+                self._increment_data_version()
                 logger.info(f"已删除 {stock_code} 的持仓记录")
                 return True
             else:
@@ -615,6 +656,21 @@ class PositionManager:
             logger.error(f"删除 {stock_code} 的持仓记录时出错: {str(e)}")
             self.memory_conn.rollback()
             return False
+
+
+    def get_data_version_info(self):
+        """获取持仓数据版本信息"""
+        with self.version_lock:
+            return {
+                'version': self.data_version,
+                'changed': self.data_changed,
+                'timestamp': datetime.now().isoformat()
+            }
+
+    def mark_data_consumed(self):
+        """标记持仓数据已被消费"""
+        with self.version_lock:
+            self.data_changed = False
 
     def update_all_positions_highest_price(self):
         """更新所有持仓的最高价"""
