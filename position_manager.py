@@ -1069,7 +1069,7 @@ class PositionManager:
     
     def check_dynamic_take_profit(self, stock_code):
         """
-        检查动态止盈条件
+        检查动态止盈条件 - 高层接口方法
         
         参数:
         stock_code (str): 股票代码
@@ -1078,62 +1078,28 @@ class PositionManager:
         tuple: (是否触发止盈, 止盈信号类型)，止盈信号类型可以是 'HALF', 'FULL' 或 None
         """
         try:
+            # ✅ 1. 获取持仓数据
             position = self.get_position(stock_code)
             if not position:
                 logger.debug(f"未持有 {stock_code}，不需要检查止盈")
                 return False, None
             
-            # 获取当前收益率
-            current_price = position['current_price']
-            cost_price = position['cost_price']
-            profit_ratio = (current_price - cost_price) / cost_price if cost_price > 0 else 0
-            profit_triggered = position['profit_triggered']
-            highest_price = position['highest_price']
-
-            # 检查初次止盈（盈利5%卖出半仓）
-            # 检查是否已经触发过首次止盈
-            if config.ENABLE_DYNAMIC_STOP_PROFIT:
-                if profit_triggered == False:
-                    if profit_ratio is not None and profit_ratio >= config.INITIAL_TAKE_PROFIT_RATIO:
-                        logger.info(f"{stock_code} 触发初次止盈，当前盈利: {profit_ratio:.2%}, 初次止盈阈值: {config.INITIAL_TAKE_PROFIT_RATIO:.2%}")
-                        # 计算止损价格
-                        stop_loss_price = self.calculate_stop_loss_price(cost_price, highest_price, True)
-                        # TODO - 问题：这实际上是在"更新持仓"而不是"执行卖出"
-                        # 应该通过trading_executor执行真实的卖出操作
-                        # self.update_position(stock_code=stock_code, volume=position['volume'] / 2, cost_price=position['cost_price'], current_price=position['current_price'], profit_triggered=True, highest_price=highest_price, open_date=position['open_date'], stop_loss_price=stop_loss_price)
-                        return True, 'HALF'
-                
-                # 检查动态止盈
-                if profit_triggered:
-                    # 计算最高价相对持仓成本价的涨幅, 确保 highest_price 不为 None
-                    if highest_price is not None:
-                        highest_profit_ratio = (highest_price - cost_price) / cost_price
-                    
-                    # 确定止盈位系数
-                    take_profit_coefficient = 1.0  # Default to no take-profit
-                    for profit_level, coefficient in config.DYNAMIC_TAKE_PROFIT:
-                        if highest_profit_ratio >= profit_level:
-                            take_profit_coefficient = coefficient
-                            break  # Stop at the first matching level
-                    
-                    # 计算动态止盈位
-                    dynamic_take_profit_price = highest_price * take_profit_coefficient
-                    
-                    # 如果当前价格小于动态止盈位，触发止盈
-                    if current_price is not None and current_price < dynamic_take_profit_price:
-                        logger.info(f"{stock_code} 触发动态止盈，当前价格: {current_price:.2f}, 动态止盈位: {dynamic_take_profit_price:.2f}, 最高价: {highest_price:.2f}")
-                        # TODO - 问题：这实际上是在"更新持仓"而不是"执行卖出"
-                        # 应该通过trading_executor执行真实的卖出操作
-                        stop_loss_price = self.calculate_stop_loss_price(cost_price, highest_price, True)
-                        # self.update_position(stock_code=stock_code, volume=0, cost_price=position['cost_price'], current_price=position['current_price'], profit_triggered=True, highest_price=highest_price, open_date=position['open_date'], stop_loss_price=stop_loss_price)
-                        return True, 'FULL'
-                    else:
-                        #更新最高价和止损价
-                        stop_loss_price = self.calculate_stop_loss_price(cost_price, max(highest_price,current_price), True)
-                        self.update_position(stock_code=stock_code, volume=position['volume'], cost_price=position['cost_price'], current_price=position['current_price'], profit_triggered=True, highest_price=max(highest_price,current_price), open_date=position['open_date'], stop_loss_price=stop_loss_price)
-                        return False, None
+            # ✅ 2. 获取最新行情数据
+            latest_quote = self.data_manager.get_latest_data(stock_code)
+            if not latest_quote:
+                logger.warning(f"无法获取 {stock_code} 的最新行情数据")
+                # 使用持仓中的当前价格作为备选
+                latest_quote = {
+                    'lastPrice': position.get('current_price', 0)
+                }
             
-            return False, None
+            # ✅ 3. 调用纯逻辑判断方法（复用代码，避免重复）
+            signal_triggered, signal_type = self._check_take_profit_with_data(position, latest_quote)
+            
+            if signal_triggered:
+                logger.info(f"{stock_code} 检测到止盈信号: {signal_type}")
+            
+            return signal_triggered, signal_type
             
         except Exception as e:
             logger.error(f"检查 {stock_code} 的动态止盈条件时出错: {str(e)}")
@@ -1181,7 +1147,7 @@ class PositionManager:
 
     def _check_take_profit_with_data(self, position, latest_quote):
         """
-        基于传入的持仓数据和最新行情检查动态止盈条件
+        基于传入的持仓数据和最新行情检查动态止盈条件 - 纯逻辑方法
         
         参数:
         position (dict): 持仓数据
@@ -1194,54 +1160,77 @@ class PositionManager:
             if not position:
                 return False, None
             
-            # 获取股票代码
-            stock_code = position['stock_code']
+            # 获取股票代码（用于日志）
+            stock_code = position.get('stock_code', 'unknown')
             
-            # 转换所有价格和比率为数值类型
+            # ✅ 1. 安全的数据类型转换
             try:
                 # 当前价格（优先使用最新行情）
-                current_price = float(latest_quote.get('lastPrice', 0)) if latest_quote else float(position.get('current_price', 0))
+                current_price = float(latest_quote.get('lastPrice', 0)) if latest_quote else 0
+                if current_price <= 0:
+                    current_price = float(position.get('current_price', 0))
                 
                 # 成本价
                 cost_price = float(position.get('cost_price', 0))
                 
-                # 计算利润率
-                profit_ratio = (current_price - cost_price) / cost_price if cost_price > 0 else 0
-                
                 # 获取止盈标志和最高价
                 profit_triggered = bool(position.get('profit_triggered', False))
                 highest_price = float(position.get('highest_price', 0))
+                
+                # 基础数据验证
+                if cost_price <= 0 or current_price <= 0:
+                    logger.debug(f"{stock_code} 价格数据无效: cost_price={cost_price}, current_price={current_price}")
+                    return False, None
+                    
             except (TypeError, ValueError) as e:
                 logger.error(f"价格数据类型转换错误 - {stock_code}: {e}")
-                logger.debug(f"当前价格数据: current_price={latest_quote.get('lastPrice') if latest_quote else position.get('current_price')}, "
+                logger.debug(f"原始数据: current_price={latest_quote.get('lastPrice') if latest_quote else 'N/A'}, "
                             f"cost_price={position.get('cost_price')}, highest_price={position.get('highest_price')}")
                 return False, None
 
-            # 检查初次止盈（盈利达到设定阈值卖出半仓）
-            if config.ENABLE_DYNAMIC_STOP_PROFIT:
-                if not profit_triggered:
-                    if profit_ratio >= config.INITIAL_TAKE_PROFIT_RATIO:
-                        logger.info(f"{stock_code} 触发初次止盈，当前盈利: {profit_ratio:.2%}, 初次止盈阈值: {config.INITIAL_TAKE_PROFIT_RATIO:.2%}")
-                        return True, 'HALF'
+            # ✅ 2. 计算利润率
+            profit_ratio = (current_price - cost_price) / cost_price
+            
+            # ✅ 3. 检查止盈逻辑（如果启用动态止盈功能）
+            if not config.ENABLE_DYNAMIC_STOP_PROFIT:
+                return False, None
+            
+            # ✅ 4. 首次止盈检查（盈利达到设定阈值卖出半仓）
+            if not profit_triggered:
+                if profit_ratio >= config.INITIAL_TAKE_PROFIT_RATIO:
+                    logger.info(f"{stock_code} 触发初次止盈，当前盈利: {profit_ratio:.2%}, "
+                            f"初次止盈阈值: {config.INITIAL_TAKE_PROFIT_RATIO:.2%}")
+                    return True, 'HALF'
+            
+            # ✅ 5. 动态止盈检查（已触发首次止盈后）
+            if profit_triggered and highest_price > 0:
+                # 计算最高价相对持仓成本价的涨幅
+                highest_profit_ratio = (highest_price - cost_price) / cost_price
                 
-                # 检查动态止盈
-                if profit_triggered and highest_price > 0:
-                    # 计算最高价相对持仓成本价的涨幅
-                    highest_profit_ratio = (highest_price - cost_price) / cost_price
-                    
-                    # 确定止盈位系数
-                    take_profit_coefficient = 1.0
-                    for profit_level, coefficient in config.DYNAMIC_TAKE_PROFIT:
-                        if highest_profit_ratio >= profit_level:
-                            take_profit_coefficient = coefficient
-                    
-                    # 计算动态止盈位
-                    dynamic_take_profit_price = highest_price * take_profit_coefficient
-                    
-                    # 如果当前价格小于动态止盈位，触发止盈
-                    if current_price < dynamic_take_profit_price:
-                        logger.info(f"{stock_code} 触发动态止盈，当前价格: {current_price:.2f}, 止盈位: {dynamic_take_profit_price:.2f}, 最高价: {highest_price:.2f}")
-                        return True, 'FULL'
+                # 确定止盈位系数
+                take_profit_coefficient = 1.0  # 默认不止盈
+                matched_level = None
+                
+                # 从高到低遍历止盈级别，找到匹配的最高级别
+                for profit_level, coefficient in config.DYNAMIC_TAKE_PROFIT:
+                    if highest_profit_ratio >= profit_level:
+                        take_profit_coefficient = coefficient
+                        matched_level = profit_level
+                        break  # 找到第一个匹配的级别就停止
+                
+                # 计算动态止盈位
+                dynamic_take_profit_price = highest_price * take_profit_coefficient
+                
+                # 如果当前价格跌破动态止盈位，触发止盈
+                if current_price <= dynamic_take_profit_price:
+                    logger.info(f"{stock_code} 触发动态止盈，当前价格: {current_price:.2f}, "
+                            f"止盈位: {dynamic_take_profit_price:.2f}, 最高价: {highest_price:.2f}, "
+                            f"匹配级别: {matched_level:.1%}")
+                    return True, 'FULL'
+                else:
+                    # 记录调试信息
+                    logger.debug(f"{stock_code} 动态止盈检查: 当前价格 {current_price:.2f} > "
+                                f"止盈位 {dynamic_take_profit_price:.2f}，继续持有")
             
             return False, None
             
@@ -1415,6 +1404,7 @@ class PositionManager:
                         # 记录信号到日志
                         if stop_loss_triggered:
                             # 这里要触发卖出操作，清仓 —— TODO
+                            
                             logger.warning(f"{stock_code} 触发清仓信号 $$$$$$$$$$$$$$$$$$$$--------------")
                         elif take_profit_triggered:
                             # 这里要触发止盈操作 —— TODO

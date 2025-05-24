@@ -8,7 +8,7 @@ from datetime import datetime
 # ======================= 系统配置 =======================
 # 调试开关
 DEBUG = False
-DEBUG_SIMU_STOCK_DATA= False
+DEBUG_SIMU_STOCK_DATA= True
 LOG_LEVEL = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
 LOG_FILE = "qmt_trading.log"
 LOG_MAX_SIZE = 10 * 1024 * 1024  # 10MB
