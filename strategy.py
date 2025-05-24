@@ -1,5 +1,6 @@
 """
 交易策略模块，实现具体的交易策略逻辑
+优化版本：统一止盈止损逻辑，优先处理止损，支持模拟交易
 """
 import time
 import threading
@@ -171,10 +172,209 @@ class TradingStrategy:
         except Exception as e:
             logger.error(f"执行 {stock_code} 的网格交易时出错: {str(e)}")
             return False
+
+    # ========== 新增：统一的止盈止损执行逻辑 ==========
+    
+    def execute_trading_signal(self, stock_code):
+        """
+        执行统一的交易信号处理 - 优化版本
+        
+        参数:
+        stock_code (str): 股票代码
+        
+        返回:
+        bool: 是否执行了交易操作
+        """
+        try:
+            # 使用统一的信号检查函数
+            signal_type, signal_info = self.position_manager.check_trading_signals(stock_code)
+            
+            if not signal_type:
+                return False
+            
+            # 检查是否已处理过该信号（防重复处理）
+            signal_key = f"{signal_type}_{stock_code}_{datetime.now().strftime('%Y%m%d_%H')}"
+            if signal_key in self.processed_signals:
+                logger.debug(f"{stock_code} {signal_type} 信号已处理，跳过")
+                return False
+            
+            logger.info(f"处理 {stock_code} 的 {signal_type} 信号")
+            
+            # 根据信号类型执行相应操作
+            success = False
+            
+            if signal_type == 'stop_loss':
+                success = self._execute_stop_loss_signal(stock_code, signal_info)
+            elif signal_type == 'take_profit_half':
+                success = self._execute_take_profit_half_signal(stock_code, signal_info)
+            elif signal_type == 'take_profit_full':
+                success = self._execute_take_profit_full_signal(stock_code, signal_info)
+            
+            if success:
+                # 记录已处理信号
+                self.processed_signals.add(signal_key)
+                logger.info(f"{stock_code} {signal_type} 信号处理成功")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"执行 {stock_code} 的交易信号时出错: {str(e)}")
+            return False
+
+    def _execute_stop_loss_signal(self, stock_code, signal_info):
+        """
+        执行止损信号
+        
+        参数:
+        stock_code (str): 股票代码
+        signal_info (dict): 信号详细信息
+        
+        返回:
+        bool: 是否执行成功
+        """
+        try:
+            volume = signal_info['volume']
+            current_price = signal_info['current_price']
+            
+            logger.warning(f"执行 {stock_code} 止损操作，数量: {volume}, 当前价格: {current_price:.2f}")
+            
+            # 检查是否为模拟交易模式
+            if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
+                # 模拟交易：直接调整持仓
+                success = self.position_manager.simulate_sell_position(
+                    stock_code=stock_code,
+                    sell_volume=volume,
+                    sell_price=current_price,
+                    sell_type='full'
+                )
+                
+                if success:
+                    logger.warning(f"[模拟交易] {stock_code} 止损执行完成，持仓已清零")
+                return success
+            else:
+                # 实盘交易：调用交易接口（先注释掉）
+                logger.warning(f"[实盘交易] {stock_code} 止损信号已识别，但实盘交易功能已注释")
+                
+                # TODO: 实盘交易功能开发完成后启用以下代码
+                # order_id = self.trading_executor.sell_stock(
+                #     stock_code, volume, price_type=1, strategy='stop_loss'
+                # )
+                # return order_id is not None
+                
+                return False  # 暂时返回False，表示未执行实盘交易
+                
+        except Exception as e:
+            logger.error(f"执行 {stock_code} 止损信号时出错: {str(e)}")
+            return False
+
+    def _execute_take_profit_half_signal(self, stock_code, signal_info):
+        """
+        执行首次止盈信号（卖出半仓）
+        
+        参数:
+        stock_code (str): 股票代码
+        signal_info (dict): 信号详细信息
+        
+        返回:
+        bool: 是否执行成功
+        """
+        try:
+            total_volume = signal_info['volume']
+            current_price = signal_info['current_price']
+            sell_ratio = signal_info['sell_ratio']
+            
+            # 计算卖出数量
+            sell_volume = int(total_volume * sell_ratio / 100) * 100
+            sell_volume = max(sell_volume, 100)  # 至少100股
+            
+            logger.info(f"执行 {stock_code} 首次止盈，卖出半仓，数量: {sell_volume}, 价格: {current_price:.2f}")
+            
+            # 检查是否为模拟交易模式
+            if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
+                # 模拟交易：直接调整持仓
+                success = self.position_manager.simulate_sell_position(
+                    stock_code=stock_code,
+                    sell_volume=sell_volume,
+                    sell_price=current_price,
+                    sell_type='partial'
+                )
+                
+                if success:
+                    self.position_manager.mark_profit_triggered(stock_code)
+                    logger.info(f"[模拟交易] {stock_code} 首次止盈执行完成，已标记profit_triggered=True")
+                return success
+            else:
+                # 实盘交易：调用交易接口（先注释掉）
+                logger.info(f"[实盘交易] {stock_code} 首次止盈信号已识别，但实盘交易功能已注释")
+                
+                # TODO: 实盘交易功能开发完成后启用以下代码
+                # order_id = self.trading_executor.sell_stock(
+                #     stock_code, sell_volume, price_type=0, strategy='take_profit_half'
+                # )
+                # if order_id:
+                #     # 标记已触发首次止盈
+                #     self.position_manager.mark_profit_triggered(stock_code)
+                #     return True
+                
+                return False  # 暂时返回False，表示未执行实盘交易
+                
+        except Exception as e:
+            logger.error(f"执行 {stock_code} 首次止盈信号时出错: {str(e)}")
+            return False
+
+    def _execute_take_profit_full_signal(self, stock_code, signal_info):
+        """
+        执行动态止盈信号（卖出剩余仓位）
+        
+        参数:
+        stock_code (str): 股票代码
+        signal_info (dict): 信号详细信息
+        
+        返回:
+        bool: 是否执行成功
+        """
+        try:
+            volume = signal_info['volume']
+            current_price = signal_info['current_price']
+            dynamic_take_profit_price = signal_info['dynamic_take_profit_price']
+            
+            logger.info(f"执行 {stock_code} 动态止盈，卖出剩余仓位，数量: {volume}, "
+                       f"当前价格: {current_price:.2f}, 止盈位: {dynamic_take_profit_price:.2f}")
+            
+            # 检查是否为模拟交易模式
+            if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
+                # 模拟交易：直接调整持仓
+                success = self.position_manager.simulate_sell_position(
+                    stock_code=stock_code,
+                    sell_volume=volume,
+                    sell_price=current_price,
+                    sell_type='full'
+                )
+                
+                if success:
+                    logger.info(f"[模拟交易] {stock_code} 动态止盈执行完成，持仓已清零")
+                return success
+            else:
+                # 实盘交易：调用交易接口（先注释掉）
+                logger.info(f"[实盘交易] {stock_code} 动态止盈信号已识别，但实盘交易功能已注释")
+                
+                # TODO: 实盘交易功能开发完成后启用以下代码
+                # order_id = self.trading_executor.sell_stock(
+                #     stock_code, volume, price_type=0, strategy='take_profit_full'
+                # )
+                # return order_id is not None
+                
+                return False  # 暂时返回False，表示未执行实盘交易
+                
+        except Exception as e:
+            logger.error(f"执行 {stock_code} 动态止盈信号时出错: {str(e)}")
+            return False
+
+    # ========== 向后兼容的旧版本接口 ==========
     
     def execute_stop_loss(self, stock_code):
         """
-        执行止损策略
+        执行止损策略 - 向后兼容接口
         
         参数:
         stock_code (str): 股票代码
@@ -183,32 +383,20 @@ class TradingStrategy:
         bool: 是否执行成功
         """
         try:
-            # 检查是否触发止损
-            stop_loss_triggered = self.position_manager.check_stop_loss(stock_code)
+            # 使用新的统一信号检查
+            signal_type, signal_info = self.position_manager.check_trading_signals(stock_code)
             
-            if stop_loss_triggered:
+            if signal_type == 'stop_loss':
                 # 检查是否已处理过该信号
                 signal_key = f"stop_loss_{stock_code}_{datetime.now().strftime('%Y%m%d')}"
                 if signal_key in self.processed_signals:
                     logger.debug(f"{stock_code} 止损信号已处理，跳过")
                     return False
                 
-                # 获取持仓
-                position = self.position_manager.get_position(stock_code)
-                if not position:
-                    logger.warning(f"未持有 {stock_code}，无法执行止损")
-                    return False
-                
-                volume = position['volume']
-                
-                # 执行全仓止损
-                logger.warning(f"执行 {stock_code} 全仓止损，数量: {volume}")
-                order_id = self.trading_executor.sell_stock(stock_code, volume, price_type=1, strategy='dyna')  # 市价卖出
-                
-                if order_id:
-                    # 记录已处理信号
+                success = self._execute_stop_loss_signal(stock_code, signal_info)
+                if success:
                     self.processed_signals.add(signal_key)
-                    return True
+                return success
             
             return False
             
@@ -218,7 +406,7 @@ class TradingStrategy:
     
     def execute_dynamic_take_profit(self, stock_code):
         """
-        执行动态止盈策略
+        执行动态止盈策略 - 向后兼容接口
         
         参数:
         stock_code (str): 股票代码
@@ -227,42 +415,25 @@ class TradingStrategy:
         bool: 是否执行成功
         """
         try:
-            # 检查是否触发动态止盈
-            take_profit_triggered, take_profit_type = self.position_manager.check_dynamic_take_profit(stock_code)
+            # 使用新的统一信号检查
+            signal_type, signal_info = self.position_manager.check_trading_signals(stock_code)
             
-            if take_profit_triggered:
+            if signal_type in ['take_profit_half', 'take_profit_full']:
                 # 检查是否已处理过该信号
-                signal_key = f"take_profit_{stock_code}_{take_profit_type}_{datetime.now().strftime('%Y%m%d')}"
+                signal_key = f"take_profit_{stock_code}_{signal_type}_{datetime.now().strftime('%Y%m%d')}"
                 if signal_key in self.processed_signals:
-                    logger.debug(f"{stock_code} {take_profit_type} 止盈信号已处理，跳过")
+                    logger.debug(f"{stock_code} {signal_type} 止盈信号已处理，跳过")
                     return False
                 
-                # 获取持仓
-                position = self.position_manager.get_position(stock_code)
-                if not position:
-                    logger.warning(f"未持有 {stock_code}，无法执行止盈")
-                    return False
+                success = False
+                if signal_type == 'take_profit_half':
+                    success = self._execute_take_profit_half_signal(stock_code, signal_info)
+                elif signal_type == 'take_profit_full':
+                    success = self._execute_take_profit_full_signal(stock_code, signal_info)
                 
-                volume = position['volume']
-                
-                # 根据止盈类型确定卖出数量
-                if take_profit_type == 'HALF':
-                    # 首次盈利5%卖出半仓
-                    sell_volume = int(volume * config.INITIAL_TAKE_PROFIT_RATIO_PERCENTAGE / 100) * 100
-                    sell_volume = max(sell_volume, 100)  # 至少100股
-                    logger.info(f"执行 {stock_code} 首次止盈，卖出半仓，数量: {sell_volume}")
-                else:  # 'FULL'
-                    # 动态止盈卖出剩余仓位
-                    sell_volume = volume
-                    logger.info(f"执行 {stock_code} 动态止盈，卖出全部剩余仓位，数量: {sell_volume}")
-                
-                # 执行卖出
-                order_id = self.trading_executor.sell_stock(stock_code, sell_volume, price_type=0, strategy='dyna')  # 限价卖出
-                
-                if order_id:
-                    # 记录已处理信号
+                if success:
                     self.processed_signals.add(signal_key)
-                    return True
+                return success
             
             return False
             
@@ -397,7 +568,7 @@ class TradingStrategy:
     
     def check_and_execute_strategies(self, stock_code):
         """
-        检查并执行所有交易策略
+        检查并执行所有交易策略 - 优化版本
         
         参数:
         stock_code (str): 股票代码
@@ -409,27 +580,22 @@ class TradingStrategy:
             
             # 按优先级执行各种策略
             
-            # 1. 先检查止损条件（最高优先级）
-            if self.execute_stop_loss(stock_code):
-                logger.info(f"{stock_code} 执行止损策略成功")
+            # 1. 最高优先级：执行统一的止盈止损信号处理
+            if self.execute_trading_signal(stock_code):
+                logger.info(f"{stock_code} 执行止盈止损策略成功")
                 return
             
-            # 2. 检查动态止盈条件
-            if self.execute_dynamic_take_profit(stock_code):
-                logger.info(f"{stock_code} 执行动态止盈策略成功")
-                return
-            
-            # 3. 执行网格交易
+            # 2. 执行网格交易
             if self.execute_grid_trading(stock_code):
                 logger.info(f"{stock_code} 执行网格交易策略成功")
                 return
             
-            # 4. 检查技术指标买入信号
+            # 3. 检查技术指标买入信号
             if self.execute_buy_strategy(stock_code):
                 logger.info(f"{stock_code} 执行买入策略成功")
                 return
             
-            # 5. 检查技术指标卖出信号
+            # 4. 检查技术指标卖出信号
             if self.execute_sell_strategy(stock_code):
                 logger.info(f"{stock_code} 执行卖出策略成功")
                 return
@@ -573,4 +739,4 @@ def get_trading_strategy():
     global _instance
     if _instance is None:
         _instance = TradingStrategy()
-    return _instance
+    return _instance            
