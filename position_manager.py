@@ -1172,22 +1172,33 @@ class PositionManager:
                 logger.error(f"模拟卖出失败：未持有 {stock_code}")
                 return False
             
-            current_volume = int(position['volume'])
-            current_cost_price = float(position['cost_price'])
+            # 安全获取当前持仓数据
+            current_volume = int(position.get('volume', 0))
+            current_available = int(position.get('available', current_volume))
+            current_cost_price = float(position.get('cost_price', 0))
             
             # 检查卖出数量是否有效
-            if sell_volume <= 0 or sell_volume > current_volume:
-                logger.error(f"模拟卖出失败：卖出数量无效，当前持仓: {current_volume}, 卖出数量: {sell_volume}")
+            if sell_volume <= 0:
+                logger.error(f"模拟卖出失败：卖出数量必须大于0，当前卖出数量: {sell_volume}")
+                return False
+                
+            if sell_volume > current_volume:
+                logger.error(f"模拟卖出失败：卖出数量超过持仓，当前持仓: {current_volume}, 卖出数量: {sell_volume}")
+                return False
+                
+            if sell_volume > current_available:
+                logger.error(f"模拟卖出失败：卖出数量超过可用数量，当前可用: {current_available}, 卖出数量: {sell_volume}")
                 return False
             
             logger.info(f"[模拟交易] 开始处理 {stock_code} 卖出，数量: {sell_volume}, 价格: {sell_price:.2f}")
+            logger.info(f"[模拟交易] 卖出前持仓：总数={current_volume}, 可用={current_available}, 成本价={current_cost_price:.2f}")
             
             # 记录交易到数据库
             trade_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             trade_id = f"SIM_{datetime.now().strftime('%Y%m%d%H%M%S')}_{stock_code}_{sell_type}"
             
             # 保存交易记录
-            self._save_simulated_trade_record(
+            trade_saved = self._save_simulated_trade_record(
                 stock_code=stock_code,
                 trade_time=trade_time,
                 trade_type='SELL',
@@ -1198,6 +1209,14 @@ class PositionManager:
                 strategy=f'auto_{sell_type}'
             )
             
+            if not trade_saved:
+                logger.error(f"[模拟交易] 保存交易记录失败: {stock_code}")
+                return False
+            
+            # 计算卖出收入（扣除手续费）
+            commission_rate = 0.0013  # 卖出手续费率（含印花税）
+            revenue = sell_price * sell_volume * (1 - commission_rate)
+            
             if sell_type == 'full' or sell_volume >= current_volume:
                 # 全仓卖出，删除持仓记录
                 success = self.remove_position(stock_code)
@@ -1205,19 +1224,29 @@ class PositionManager:
                     logger.info(f"[模拟交易] {stock_code} 全仓卖出完成，持仓已清零")
                     
                     # 更新模拟账户资金
-                    revenue = sell_price * sell_volume * 0.9987  # 扣除手续费
                     config.SIMULATION_BALANCE += revenue
                     logger.info(f"[模拟交易] 账户资金增加: +{revenue:.2f}, 当前余额: {config.SIMULATION_BALANCE:.2f}")
                 return success
             else:
-                # 部分卖出，更新持仓数量，成本价保持不变
+                # 部分卖出，更新持仓数量
                 new_volume = current_volume - sell_volume
+                new_available = current_available - sell_volume
+                
+                # 确保新的可用数量不为负数
+                new_available = max(0, new_available)
                 
                 # 获取其他持仓信息
                 current_price = position.get('current_price', sell_price)
                 profit_triggered = position.get('profit_triggered', False)
                 highest_price = position.get('highest_price', current_price)
                 open_date = position.get('open_date')
+                stock_name = position.get('stock_name')
+                
+                # 成本价逻辑：
+                # 1. 如果是止盈卖出，成本价保持不变（确保剩余持仓盈亏计算准确）
+                # 2. 如果是其他类型卖出，也保持成本价不变
+                # 这样可以准确跟踪剩余持仓的真实盈亏情况
+                final_cost_price = current_cost_price
                 
                 # 如果是首次止盈卖出，标记profit_triggered为True
                 if sell_type == 'partial' and not profit_triggered:
@@ -1226,29 +1255,43 @@ class PositionManager:
                 
                 # 重新计算止损价格
                 new_stop_loss_price = self.calculate_stop_loss_price(
-                    current_cost_price, highest_price, profit_triggered
+                    final_cost_price, highest_price, profit_triggered
                 )
                 
-                # 更新持仓
+                # 更新持仓 - 关键：正确传递所有参数
                 success = self.update_position(
                     stock_code=stock_code,
-                    volume=new_volume,
-                    cost_price=current_cost_price,  # 成本价保持不变
+                    volume=new_volume,                    # ✅ 更新总数
+                    available=new_available,              # ✅ 更新可用数
+                    cost_price=final_cost_price,          # ✅ 成本价（止盈时保持不变）
                     current_price=current_price,
                     profit_triggered=profit_triggered,
                     highest_price=highest_price,
                     open_date=open_date,
-                    stop_loss_price=new_stop_loss_price
+                    stop_loss_price=new_stop_loss_price,
+                    stock_name=stock_name
                 )
                 
                 if success:
-                    logger.info(f"[模拟交易] {stock_code} 部分卖出完成，剩余持仓: {new_volume}, "
-                              f"成本价: {current_cost_price:.2f}, 新止损价: {new_stop_loss_price:.2f}")
+                    logger.info(f"[模拟交易] {stock_code} 部分卖出完成:")
+                    logger.info(f"  - 剩余持仓: 总数={new_volume}, 可用={new_available}")
+                    logger.info(f"  - 成本价: {final_cost_price:.2f} (保持不变)")
+                    logger.info(f"  - 新止损价: {new_stop_loss_price:.2f}")
+                    logger.info(f"  - 已触发首次止盈: {profit_triggered}")
                     
                     # 更新模拟账户资金
-                    revenue = sell_price * sell_volume * 0.9987  # 扣除手续费
                     config.SIMULATION_BALANCE += revenue
                     logger.info(f"[模拟交易] 账户资金增加: +{revenue:.2f}, 当前余额: {config.SIMULATION_BALANCE:.2f}")
+                    
+                    # 验证更新结果
+                    updated_position = self.get_position(stock_code)
+                    if updated_position:
+                        logger.info(f"[模拟交易] 验证更新结果: 总数={updated_position.get('volume')}, "
+                                f"可用={updated_position.get('available')}, 成本价={updated_position.get('cost_price'):.2f}")
+                    else:
+                        logger.warning(f"[模拟交易] 无法获取更新后的持仓数据进行验证")
+                else:
+                    logger.error(f"[模拟交易] {stock_code} 持仓更新失败")
                 
                 return success
                 
