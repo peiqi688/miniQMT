@@ -209,6 +209,11 @@ class PositionManager:
         try:
             db_positions = pd.read_sql_query("SELECT * FROM positions", self.conn)
             if not db_positions.empty:
+                # 确保stock_name字段存在，如果不存在则添加默认值
+                if 'stock_name' not in db_positions.columns:
+                    db_positions['stock_name'] = db_positions['stock_code']  # 使用股票代码作为默认名称
+                    logger.warning("SQLite数据库中缺少stock_name字段，使用股票代码作为默认值")
+
                 db_positions.to_sql("positions", self.memory_conn, if_exists="replace", index=False)
                 self.memory_conn.commit()
                 logger.info("数据库数据已同步到内存数据库")
@@ -223,11 +228,12 @@ class PositionManager:
                 logger.debug("模拟交易模式：跳过内存数据库到SQLite数据库的同步")
                 return
         
-            memory_positions = pd.read_sql_query("SELECT stock_code, open_date, profit_triggered, highest_price, stop_loss_price FROM positions", self.memory_conn)
+            memory_positions = pd.read_sql_query("SELECT stock_code, stock_name, open_date, profit_triggered, highest_price, stop_loss_price FROM positions", self.memory_conn)
             if not memory_positions.empty:
                 now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 for _, row in memory_positions.iterrows():
                     stock_code = row['stock_code']
+                    stock_name = row['stock_name']
                     open_date = row['open_date']
                     profit_triggered = row['profit_triggered']
                     highest_price = row['highest_price']
@@ -235,33 +241,38 @@ class PositionManager:
                     
                     # 查询数据库中的对应记录
                     cursor = self.conn.cursor()
-                    cursor.execute("SELECT open_date, profit_triggered, highest_price, stop_loss_price FROM positions WHERE stock_code=?", (stock_code,))
+                    cursor.execute("SELECT stock_name, open_date, profit_triggered, highest_price, stop_loss_price FROM positions WHERE stock_code=?", (stock_code,))
                     db_row = cursor.fetchone()
 
                     if db_row:
-                        db_open_date, db_profit_triggered, db_highest_price, db_stop_loss_price = db_row
+                        db_stock_name, db_open_date, db_profit_triggered, db_highest_price, db_stop_loss_price = db_row
                         # 比较字段是否不同
-                        if (db_open_date != open_date) or (db_profit_triggered != profit_triggered) or (db_highest_price != highest_price) or (db_stop_loss_price != stop_loss_price):
+                        if (db_stock_name != stock_name) or (db_open_date != open_date) or (db_profit_triggered != profit_triggered) or (db_highest_price != highest_price) or (db_stop_loss_price != stop_loss_price):
                             # 如果内存数据库中的 open_date 与 SQLite 数据库中的不一致，则使用 SQLite 数据库中的值
                             if db_open_date != open_date:
                                 open_date = db_open_date
                                 row['open_date'] = open_date  # 更新内存数据库中的 open_date
                             # 更新数据库，确保所有字段都得到更新
-                            cursor.execute("UPDATE positions SET open_date=?, profit_triggered=?, highest_price=?, stop_loss_price=?, last_update=? WHERE stock_code=?", (open_date, profit_triggered, highest_price, stop_loss_price, now, stock_code))
+                            cursor.execute("""
+                                UPDATE positions 
+                                SET stock_name=?, open_date=?, profit_triggered=?, highest_price=?, stop_loss_price=?, last_update=? 
+                                WHERE stock_code=?
+                            """, (stock_name, open_date, profit_triggered, highest_price, stop_loss_price, now, stock_code))
                             logger.info(f"更新内存数据库的 {stock_code} 到sql数据库")
                     else:
                         # 插入新记录，使用当前日期作为 open_date
                         current_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         cursor.execute("""
-                            INSERT INTO positions (stock_code, open_date, profit_triggered, highest_price, stop_loss_price, last_update) 
-                            VALUES (?, ?, ?, ?, ?, ?)
-                        """, (stock_code, current_date, profit_triggered, highest_price, stop_loss_price, now))
+                            INSERT INTO positions (stock_code, stock_name, open_date, profit_triggered, highest_price, stop_loss_price, last_update) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?)
+                        """, (stock_code, stock_name, current_date, profit_triggered, highest_price, stop_loss_price, now))
+                        
                         # 插入新记录后，立即从数据库读取 open_date，以确保内存数据库与数据库一致
                         cursor.execute("SELECT open_date FROM positions WHERE stock_code=?", (stock_code,))
                         open_date = cursor.fetchone()[0]
                         row['open_date'] = open_date  # 更新内存数据库中的 open_date
-                        logger.warning(f"在数据库中未找到 {stock_code} 的记录")
                         logger.info(f"在数据库中插入新的 {stock_code} 记录，使用当前日期 {current_date} 作为 open_date")
+
 
                 self.conn.commit()
         except Exception as e:
@@ -523,8 +534,12 @@ class PositionManager:
                 if final_highest_price is None: # if not passed or calculated yet
                     final_highest_price = max(old_db_highest_price, final_current_price) if old_db_highest_price is not None else final_current_price
                 
-                # 如果没有传入止损价格，则重新计算
-                if final_stop_loss_price is None:
+                # ✅ 修复：如果最高价发生变化，强制重新计算止损价格
+                if old_db_highest_price != final_highest_price:
+                    logger.info(f"{stock_code} 最高价变化：{old_db_highest_price} -> {final_highest_price}，重新计算止损价格")
+                    calculated_slp = self.calculate_stop_loss_price(final_cost_price, final_highest_price, profit_triggered)
+                    final_stop_loss_price = round(calculated_slp, 2) if calculated_slp is not None else None
+                elif final_stop_loss_price is None:
                     calculated_slp = self.calculate_stop_loss_price(final_cost_price, final_highest_price, profit_triggered)
                     final_stop_loss_price = round(calculated_slp, 2) if calculated_slp is not None else None
                 else:
@@ -792,14 +807,18 @@ class PositionManager:
                                 # 忽略无效值
                                 pass
                 
-                # 确保返回的所有值都是有效数值
+                # ✅ 计算总资产
+                available = float(config.SIMULATION_BALANCE)
+                total_asset = available + market_value  # 可用资金 + 持仓市值
+                
                 return {
                     'account_id': 'SIMULATION',
                     'account_type': 'SIMULATION',
-                    'balance': float(config.SIMULATION_BALANCE),
-                    'available': float(config.SIMULATION_BALANCE) - market_value,
+                    'available': available,
                     'market_value': float(market_value),
-                    'profit_loss': 0.0
+                    'total_asset': total_asset,  # ✅ 添加总资产字段
+                    'profit_loss': 0.0,
+                    'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }
 
             # 使用qmt_trader获取账户信息
@@ -1018,16 +1037,27 @@ class PositionManager:
                 else:
                     highest_profit_ratio = 0.0
                     
-                take_profit_coefficient = 0.97  # 默认值，最高价的97%
+                # ✅ 修正：从高到低遍历，找到最高匹配区间
+                take_profit_coefficient = 1.0  # 默认值改为1.0，表示不进行动态止损
+                matched_level = None
                 
-                # 遍历止盈级别，找到匹配的系数
-                for profit_level, coefficient in config.DYNAMIC_TAKE_PROFIT:
+                for profit_level, coefficient in sorted(config.DYNAMIC_TAKE_PROFIT, reverse=True):
                     if highest_profit_ratio >= profit_level:
                         take_profit_coefficient = coefficient
-                        break  # 找到第一个匹配的级别
+                        matched_level = profit_level
+                        break  # 找到最高匹配级别后停止
                 
                 # 计算动态止损价
                 dynamic_stop_loss_price = highest_price * take_profit_coefficient
+                
+                # 添加调试日志
+                if matched_level is not None:
+                    logger.debug(f"动态止损计算：成本价={cost_price:.2f}, 最高价={highest_price:.2f}, "
+                            f"最高盈利={highest_profit_ratio:.1%}, 匹配区间={matched_level:.1%}, "
+                            f"系数={take_profit_coefficient}, 止损价={dynamic_stop_loss_price:.2f}")
+                else:
+                    logger.debug(f"动态止损计算：未达到任何盈利区间，使用最高价作为止损价")
+                
                 return dynamic_stop_loss_price
             else:
                 # 固定止损：基于成本价
@@ -1117,32 +1147,32 @@ class PositionManager:
                 # 计算最高价相对持仓成本价的涨幅
                 highest_profit_ratio = (highest_price - cost_price) / cost_price
                 
-                # 确定止盈位系数
+                # ✅ 从高到低遍历，找到最高匹配区间
                 take_profit_coefficient = 1.0  # 默认不止盈
                 matched_level = None
                 
-                # 从高到低遍历止盈级别，找到匹配的最高级别
-                for profit_level, coefficient in config.DYNAMIC_TAKE_PROFIT:
+                for profit_level, coefficient in sorted(config.DYNAMIC_TAKE_PROFIT, reverse=True):
                     if highest_profit_ratio >= profit_level:
                         take_profit_coefficient = coefficient
                         matched_level = profit_level
-                        break  # 找到第一个匹配的级别就停止
+                        break  # 找到最高匹配区间后立即停止
                 
-                # 计算动态止盈位
-                dynamic_take_profit_price = highest_price * take_profit_coefficient
-                
-                # 如果当前价格跌破动态止盈位，触发止盈
-                if current_price <= dynamic_take_profit_price:
-                    logger.info(f"{stock_code} 触发动态止盈，当前价格: {current_price:.2f}, "
-                            f"止盈位: {dynamic_take_profit_price:.2f}, 最高价: {highest_price:.2f}, "
-                            f"匹配级别: {matched_level:.1%}")
-                    return 'take_profit_full', {
-                        'current_price': current_price,
-                        'dynamic_take_profit_price': dynamic_take_profit_price,
-                        'highest_price': highest_price,
-                        'matched_level': matched_level,
-                        'volume': position['volume']
-                    }
+                if matched_level is not None:
+                    # 计算动态止盈位
+                    dynamic_take_profit_price = highest_price * take_profit_coefficient
+                    
+                    # 如果当前价格跌破动态止盈位，触发止盈
+                    if current_price <= dynamic_take_profit_price:
+                        logger.info(f"{stock_code} 触发动态止盈，当前价格: {current_price:.2f}, "
+                                f"止盈位: {dynamic_take_profit_price:.2f}, 最高价: {highest_price:.2f}, "
+                                f"最高达到区间: {matched_level:.1%}（系数{take_profit_coefficient})")
+                        return 'take_profit_full', {
+                            'current_price': current_price,
+                            'dynamic_take_profit_price': dynamic_take_profit_price,
+                            'highest_price': highest_price,
+                            'matched_level': matched_level,
+                            'volume': position['volume']
+                        }
             
             return None, None
             

@@ -91,6 +91,7 @@ class DataManager:
         CREATE TABLE IF NOT EXISTS trade_records (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             stock_code TEXT,
+            stock_name TEXT,            
             trade_time TIMESTAMP,
             trade_type TEXT,  -- BUY, SELL
             price REAL,
@@ -106,6 +107,7 @@ class DataManager:
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS positions (
             stock_code TEXT PRIMARY KEY,
+            stock_name TEXT,            
             volume INTEGER,
             available REAL,           
             cost_price REAL,

@@ -1153,9 +1153,17 @@ document.addEventListener('DOMContentLoaded', () => {
             // 新的格式化逻辑，符合要求的格式
             const formattedLogs = logEntries.map(entry => {
                 if (typeof entry === 'object' && entry !== null) {
-                    // 转换日期格式为 MM-DD
-                    const dateStr = entry.trade_time ? new Date(entry.trade_time).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }).replace(/\//g, '-') : '';
-                    
+                    // ✅ 修改：转换日期格式为 MM-DD HH:MM:SS
+                    let dateStr = '';
+                    if (entry.trade_time) {
+                        const date = new Date(entry.trade_time);
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const hours = String(date.getHours()).padStart(2, '0');
+                        const minutes = String(date.getMinutes()).padStart(2, '0');
+                        const seconds = String(date.getSeconds()).padStart(2, '0');
+                        dateStr = `${month}-${day} ${hours}:${minutes}:${seconds}`;
+                    }                   
                     // 转换交易类型
                     const actionType = entry.trade_type === 'BUY' ? '买入' : 
                                     (entry.trade_type === 'SELL' ? '卖出' : entry.trade_type);

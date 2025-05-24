@@ -209,7 +209,7 @@ def get_trade_records():
 
         # Format 'trade_time' to 'YYYY-MM-DD'
         if 'trade_time' in trades_df.columns:
-            trades_df['trade_time'] = pd.to_datetime(trades_df['trade_time']).dt.strftime('%Y-%m-%d')
+            trades_df['trade_time'] = pd.to_datetime(trades_df['trade_time']).dt.strftime('%Y-%m-%d %H:%M:%S')
         
         # Replace NaN with None (which will become null in JSON)
         trades_df = trades_df.replace({pd.NA: None, float('nan'): None})
