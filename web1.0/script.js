@@ -1153,9 +1153,17 @@ document.addEventListener('DOMContentLoaded', () => {
             // 新的格式化逻辑，符合要求的格式
             const formattedLogs = logEntries.map(entry => {
                 if (typeof entry === 'object' && entry !== null) {
-                    // 转换日期格式为 MM-DD
-                    const dateStr = entry.trade_time ? new Date(entry.trade_time).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }).replace(/\//g, '-') : '';
-                    
+                    // ✅ 修改：转换日期格式为 MM-DD HH:MM:SS
+                    let dateStr = '';
+                    if (entry.trade_time) {
+                        const date = new Date(entry.trade_time);
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const hours = String(date.getHours()).padStart(2, '0');
+                        const minutes = String(date.getMinutes()).padStart(2, '0');
+                        const seconds = String(date.getSeconds()).padStart(2, '0');
+                        dateStr = `${month}-${day} ${hours}:${minutes}:${seconds}`;
+                    }                   
                     // 转换交易类型
                     const actionType = entry.trade_type === 'BUY' ? '买入' : 
                                     (entry.trade_type === 'SELL' ? '卖出' : entry.trade_type);
@@ -1248,6 +1256,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 添加版本号跟踪
+    let currentHoldingsVersion = 0;
+    // 修改数据获取函数
     async function fetchHoldings() {
         // 如果已经有请求在进行中，则跳过
         if (requestLocks.holdings) {
@@ -1255,44 +1266,24 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 最小刷新间隔检查 - 3秒
-        const now = Date.now();
-        if (now - lastDataUpdateTimestamps.holdings < 3000) {
-            console.log('Holdings data recently updated, skipping');
-            return;
-        }
-
         // 标记请求开始
         requestLocks.holdings = true;
 
-        // 使用延迟显示加载状态，避免短暂操作造成闪烁
-        let loadingTimer = null;
-
-        // 仅在加载时间超过300ms时才显示加载提示
-        if (!elements.holdingsLoading.classList.contains('shown')) {
-            loadingTimer = setTimeout(() => {
-                elements.holdingsLoading.classList.remove('hidden');
-                elements.holdingsLoading.classList.add('shown');
-            }, 300);
-        }
-
-        try {            
-            const data = await apiRequest(API_ENDPOINTS.getPositionsAll);
+        try {
+            // ✅ 带版本号的请求
+            const url = `${API_ENDPOINTS.getPositionsAll}?version=${currentHoldingsVersion}`;
+            const data = await apiRequest(url);
             
-            // 取消加载提示定时器
-            if (loadingTimer) clearTimeout(loadingTimer);
-            
-            // 检查版本是否变化
-            if (data.data_version && data.data_version <= currentDataVersions.holdings) {
-                console.log('Holdings data version unchanged, skipping update');
-                elements.holdingsLoading.classList.add('hidden');
-                elements.holdingsLoading.classList.remove('shown');
+            // 检查是否有数据变化
+            if (data.no_change) {
+                console.log('Holdings data unchanged, skipping update');
                 return;
             }
             
             // 更新版本号
             if (data.data_version) {
-                currentDataVersions.holdings = data.data_version;
+                currentHoldingsVersion = data.data_version;
+                console.log(`Holdings data updated to version: ${currentHoldingsVersion}`);
             }
             
             if (data.status === 'success' && Array.isArray(data.data)) {
@@ -1302,30 +1293,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.message || '数据格式错误');
             }
             
-            // 短暂延迟后隐藏加载提示
-            setTimeout(() => {
-                elements.holdingsLoading.classList.add('hidden');
-                elements.holdingsLoading.classList.remove('shown');
-            }, 300);
         } catch (error) {
-            // 取消加载提示定时器
-            if (loadingTimer) clearTimeout(loadingTimer);
-            
-            elements.holdingsLoading.classList.add('hidden');
-            elements.holdingsLoading.classList.remove('shown');
-            
-            // 显示错误信息
-            elements.holdingsError.classList.remove('hidden');
-            elements.holdingsError.textContent = `加载失败: ${error.message}`;
-            
-            // 5秒后自动隐藏错误信息
-            setTimeout(() => {
-                elements.holdingsError.classList.add('hidden');
-            }, 5000);
-            
-            showMessage("加载持仓数据失败", 'error');
+            console.error('Error fetching holdings:', error);
         } finally {
-            // 释放请求锁定，添加小延迟避免立即重复请求
             setTimeout(() => {
                 requestLocks.holdings = false;
             }, 1000);
@@ -1764,84 +1734,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function pollData() {
-        // 如果监控状态关闭，不再继续轮询
         if (!isMonitoring) {
             console.log("Monitor is off, stopping polling");
             stopPolling();
             return;
         }
         
-        // 如果API未连接，尝试重新检查连接
-        if (!isApiConnected) {
-            console.log("API disconnected, checking connection...");
-            try {
-                const response = await fetch(API_ENDPOINTS.checkConnection);
-                if (response.ok) {
-                    const data = await response.json();
-                    updateConnectionStatus(data.connected || false);
-                } else {
-                    updateConnectionStatus(false);
-                }
-                
-                // 如果仍未连接，跳过本次轮询
-                if (!isApiConnected) {
-                    console.log("API still disconnected, skipping poll");
-                    return;
-                }
-            } catch (error) {
-                console.error("Connection check failed:", error);
-                updateConnectionStatus(false);
-                return;
-            }
-        }
-
         console.log("Polling for data updates...");
-
-        // 如果所有请求都在进行中，则跳过本次轮询
-        if (requestLocks.status && requestLocks.holdings && requestLocks.logs) {
-            console.log("All requests in progress, skipping poll cycle");
-            return;
-        }
-
-        // 添加微妙的刷新指示，而不是明显的加载提示
-        document.body.classList.add('api-refreshing');
-
-        // 根据条件决定是否显示刷新状态
-        const now = Date.now();
-        const allRecentlyUpdated = 
-            (now - lastDataUpdateTimestamps.status < 3000) &&
-            (now - lastDataUpdateTimestamps.holdings < 3000) &&
-            (now - lastDataUpdateTimestamps.logs < 3000);
-            
-        if (!allRecentlyUpdated) {
-            showRefreshStatus();
-        }
-
+    
         try {
             const now = Date.now();
             
-            // 根据各数据类型的刷新间隔决定是否刷新
-            if (!requestLocks.status && now - lastDataUpdateTimestamps.status >= DATA_REFRESH_INTERVALS.status) {
+            // 只轮询状态和日志，持仓数据主要靠SSE推送
+            if (!requestLocks.status && now - lastDataUpdateTimestamps.status >= 10000) { // 增加到10秒
                 await fetchStatus();
-                // 短暂延迟，避免请求过于集中
                 await new Promise(r => setTimeout(r, 200));
             }
             
-            if (!requestLocks.holdings && now - lastDataUpdateTimestamps.holdings >= DATA_REFRESH_INTERVALS.holdings) {
-                await fetchHoldings();
-                await new Promise(r => setTimeout(r, 200));
-            }
-            
-            if (!requestLocks.logs && now - lastDataUpdateTimestamps.logs >= DATA_REFRESH_INTERVALS.logs) {
+            if (!requestLocks.logs && now - lastDataUpdateTimestamps.logs >= 10000) { // 增加到10秒
                 await fetchLogs();
             }
+            
+            // 持仓数据降低轮询频率，主要依赖SSE推送
+            if (!requestLocks.holdings && now - lastDataUpdateTimestamps.holdings >= 30000) { // 增加到30秒
+                await fetchHoldings();
+            }
+            
         } catch (error) {
             console.error("Poll cycle error:", error);
-        } finally {
-            // 移除刷新状态
-            document.body.classList.remove('api-refreshing');
         }
-
+    
         console.log("Polling cycle finished.");
     }
 
@@ -1889,52 +1811,46 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sseConnection) {
             sseConnection.close();
         }
-
+    
         const sseURL = `${API_BASE_URL}/api/sse`;
         sseConnection = new EventSource(sseURL);
-
-        // SSE节流相关
-        let lastSseUpdateTime = 0;
-
+    
         sseConnection.onmessage = function(event) {
             try {
                 const data = JSON.parse(event.data);
                 console.log('SSE update received:', data);
                 
-                // 确保SSE更新之间至少有3秒间隔
-                const now = Date.now();
-                if (now - lastSseUpdateTime < 3000) {
-                    console.log('SSE updates too frequent, throttling');
-                    return;
-                }
-                lastSseUpdateTime = now;
-                
-                // 更新账户信息 - 不影响监控或自动交易状态
+                // 更新账户信息
                 if (data.account_info) {
                     updateQuickAccountInfo(data.account_info);
                 }
                 
-                // 更新自动交易状态 - 不影响监控状态
-                if (data.monitoring && data.monitoring.autoTradingEnabled !== undefined) {
-                    isAutoTradingEnabled = data.monitoring.autoTradingEnabled;
-                    elements.globalAllowBuySell.checked = isAutoTradingEnabled;
+                // 更新监控状态
+                if (data.monitoring) {
+                    updateMonitoringInfo(data.monitoring);
                 }
                 
-                // 显示轻微的更新提示（但不频繁显示）
-                if (now - lastRefreshStatusShown > 5000) {
-                    showUpdatedIndicator();
+                // ✅ 处理持仓数据变化通知
+                if (data.positions_update && data.positions_update.changed) {
+                    console.log(`Received positions update notification: v${data.positions_update.version}`);
+                    // 立即获取最新持仓数据
+                    setTimeout(() => {
+                        if (!requestLocks.holdings) {
+                            fetchHoldings();
+                        }
+                    }, 100); // 短暂延迟避免冲突
                 }
+                
             } catch (e) {
                 console.error('SSE data parse error:', e);
             }
         };
-
+    
         sseConnection.onerror = function(error) {
             console.error('SSE connection error:', error);
-            // 60秒后重试
             setTimeout(() => {
                 initSSE();
-            }, 60000);
+            }, 5000); // 减少重连时间到5秒
         };
     }
 

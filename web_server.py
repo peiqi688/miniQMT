@@ -209,7 +209,7 @@ def get_trade_records():
 
         # Format 'trade_time' to 'YYYY-MM-DD'
         if 'trade_time' in trades_df.columns:
-            trades_df['trade_time'] = pd.to_datetime(trades_df['trade_time']).dt.strftime('%Y-%m-%d')
+            trades_df['trade_time'] = pd.to_datetime(trades_df['trade_time']).dt.strftime('%Y-%m-%d %H:%M:%S')
         
         # Replace NaN with None (which will become null in JSON)
         trades_df = trades_df.replace({pd.NA: None, float('nan'): None})
@@ -805,38 +805,60 @@ def update_holding_params():
 # 添加SSE接口
 @app.route('/api/sse', methods=['GET'])
 def sse():
-    """提供Server-Sent Events流"""
+    """提供Server-Sent Events流 - 增强版"""
     def event_stream():
+        last_positions_version = 0
         prev_data = None
+        
         while True:
             try:
-                # 获取最新数据
+                # 检查持仓数据是否有变化
+                version_info = position_manager.get_data_version_info()
+                current_version = version_info['version']
+                data_changed = version_info['changed']
+                
+                # 获取基础数据
                 account_info = position_manager.get_account_info() or {}
+                
                 current_data = {
                     'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    'holdings_count': len(realtime_data['positions_all']),
                     'account_info': {
                         'available': account_info.get('available', 0),
                         'market_value': account_info.get('market_value', 0),
                         'total_asset': account_info.get('total_asset', 0)
                     },
                     'monitoring': {
-                        'isMonitoring': config.ENABLE_AUTO_TRADING,
+                        'isMonitoring': config.ENABLE_MONITORING,
+                        'autoTradingEnabled': config.ENABLE_AUTO_TRADING,
                         'allowBuy': getattr(config, 'ENABLE_ALLOW_BUY', True),
                         'allowSell': getattr(config, 'ENABLE_ALLOW_SELL', True),
                         'simulationMode': getattr(config, 'ENABLE_SIMULATION_MODE', False)
                     }
                 }
                 
+                # ✅ 如果持仓数据有变化，添加持仓更新通知
+                if current_version > last_positions_version:
+                    current_data['positions_update'] = {
+                        'version': current_version,
+                        'changed': True
+                    }
+                    last_positions_version = current_version
+                    logger.debug(f"SSE推送持仓数据变化通知: v{current_version}")
+                
                 # 只在数据变化时发送更新
                 if current_data != prev_data:
                     yield f"data: {json.dumps(current_data)}\n\n"
                     prev_data = current_data
+                    
+                    # 标记数据已被消费
+                    if data_changed:
+                        position_manager.mark_data_consumed()
+                
             except Exception as e:
                 logger.error(f"SSE流生成数据时出错: {str(e)}")
                 yield f"data: {json.dumps({'error': str(e)})}\n\n"
             
-            time.sleep(2)  # 每2秒检查一次
+            time.sleep(1)  # 减少到1秒检查一次
     
     return Response(stream_with_context(event_stream()), 
                    mimetype="text/event-stream",
@@ -846,37 +868,45 @@ def sse():
 # 修改get_positions_all函数，添加数据版本号
 @app.route('/api/positions-all', methods=['GET'])
 def get_positions_all():
-    """获取所有持仓信息（包括所有字段）"""
+    """获取所有持仓信息 - 增加版本号支持"""
     try:
+        # 获取客户端版本号
+        client_version = request.args.get('version', 0, type=int)
+        
+        # 获取当前数据版本
+        version_info = position_manager.get_data_version_info()
+        current_version = version_info['version']
+        
+        # 如果客户端版本是最新的，返回无变化
+        if client_version >= current_version:
+            return jsonify({
+                'status': 'success',
+                'data': [],
+                'data_version': current_version,
+                'no_change': True
+            })
+        
+        # 获取完整数据
         positions_all_df = position_manager.get_all_positions_with_all_fields()
-        
-        # 计算数据版本号（使用时间戳）
-        data_version = int(time.time())
-        
-        # 处理NaN值
         positions_all_df = positions_all_df.replace({pd.NA: None, float('nan'): None})
-        
-        # 转换为JSON可序列化的格式
         positions_all = positions_all_df.to_dict('records')
         
         # 更新实时数据
         realtime_data['positions_all'] = positions_all
 
-        # 添加数据版本号（可以使用时间戳）
-        data_version = int(time.time())
-
         response = make_response(jsonify({
             'status': 'success',
             'data': positions_all,
-            'data_version': data_version  # 添加版本号
+            'data_version': current_version,
+            'no_change': False
         }))
         response.headers['Content-Type'] = 'application/json; charset=utf-8'
         return response
     except Exception as e:
-        logger.error(f"获取所有持仓信息（所有字段）时出错: {str(e)}")
+        logger.error(f"获取所有持仓信息时出错: {str(e)}")
         return jsonify({
             'status': 'error',
-            'message': f"获取所有持仓信息（所有字段）时出错: {str(e)}"
+            'message': f"获取所有持仓信息时出错: {str(e)}"
         }), 500
 
 def push_realtime_data():
