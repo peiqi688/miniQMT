@@ -1238,9 +1238,230 @@ class PositionManager:
 
     # ========== 新增：模拟交易持仓调整功能 ==========
     
+    # 在 PositionManager 类中添加/修改以下方法
+
+    def simulate_buy_position(self, stock_code, buy_volume, buy_price, strategy='simu'):
+        """
+        模拟交易：买入股票，支持成本价加权平均计算
+        
+        参数:
+        stock_code (str): 股票代码
+        buy_volume (int): 买入数量
+        buy_price (float): 买入价格
+        strategy (str): 策略标识
+        
+        返回:
+        bool: 是否操作成功
+        """
+        try:
+            # 获取当前持仓
+            position = self.get_position(stock_code)
+            
+            logger.info(f"[模拟交易] 开始处理 {stock_code} 买入，数量: {buy_volume}, 价格: {buy_price:.2f}")
+            
+            # 记录交易到数据库
+            trade_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            trade_id = f"SIM_{datetime.now().strftime('%Y%m%d%H%M%S')}_{stock_code}_BUY"
+            
+            # 保存交易记录
+            trade_saved = self._save_simulated_trade_record(
+                stock_code=stock_code,
+                trade_time=trade_time,
+                trade_type='BUY',
+                price=buy_price,
+                volume=buy_volume,
+                amount=buy_price * buy_volume,
+                trade_id=trade_id,
+                strategy=strategy
+            )
+            
+            if not trade_saved:
+                logger.error(f"[模拟交易] 保存交易记录失败: {stock_code}")
+                return False
+            
+            # 计算买入成本（扣除手续费）
+            commission_rate = 0.0003  # 买入手续费率
+            cost = buy_price * buy_volume * (1 + commission_rate)
+            
+            if position:
+                # 已有持仓，计算加权平均成本价
+                old_volume = int(position.get('volume', 0))
+                old_cost_price = float(position.get('cost_price', 0))
+                old_available = int(position.get('available', old_volume))
+                
+                # 计算新的持仓数据
+                new_volume = old_volume + buy_volume
+                new_available = old_available + buy_volume
+                
+                # 加权平均成本价计算
+                total_cost = (old_volume * old_cost_price) + (buy_volume * buy_price)
+                new_cost_price = total_cost / new_volume
+                
+                logger.info(f"[模拟交易] {stock_code} 加仓:")
+                logger.info(f"  - 原持仓: 数量={old_volume}, 成本价={old_cost_price:.2f}")
+                logger.info(f"  - 新买入: 数量={buy_volume}, 价格={buy_price:.2f}")
+                logger.info(f"  - 合并后: 数量={new_volume}, 新成本价={new_cost_price:.2f}")
+                
+                # 获取其他持仓信息
+                current_price = position.get('current_price', buy_price)
+                profit_triggered = position.get('profit_triggered', False)
+                highest_price = max(float(position.get('highest_price', 0)), buy_price)
+                open_date = position.get('open_date')  # 保持原开仓日期
+                stock_name = position.get('stock_name')
+                
+            else:
+                # 新建仓
+                new_volume = buy_volume
+                new_available = buy_volume
+                new_cost_price = buy_price
+                current_price = buy_price
+                profit_triggered = False
+                highest_price = buy_price
+                open_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # 新开仓时间
+                stock_name = self.data_manager.get_stock_name(stock_code)
+                
+                logger.info(f"[模拟交易] {stock_code} 新建仓: 数量={new_volume}, 成本价={new_cost_price:.2f}")
+            
+            # 重新计算止损价格
+            new_stop_loss_price = self.calculate_stop_loss_price(
+                new_cost_price, highest_price, profit_triggered
+            )
+            
+            # 更新持仓 - 关键：在模拟模式下特殊处理
+            success = self._simulate_update_position(
+                stock_code=stock_code,
+                volume=new_volume,
+                available=new_available,
+                cost_price=new_cost_price,
+                current_price=current_price,
+                profit_triggered=profit_triggered,
+                highest_price=highest_price,
+                open_date=open_date,
+                stop_loss_price=new_stop_loss_price,
+                stock_name=stock_name
+            )
+            
+            if success:
+                logger.info(f"[模拟交易] {stock_code} 买入完成")
+                
+                # 更新模拟账户资金
+                config.SIMULATION_BALANCE -= cost
+                logger.info(f"[模拟交易] 账户资金减少: -{cost:.2f}, 当前余额: {config.SIMULATION_BALANCE:.2f}")
+                
+                # 触发数据版本更新
+                self._increment_data_version()
+            else:
+                logger.error(f"[模拟交易] {stock_code} 持仓更新失败")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"模拟买入 {stock_code} 时出错: {str(e)}")
+            return False
+
+    def _simulate_update_position(self, stock_code, volume, cost_price, available=None, 
+                                current_price=None, profit_triggered=False, highest_price=None, 
+                                open_date=None, stop_loss_price=None, stock_name=None):
+        """
+        模拟交易专用的持仓更新方法 - 只更新内存数据库
+        
+        这个方法确保模拟交易的数据变更只影响内存数据库，不会同步到SQLite
+        """
+        try:
+            # 确保stock_code有效
+            if stock_code is None or stock_code == "":
+                logger.error("股票代码不能为空")
+                return False
+
+            if stock_name is None:
+                stock_name = self.data_manager.get_stock_name(stock_code)
+
+            # 类型转换
+            p_volume = int(float(volume)) if volume is not None else 0
+            p_cost_price = float(cost_price) if cost_price is not None else 0.0
+            p_current_price = float(current_price) if current_price is not None else p_cost_price
+            p_available = int(float(available)) if available is not None else p_volume
+            p_highest_price = float(highest_price) if highest_price is not None else p_current_price
+            p_stop_loss_price = float(stop_loss_price) if stop_loss_price is not None else None
+            
+            # 布尔值转换
+            if isinstance(profit_triggered, str):
+                p_profit_triggered = profit_triggered.lower() in ['true', '1', 't', 'y', 'yes']
+            else:
+                p_profit_triggered = bool(profit_triggered)
+
+            # 如果当前价格为None，获取最新行情
+            if p_current_price is None or p_current_price <= 0:
+                latest_data = self.data_manager.get_latest_data(stock_code)
+                if latest_data and 'lastPrice' in latest_data and latest_data['lastPrice'] is not None:
+                    p_current_price = float(latest_data['lastPrice'])
+                else:
+                    p_current_price = p_cost_price
+            
+            # 计算市值和收益率
+            p_market_value = round(p_volume * p_current_price, 2)
+            
+            if p_cost_price > 0:
+                p_profit_ratio = round(100 * (p_current_price - p_cost_price) / p_cost_price, 2)
+            else:
+                p_profit_ratio = 0.0
+            
+            # 处理止损价格
+            if p_stop_loss_price is None:
+                calculated_slp = self.calculate_stop_loss_price(p_cost_price, p_highest_price, p_profit_triggered)
+                p_stop_loss_price = round(calculated_slp, 2) if calculated_slp is not None else None
+            
+            # 获取当前时间
+            now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            if open_date is None:
+                open_date = now
+            
+            # 检查是否已有持仓记录
+            cursor = self.memory_conn.cursor()
+            cursor.execute("SELECT open_date FROM positions WHERE stock_code=?", (stock_code,))
+            result = cursor.fetchone()
+            
+            if result:
+                # 更新持仓 - 保持原开仓日期
+                original_open_date = result[0]
+                cursor.execute("""
+                    UPDATE positions 
+                    SET volume=?, cost_price=?, current_price=?, market_value=?, available=?,
+                        profit_ratio=?, last_update=?, highest_price=?, stop_loss_price=?, 
+                        profit_triggered=?, stock_name=?
+                    WHERE stock_code=?
+                """, (p_volume, round(p_cost_price, 2), round(p_current_price, 2), p_market_value, 
+                    p_available, p_profit_ratio, now, round(p_highest_price, 2), 
+                    round(p_stop_loss_price, 2) if p_stop_loss_price else None, 
+                    p_profit_triggered, stock_name, stock_code))
+            else:
+                # 新增持仓
+                cursor.execute("""
+                    INSERT INTO positions 
+                    (stock_code, stock_name, volume, cost_price, current_price, market_value, 
+                    available, profit_ratio, last_update, open_date, profit_triggered, 
+                    highest_price, stop_loss_price)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (stock_code, stock_name, p_volume, round(p_cost_price, 2), 
+                    round(p_current_price, 2), p_market_value, p_available, p_profit_ratio, 
+                    now, open_date, p_profit_triggered, round(p_highest_price, 2), 
+                    round(p_stop_loss_price, 2) if p_stop_loss_price else None))
+            
+            self.memory_conn.commit()
+            
+            # 注意：这里不调用 _increment_data_version()，由调用方决定何时触发
+            logger.debug(f"[模拟交易] 内存数据库更新成功: {stock_code}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"模拟更新 {stock_code} 持仓时出错: {str(e)}")
+            self.memory_conn.rollback()
+            return False
+
     def simulate_sell_position(self, stock_code, sell_volume, sell_price, sell_type='partial'):
         """
-        模拟交易：直接调整持仓数据
+        模拟交易：直接调整持仓数据 - 优化版本
         
         参数:
         stock_code (str): 股票代码
@@ -1304,14 +1525,17 @@ class PositionManager:
             revenue = sell_price * sell_volume * (1 - commission_rate)
             
             if sell_type == 'full' or sell_volume >= current_volume:
-                # 全仓卖出，删除持仓记录
-                success = self.remove_position(stock_code)
+                # 全仓卖出，从内存数据库删除持仓记录
+                success = self._simulate_remove_position(stock_code)
                 if success:
                     logger.info(f"[模拟交易] {stock_code} 全仓卖出完成，持仓已清零")
                     
                     # 更新模拟账户资金
                     config.SIMULATION_BALANCE += revenue
                     logger.info(f"[模拟交易] 账户资金增加: +{revenue:.2f}, 当前余额: {config.SIMULATION_BALANCE:.2f}")
+                    
+                    # 触发数据版本更新
+                    self._increment_data_version()
                 return success
             else:
                 # 部分卖出，更新持仓数量
@@ -1328,10 +1552,7 @@ class PositionManager:
                 open_date = position.get('open_date')
                 stock_name = position.get('stock_name')
                 
-                # 成本价逻辑：
-                # 1. 如果是止盈卖出，成本价保持不变（确保剩余持仓盈亏计算准确）
-                # 2. 如果是其他类型卖出，也保持成本价不变
-                # 这样可以准确跟踪剩余持仓的真实盈亏情况
+                # 关键优化：成本价保持不变（符合实际交易逻辑）
                 final_cost_price = current_cost_price
                 
                 # 如果是首次止盈卖出，标记profit_triggered为True
@@ -1344,12 +1565,12 @@ class PositionManager:
                     final_cost_price, highest_price, profit_triggered
                 )
                 
-                # 更新持仓 - 关键：正确传递所有参数
-                success = self.update_position(
+                # 更新持仓 - 使用模拟专用方法
+                success = self._simulate_update_position(
                     stock_code=stock_code,
-                    volume=new_volume,                    # ✅ 更新总数
-                    available=new_available,              # ✅ 更新可用数
-                    cost_price=final_cost_price,          # ✅ 成本价（止盈时保持不变）
+                    volume=new_volume,
+                    available=new_available,
+                    cost_price=final_cost_price,
                     current_price=current_price,
                     profit_triggered=profit_triggered,
                     highest_price=highest_price,
@@ -1369,6 +1590,9 @@ class PositionManager:
                     config.SIMULATION_BALANCE += revenue
                     logger.info(f"[模拟交易] 账户资金增加: +{revenue:.2f}, 当前余额: {config.SIMULATION_BALANCE:.2f}")
                     
+                    # 触发数据版本更新
+                    self._increment_data_version()
+                    
                     # 验证更新结果
                     updated_position = self.get_position(stock_code)
                     if updated_position:
@@ -1383,6 +1607,33 @@ class PositionManager:
                 
         except Exception as e:
             logger.error(f"模拟卖出 {stock_code} 时出错: {str(e)}")
+            return False
+
+    def _simulate_remove_position(self, stock_code):
+        """
+        模拟交易专用：从内存数据库删除持仓记录
+        
+        参数:
+        stock_code (str): 股票代码
+        
+        返回:
+        bool: 是否删除成功
+        """
+        try:
+            cursor = self.memory_conn.cursor()
+            cursor.execute("DELETE FROM positions WHERE stock_code=?", (stock_code,))
+            self.memory_conn.commit()
+            
+            if cursor.rowcount > 0:
+                logger.info(f"[模拟交易] 已从内存数据库删除 {stock_code} 的持仓记录")
+                return True
+            else:
+                logger.warning(f"[模拟交易] 未找到 {stock_code} 的持仓记录，无需删除")
+                return False
+                
+        except Exception as e:
+            logger.error(f"删除 {stock_code} 的模拟持仓记录时出错: {str(e)}")
+            self.memory_conn.rollback()
             return False
 
     def _save_simulated_trade_record(self, stock_code, trade_time, trade_type, price, volume, amount, trade_id, strategy='simu'):

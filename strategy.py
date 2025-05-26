@@ -240,7 +240,7 @@ class TradingStrategy:
             
             # 检查是否为模拟交易模式
             if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
-                # 模拟交易：直接调整持仓
+                # 模拟交易：调用优化后的模拟卖出方法
                 success = self.position_manager.simulate_sell_position(
                     stock_code=stock_code,
                     sell_volume=volume,
@@ -291,7 +291,7 @@ class TradingStrategy:
             
             # 检查是否为模拟交易模式
             if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
-                # 模拟交易：直接调整持仓
+                # 模拟交易：调用优化后的模拟卖出方法
                 success = self.position_manager.simulate_sell_position(
                     stock_code=stock_code,
                     sell_volume=sell_volume,
@@ -300,8 +300,7 @@ class TradingStrategy:
                 )
                 
                 if success:
-                    self.position_manager.mark_profit_triggered(stock_code)
-                    logger.info(f"[模拟交易] {stock_code} 首次止盈执行完成，已标记profit_triggered=True")
+                    logger.info(f"[模拟交易] {stock_code} 首次止盈执行完成")
                 return success
             else:
                 # 实盘交易：调用交易接口（先注释掉）

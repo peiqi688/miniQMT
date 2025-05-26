@@ -931,6 +931,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 重置请求锁定状态
                 requestLocks.holdings = false;
                 requestLocks.logs = false;
+                currentHoldingsVersion = 0; // 重置版本号，强制刷新
                 
                 // 刷新相关数据
                 await fetchHoldings();
