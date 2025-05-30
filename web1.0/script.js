@@ -989,9 +989,9 @@ document.addEventListener('DOMContentLoaded', () => {
         cells[6].className = `border p-2 ${profitRatio >= 0 ? 'text-red-600' : 'text-green-600'}`;
 
         // 更新持仓信息
-        cells[7].textContent = stock.market_value || '--';
-        cells[8].textContent = stock.available || 0;
-        cells[9].textContent = stock.volume || 0;
+        cells[7].textContent = parseFloat(stock.market_value || 0).toFixed(0);
+        cells[8].textContent = parseFloat(stock.available || 0).toFixed(0);
+        cells[9].textContent = parseFloat(stock.volume || 0).toFixed(0);
 
         // 更新止盈标志
         cells[10].innerHTML = `<input type="checkbox" ${stock.profit_triggered ? 'checked' : ''} disabled>`;
@@ -1028,9 +1028,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <td class="border p-2">${parseFloat(stock.current_price || 0).toFixed(2)}</td>
             <td class="border p-2">${parseFloat(stock.cost_price || 0).toFixed(2)}</td>
             <td class="border p-2 ${profitRatio >= 0 ? 'text-red-600' : 'text-green-600'}">${profitRatio.toFixed(2)}%</td>
-            <td class="border p-2">${stock.market_value || '--'}</td>
-            <td class="border p-2">${stock.available || 0}</td>       
-            <td class="border p-2">${stock.volume || 0}</td>         
+            <td class="border p-2">${parseFloat(stock.market_value || 0).toFixed(0)}</td>
+            <td class="border p-2">${parseFloat(stock.available || 0).toFixed(0)}</td>       
+            <td class="border p-2">${parseFloat(stock.volume || 0).toFixed(0)}</td>         
             <td class="border p-2 text-center"><input type="checkbox" ${stock.profit_triggered ? 'checked' : ''} disabled></td>
             <td class="border p-2">${parseFloat(stock.highest_price || 0).toFixed(2)}</td>                
             <td class="border p-2">${parseFloat(stock.stop_loss_price || 0).toFixed(2)}</td> 

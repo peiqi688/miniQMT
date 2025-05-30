@@ -256,10 +256,10 @@ class TradingStrategy:
                 logger.warning(f"[实盘交易] {stock_code} 止损信号已识别，但实盘交易功能已注释")
                 
                 # TODO: 实盘交易功能开发完成后启用以下代码
-                # order_id = self.trading_executor.sell_stock(
-                #     stock_code, volume, price_type=1, strategy='stop_loss'
-                # )
-                # return order_id is not None
+                order_id = self.trading_executor.sell_stock(
+                    stock_code, volume, price_type=1, strategy='stop_loss'
+                )
+                return order_id is not None
                 
                 return False  # 暂时返回False，表示未执行实盘交易
                 
@@ -307,13 +307,13 @@ class TradingStrategy:
                 logger.info(f"[实盘交易] {stock_code} 首次止盈信号已识别，但实盘交易功能已注释")
                 
                 # TODO: 实盘交易功能开发完成后启用以下代码
-                # order_id = self.trading_executor.sell_stock(
-                #     stock_code, sell_volume, price_type=0, strategy='take_profit_half'
-                # )
-                # if order_id:
-                #     # 标记已触发首次止盈
-                #     self.position_manager.mark_profit_triggered(stock_code)
-                #     return True
+                order_id = self.trading_executor.sell_stock(
+                    stock_code, sell_volume, price_type=0, strategy='take_profit_half'
+                )
+                if order_id:
+                    # 标记已触发首次止盈
+                    self.position_manager.mark_profit_triggered(stock_code)
+                    return True
                 
                 return False  # 暂时返回False，表示未执行实盘交易
                 
@@ -358,10 +358,10 @@ class TradingStrategy:
                 logger.info(f"[实盘交易] {stock_code} 动态止盈信号已识别，但实盘交易功能已注释")
                 
                 # TODO: 实盘交易功能开发完成后启用以下代码
-                # order_id = self.trading_executor.sell_stock(
-                #     stock_code, volume, price_type=0, strategy='take_profit_full'
-                # )
-                # return order_id is not None
+                order_id = self.trading_executor.sell_stock(
+                    stock_code, volume, price_type=0, strategy='take_profit_full'
+                )
+                return order_id is not None
                 
                 return False  # 暂时返回False，表示未执行实盘交易
                 

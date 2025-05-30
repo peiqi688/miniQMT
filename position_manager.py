@@ -1513,7 +1513,7 @@ class PositionManager:
                 volume=sell_volume,
                 amount=sell_price * sell_volume,
                 trade_id=trade_id,
-                strategy=f'auto_{sell_type}'
+                strategy=f'simu_{sell_type}'
             )
             
             if not trade_saved:
