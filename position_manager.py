@@ -1188,15 +1188,17 @@ class PositionManager:
                 return None, None
 
             # 4. 优先检查止损条件（最高优先级）
-            fixed_stop_loss_price = cost_price * (1 + config.STOP_LOSS_RATIO)
-            if fixed_stop_loss_price > 0 and current_price <= fixed_stop_loss_price:
-                logger.warning(f"{stock_code} 触发固定止损，当前价格: {current_price:.2f}, 止损价格: {fixed_stop_loss_price:.2f}")
-                return 'stop_loss', {
-                    'current_price': current_price,
-                    'stop_loss_price': fixed_stop_loss_price,
-                    'cost_price': cost_price,
-                    'volume': position['volume']
-                }
+            if not profit_triggered:
+                fixed_stop_loss_price = cost_price * (1 + config.STOP_LOSS_RATIO)
+                if fixed_stop_loss_price > 0 and current_price <= fixed_stop_loss_price:
+                    logger.warning(f"{stock_code} 触发固定止损，当前价格: {current_price:.2f}, 止损价格: {fixed_stop_loss_price:.2f}")
+                    return 'stop_loss', {
+                        'current_price': current_price,
+                        'stop_loss_price': fixed_stop_loss_price,
+                        'cost_price': cost_price,
+                        'volume': position['volume'],
+                         'reason': 'protect_capital'  # 标识这是保护本金的止损
+                    }
             
             # 5. 检查止盈逻辑（如果启用动态止盈功能）
             if not config.ENABLE_DYNAMIC_STOP_PROFIT:
