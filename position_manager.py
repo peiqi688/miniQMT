@@ -1101,6 +1101,11 @@ class PositionManager:
                 profit_triggered = bool(profit_triggered)
             
             if profit_triggered:
+        # ✅ 检查配置有效性
+                if not config.DYNAMIC_TAKE_PROFIT:
+                    logger.warning("动态止盈配置为空，使用保守止盈位")
+                    return highest_price * 0.95  # 保守的5%回撤止盈
+
                 # 动态止损：基于最高价和分级止损
                 if cost_price > 0:  # 防止除零
                     highest_profit_ratio = (highest_price - cost_price) / cost_price

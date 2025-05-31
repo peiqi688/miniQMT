@@ -260,8 +260,30 @@ _is_test_environment() 方法用于判断是否在测试环境中，如果在测
 ```
 
 **自动交易买入调用链**：
-```
-策略线程 → check_and_execute_strategies → execute_buy_strategy → trading_executor.buy_stock → 模拟交易或实盘交易接口
-```
-
-两种方式最终都通过相同的`trading_executor.buy_stock`方法执行交易，但触发条件和参数构建方式不同。
+执行调用流程
+信号检测流程
+position_monitor_loop() 
+  ↓
+check_trading_signals() [position_manager]
+  ↓ 
+{signal_type, signal_info} → latest_signals队列
+策略执行流程
+check_and_execute_strategies() [strategy]
+  ↓
+get_pending_signals() 
+  ↓
+execute_trading_signal_direct()
+  ↓
+模拟交易: simulate_sell_position() [position_manager]
+实盘交易: sell_stock() [trading_executor] → QMT API
+模拟交易执行路径
+python# 模拟交易直接操作内存数据库
+simulate_sell_position()
+  → _save_simulated_trade_record()  # 保存记录
+  → _simulate_update_position()     # 更新持仓
+  → config.SIMULATION_BALANCE += revenue  # 更新资金
+实盘交易执行路径
+python# 实盘交易通过QMT接口
+sell_stock() [trading_executor]
+  → qmt_trader.sell()  # QMT API调用
+  → _save_trade_record()  # 成交后回调保存
