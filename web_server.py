@@ -325,15 +325,8 @@ def save_config():
         if "globalAllowBuySell" in config_data:
             old_auto_trading = config.ENABLE_AUTO_TRADING
             config.ENABLE_AUTO_TRADING = bool(config_data["globalAllowBuySell"])
-            logger.info(f"自动交易状态变更: {old_auto_trading} -> {config.ENABLE_AUTO_TRADING} (通过保存配置)")
-            # 只在自动交易功能需要时启动或停止策略线程
-            if config.ENABLE_AUTO_TRADING:
-                # 无论监控状态如何，只要自动交易开启就启动策略线程
-                trading_strategy.start_strategy_thread()
-            else:
-                # 如果关闭自动交易，则停止策略线程
-                trading_strategy.stop_strategy_thread()
-
+            logger.info(f"自动交易总开关: {old_auto_trading} -> {config.ENABLE_AUTO_TRADING}")
+        
         # 在处理保存配置的API中添加
         if "simulationMode" in config_data:
             old_simulation_mode = getattr(config, 'ENABLE_SIMULATION_MODE', False)

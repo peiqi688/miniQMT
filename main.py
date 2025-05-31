@@ -65,10 +65,10 @@ def start_position_thread(position_manager):
 
 def start_strategy_thread(trading_strategy):
     """启动策略线程"""
-    if config.ENABLE_AUTO_TRADING:
-        logger.info("启动策略线程")
-        trading_strategy.start_strategy_thread()
-        threads.append(("strategy_thread", trading_strategy.stop_strategy_thread))
+    # if config.ENABLE_AUTO_TRADING:
+    logger.info("启动策略线程")
+    trading_strategy.start_strategy_thread()
+    threads.append(("strategy_thread", trading_strategy.stop_strategy_thread))
 
 def start_log_cleanup_thread():
     """启动日志清理线程"""

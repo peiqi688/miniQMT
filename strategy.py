@@ -174,7 +174,23 @@ class TradingStrategy:
             return False
 
     # ========== 新增：统一的止盈止损执行逻辑 ==========
-    
+    def execute_trading_signal_direct(self, stock_code, signal_type, signal_info):
+        """直接执行指定的交易信号"""
+        try:
+            if signal_type == 'stop_loss':
+                return self._execute_stop_loss_signal(stock_code, signal_info)
+            elif signal_type == 'take_profit_half':
+                return self._execute_take_profit_half_signal(stock_code, signal_info)
+            elif signal_type == 'take_profit_full':
+                return self._execute_take_profit_full_signal(stock_code, signal_info)
+            else:
+                logger.warning(f"未知的信号类型: {signal_type}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"执行 {stock_code} 的 {signal_type} 信号时出错: {str(e)}")
+            return False
+            
     def execute_trading_signal(self, stock_code):
         """
         执行统一的交易信号处理 - 优化版本
@@ -567,49 +583,87 @@ class TradingStrategy:
     
     def check_and_execute_strategies(self, stock_code):
         """
-        检查并执行所有交易策略 - 优化版本
-        
-        参数:
-        stock_code (str): 股票代码
+        检查并执行所有交易策略 - 重构版本
+        策略检测始终运行，但交易执行依赖ENABLE_AUTO_TRADING
         """
         try:
-            # 获取最新行情和指标
+            # 更新数据（始终执行）
             self.data_manager.update_stock_data(stock_code)
             self.indicator_calculator.calculate_all_indicators(stock_code)
             
-            # 按优先级执行各种策略
+            # 1. 检查止盈止损信号（如果启用）
+            if config.ENABLE_DYNAMIC_STOP_PROFIT:
+                pending_signals = self.position_manager.get_pending_signals()
+                
+                if stock_code in pending_signals:
+                    signal_data = pending_signals[stock_code]
+                    signal_type = signal_data['type']
+                    signal_info = signal_data['info']
+                    
+                    logger.info(f"{stock_code} 处理待执行的{signal_type}信号")
+                    
+                    # 检查是否已处理过该信号（防重复）
+                    signal_key = f"{signal_type}_{stock_code}_{datetime.now().strftime('%Y%m%d_%H')}"
+                    if signal_key not in self.processed_signals:
+                        
+                        if config.ENABLE_AUTO_TRADING:
+                            # 执行交易信号
+                            if self.execute_trading_signal_direct(stock_code, signal_type, signal_info):
+                                logger.info(f"{stock_code} 执行{signal_type}策略成功")
+                                self.processed_signals.add(signal_key)
+                                self.position_manager.mark_signal_processed(stock_code)
+                                return
+                        else:
+                            logger.info(f"{stock_code} 检测到{signal_type}信号，但自动交易已关闭")
+                            self.position_manager.mark_signal_processed(stock_code)
             
-            # 1. 最高优先级：执行统一的止盈止损信号处理
-            if self.execute_trading_signal(stock_code):
-                logger.info(f"{stock_code} 执行止盈止损策略成功")
-                return
-            
-            # 2. 执行网格交易
-            if self.execute_grid_trading(stock_code):
-                logger.info(f"{stock_code} 执行网格交易策略成功")
-                return
+            # 2. 检查网格交易信号（如果启用）
+            if config.ENABLE_GRID_TRADING:
+                grid_signals = self.position_manager.check_grid_trade_signals(stock_code)
+                if grid_signals['buy_signals'] or grid_signals['sell_signals']:
+                    logger.info(f"{stock_code} 检测到网格交易信号")
+                    
+                    # 只有在启用自动交易时才执行
+                    if config.ENABLE_AUTO_TRADING:
+                        if self.execute_grid_trading(stock_code):
+                            logger.info(f"{stock_code} 执行网格交易策略成功")
+                            return
+                    else:
+                        logger.info(f"{stock_code} 检测到网格信号，但自动交易已关闭")
             
             # 3. 检查技术指标买入信号
-            if self.execute_buy_strategy(stock_code):
-                logger.info(f"{stock_code} 执行买入策略成功")
-                return
+            buy_signal = self.indicator_calculator.check_buy_signal(stock_code)
+            if buy_signal:
+                logger.info(f"{stock_code} 检测到买入信号")
+                
+                # 只有在启用自动交易时才执行
+                if config.ENABLE_AUTO_TRADING:
+                    if self.execute_buy_strategy(stock_code):
+                        logger.info(f"{stock_code} 执行买入策略成功")
+                        return
+                else:
+                    logger.info(f"{stock_code} 检测到买入信号，但自动交易已关闭")
             
             # 4. 检查技术指标卖出信号
-            if self.execute_sell_strategy(stock_code):
-                logger.info(f"{stock_code} 执行卖出策略成功")
-                return
+            sell_signal = self.indicator_calculator.check_sell_signal(stock_code)
+            if sell_signal:
+                logger.info(f"{stock_code} 检测到卖出信号")
+                
+                # 只有在启用自动交易时才执行
+                if config.ENABLE_AUTO_TRADING:
+                    if self.execute_sell_strategy(stock_code):
+                        logger.info(f"{stock_code} 执行卖出策略成功")
+                        return
+                else:
+                    logger.info(f"{stock_code} 检测到卖出信号，但自动交易已关闭")
             
-            logger.debug(f"{stock_code} 没有满足条件的交易信号")
+            logger.debug(f"{stock_code} 没有检测到交易信号")
             
         except Exception as e:
-            logger.error(f"检查并执行 {stock_code} 的交易策略时出错: {str(e)}")
+            logger.error(f"检查 {stock_code} 的交易策略时出错: {str(e)}")
     
     def start_strategy_thread(self):
-        """启动策略运行线程"""
-        if not config.ENABLE_AUTO_TRADING:
-            logger.info("自动交易功能已关闭，不启动策略线程")
-            return
-            
+        """启动策略运行线程 - 始终启动，不依赖ENABLE_AUTO_TRADING"""
         if self.strategy_thread and self.strategy_thread.is_alive():
             logger.warning("策略线程已在运行")
             return
@@ -618,7 +672,7 @@ class TradingStrategy:
         self.strategy_thread = threading.Thread(target=self._strategy_loop)
         self.strategy_thread.daemon = True
         self.strategy_thread.start()
-        logger.info("策略线程已启动")
+        logger.info("策略线程已启动（独立于自动交易开关）")
     
     def stop_strategy_thread(self):
         """停止策略运行线程"""
@@ -657,36 +711,24 @@ class TradingStrategy:
     
     def manual_buy(self, stock_code, volume=None, price=None, amount=None):
         """
-        手动买入股票
-        
-        参数:
-        stock_code (str): 股票代码
-        volume (int): 买入数量，与amount二选一
-        price (float): 买入价格，为None时使用市价
-        amount (float): 买入金额，与volume二选一
-        
-        返回:
-        str: 委托编号，失败返回None
+        手动买入股票 - 不受ENABLE_AUTO_TRADING限制
         """
         try:
+            # 手动交易不检查ENABLE_AUTO_TRADING，但要检查ENABLE_ALLOW_BUY
+            if not config.ENABLE_ALLOW_BUY:
+                logger.warning(f"系统当前不允许买入操作")
+                return None
 
-             # 检查是否为模拟交易模式
+            # 根据交易模式选择策略标识
             is_simulation = hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE
+            strategy = 'manual_simu' if is_simulation else 'manual_real'
 
-            if is_simulation:
-                order_id = self.trading_executor.buy_stock(stock_code, volume, price, amount, strategy='simu')
-            else:
-                order_id = self.trading_executor.buy_stock(stock_code, volume, price, amount, strategy='manual')
+            order_id = self.trading_executor.buy_stock(
+                stock_code, volume, price, amount, strategy=strategy
+            )
             
             if order_id:
-                logger.info(f"手动买入 {stock_code} 成功，委托号: {order_id}")
-                
-                # 如果是新建仓，初始化网格交易
-                position = self.position_manager.get_position(stock_code)
-                if not position and config.ENABLE_GRID_TRADING:
-                    # 等待买入成交后再初始化网格
-                    time.sleep(5)  # 简单等待一下
-                    self.init_grid_trading(stock_code)
+                logger.info(f"手动买入 {stock_code} 成功，委托号: {order_id}，模式: {'模拟' if is_simulation else '实盘'}")
             
             return order_id
             
@@ -696,38 +738,30 @@ class TradingStrategy:
     
     def manual_sell(self, stock_code, volume=None, price=None, ratio=None):
         """
-        手动卖出股票
-        
-        参数:
-        stock_code (str): 股票代码
-        volume (int): 卖出数量，与ratio二选一
-        price (float): 卖出价格，为None时使用市价
-        ratio (float): 卖出比例，0-1之间，与volume二选一
-        
-        返回:
-        str: 委托编号，失败返回None
+        手动卖出股票 - 不受ENABLE_AUTO_TRADING限制
         """
         try:
-             # 检查是否为模拟交易模式
-            is_simulation = hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE
+            # 手动交易不检查ENABLE_AUTO_TRADING，但要检查ENABLE_ALLOW_SELL
+            if not config.ENABLE_ALLOW_SELL:
+                logger.warning(f"系统当前不允许卖出操作")
+                return None
 
-            if is_simulation:
-                order_id = self.trading_executor.sell_stock(stock_code, volume, price, ratio, strategy='simu')
-            else:
-                order_id = self.trading_executor.sell_stock(stock_code, volume, price, ratio, strategy='manual')
+            # 根据交易模式选择策略标识
+            is_simulation = hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE
+            strategy = 'manual_simu' if is_simulation else 'manual_real'
+
+            order_id = self.trading_executor.sell_stock(
+                stock_code, volume, price, ratio, strategy=strategy
+            )
             
             if order_id:
-                logger.info(f"手动卖出 {stock_code} 成功，委托号: {order_id}")
+                logger.info(f"手动卖出 {stock_code} 成功，委托号: {order_id}，模式: {'模拟' if is_simulation else '实盘'}")
             
             return order_id
             
         except Exception as e:
             logger.error(f"手动卖出 {stock_code} 时出错: {str(e)}")
             return None
-    
-    def close(self):
-        """关闭策略"""
-        self.stop_strategy_thread()
 
 
 # 单例模式

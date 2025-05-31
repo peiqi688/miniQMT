@@ -66,6 +66,11 @@ class PositionManager:
         self.sync_stop_flag = False
         self.start_sync_thread()
 
+        # 添加信号状态管理
+        self.signal_lock = threading.Lock()
+        self.latest_signals = {}  # 存储最新检测到的信号
+        self.signal_timestamps = {}  # 信号时间戳        
+
     def _increment_data_version(self):
         """递增数据版本号"""
         with self.version_lock:
@@ -1008,6 +1013,12 @@ class PositionManager:
         dict: 网格交易信号，包含 'buy_signals' 和 'sell_signals'
         """
         try:
+            # 检查是否启用网格交易功能
+            if not config.ENABLE_GRID_TRADING:
+                logger.debug(f"{stock_code} 网格交易功能已关闭，跳过信号检查")
+                return {'buy_signals': [], 'sell_signals': []}
+
+
             # 获取最新价格
             latest_quote = self.data_manager.get_latest_data(stock_code)
             if not latest_quote:
@@ -1137,6 +1148,11 @@ class PositionManager:
         信号类型: 'stop_loss', 'take_profit_half', 'take_profit_full', None
         """
         try:
+            # 检查是否启用止盈止损功能
+            if not config.ENABLE_DYNAMIC_STOP_PROFIT:
+                logger.debug(f"{stock_code} 止盈止损功能已关闭，跳过信号检查")
+                return None, None
+
             # 1. 获取持仓数据
             position = self.get_position(stock_code)
             if not position:
@@ -1767,7 +1783,18 @@ class PositionManager:
         except Exception as e:
             logger.error(f"获取所有持仓信息（所有字段）时出错: {str(e)}")
             return pd.DataFrame()
-        
+
+    def get_pending_signals(self):
+        """获取待处理的信号"""
+        with self.signal_lock:
+            return dict(self.latest_signals)
+    
+    def mark_signal_processed(self, stock_code):
+        """标记信号已处理"""
+        with self.signal_lock:
+            self.latest_signals.pop(stock_code, None)
+            logger.debug(f"{stock_code} 信号已标记为已处理")
+
     def _position_monitor_loop(self):
         """持仓监控循环 - 优化版本，使用统一的信号检查"""
         while not self.stop_flag:
@@ -1793,11 +1820,17 @@ class PositionManager:
                         # 使用统一的信号检查函数
                         signal_type, signal_info = self.check_trading_signals(stock_code)
                         
-                        if signal_type:
-                            logger.info(f"{stock_code} 检测到信号: {signal_type}, 详情: {signal_info}")
-                            
-                            # 这里记录信号，实际的交易执行由strategy模块处理
-                            # 在监控循环中只记录信号，不直接执行交易
+                        with self.signal_lock:
+                            if signal_type:
+                                self.latest_signals[stock_code] = {
+                                    'type': signal_type,
+                                    'info': signal_info,
+                                    'timestamp': datetime.now()
+                                }
+                                logger.debug(f"{stock_code} 检测到信号: {signal_type}，等待策略处理")
+                            else:
+                                # 清除已不存在的信号
+                                self.latest_signals.pop(stock_code, None)
                         
                         # 更新最高价（如果当前价格更高）
                         try:
