@@ -419,8 +419,23 @@ def stop_monitor():
 def get_data_sources_status():
     """获取数据源状态"""
     try:
-        from realtime_data_manager import get_realtime_data_manager
-        manager = get_realtime_data_manager()
+        # 添加更详细的错误处理
+        try:
+            from realtime_data_manager import get_realtime_data_manager
+            manager = get_realtime_data_manager()
+        except ImportError as e:
+            logger.error(f"导入realtime_data_manager失败: {str(e)}")
+            return jsonify({
+                'status': 'error',
+                'message': f"数据管理器模块导入失败: {str(e)}"
+            }), 500
+        except Exception as e:
+            logger.error(f"初始化数据管理器失败: {str(e)}")
+            return jsonify({
+                'status': 'error',
+                'message': f"数据管理器初始化失败: {str(e)}"
+            }), 500
+        
         status = manager.get_source_status()
         
         return jsonify({
@@ -440,30 +455,50 @@ def switch_data_source():
     """手动切换数据源"""
     try:
         data = request.json
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': '请求数据不能为空'
+            }), 400
+            
         source_name = data.get('source_name')
+        if not source_name:
+            return jsonify({
+                'status': 'error',
+                'message': '缺少source_name参数'
+            }), 400
         
-        from realtime_data_manager import get_realtime_data_manager
-        manager = get_realtime_data_manager()
+        # 数据源名称映射
+        source_mapping = {
+            'MootdxSource': 'Mootdx',
+            'XtQuantSource': 'XtQuant',
+            'Mootdx': 'Mootdx',
+            'XtQuant': 'XtQuant'
+        }
+        
+        actual_source_name = source_mapping.get(source_name, source_name)
+        
+        try:
+            from realtime_data_manager import get_realtime_data_manager
+            manager = get_realtime_data_manager()
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'message': f'数据管理器初始化失败: {str(e)}'
+            }), 500
         
         # 使用新的切换方法
-        if manager.switch_to_source(source_name):
+        if manager.switch_to_source(actual_source_name):
             return jsonify({
                 'status': 'success',
-                'message': f"已切换到数据源: {source_name}",
-                'current_source': source_name
+                'message': f"已切换到数据源: {actual_source_name}",
+                'current_source': actual_source_name
             })
         else:
             return jsonify({
                 'status': 'error',
-                'message': f"无法切换到数据源: {source_name}"
+                'message': f"无法切换到数据源: {actual_source_name}，请检查数据源名称是否正确"
             }), 400
-        
-    except Exception as e:
-        logger.error(f"切换数据源时出错: {str(e)}")
-        return jsonify({
-            'status': 'error',
-            'message': f"切换数据源失败: {str(e)}"
-        }), 500
         
     except Exception as e:
         logger.error(f"切换数据源时出错: {str(e)}")
