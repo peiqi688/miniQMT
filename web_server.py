@@ -414,7 +414,67 @@ def stop_monitor():
             'status': 'error',
             'message': f"停止监控失败: {str(e)}"
         }), 500
-    
+
+@app.route('/api/data_sources/status', methods=['GET'])
+def get_data_sources_status():
+    """获取数据源状态"""
+    try:
+        from realtime_data_manager import get_realtime_data_manager
+        manager = get_realtime_data_manager()
+        status = manager.get_source_status()
+        
+        return jsonify({
+            'status': 'success',
+            'data': status,
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+    except Exception as e:
+        logger.error(f"获取数据源状态时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"获取数据源状态失败: {str(e)}"
+        }), 500
+
+@app.route('/api/data_sources/switch', methods=['POST'])
+def switch_data_source():
+    """手动切换数据源"""
+    try:
+        data = request.json
+        source_name = data.get('source_name')
+        
+        from realtime_data_manager import get_realtime_data_manager
+        manager = get_realtime_data_manager()
+        
+        # 查找指定数据源
+        target_source = None
+        for source in manager.data_sources:
+            if source.name == source_name:
+                target_source = source
+                break
+        
+        if not target_source:
+            return jsonify({
+                'status': 'error',
+                'message': f"未找到数据源: {source_name}"
+            }), 400
+        
+        # 切换数据源
+        manager.current_source = target_source
+        logger.info(f"手动切换到数据源: {source_name}")
+        
+        return jsonify({
+            'status': 'success',
+            'message': f"已切换到数据源: {source_name}",
+            'current_source': source_name
+        })
+        
+    except Exception as e:
+        logger.error(f"切换数据源时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"切换数据源失败: {str(e)}"
+        }), 500
+
 @app.route('/api/debug/status', methods=['GET'])
 def debug_status():
     """返回详细的系统状态，用于调试"""

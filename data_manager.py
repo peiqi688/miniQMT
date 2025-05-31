@@ -11,6 +11,7 @@ import xtquant.xtdata as xt
 import Methods
 import config
 from logger import get_logger
+from realtime_data_manager import get_realtime_data_manager
 
 # 获取logger
 logger = get_logger("data_manager")
@@ -35,7 +36,9 @@ class DataManager:
         
         # 初始化行情接口 
         self._init_xtquant()
-        
+
+        self.realtime_manager = get_realtime_data_manager()        
+
         # 数据更新线程
         self.update_thread = None
         self.stop_flag = False
@@ -540,9 +543,10 @@ class DataManager:
         try:
             #当前是交易时间，先尝试从xtdata接口获取tick数据
             if config.is_trade_time():
-                latest_quote = self.get_latest_xtdata(stock_code=stock_code)
-                if latest_quote and isinstance(latest_quote, dict) and 'lastPrice' in latest_quote:
-                     return latest_quote
+                realtime_data = self.realtime_manager.get_realtime_data(stock_code)
+                if realtime_data and realtime_data.get('lastPrice', 0) > 0:
+                    # logger.debug(f"使用 {realtime_data['source']} 获取 {stock_code} 实时数据")
+                    return realtime_data
             
             # 继续尝试从Mootdx获取数据
             # Adjust stock code if necessary

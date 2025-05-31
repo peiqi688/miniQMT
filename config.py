@@ -54,6 +54,20 @@ UPDATE_INTERVAL = 60
 # 备选池股票文件路径
 STOCK2BUY_FILE = os.path.join(DATA_DIR, "stock2buy.json")
 
+# 实时数据源配置
+REALTIME_DATA_CONFIG = {
+    'enable_multi_source': True,  # 是否启用多数据源
+    'health_check_interval': 30,  # 健康检查间隔（秒）
+    'source_timeout': 5,          # 数据源超时时间（秒）
+    'max_error_count': 3,         # 最大错误次数
+    'preferred_sources': [        # 数据源优先级
+        'XtQuant',
+        'Money163', 
+        'Mootdx'
+    ]
+}
+
+
 # ======================= 交易配置 =======================
 # 交易账号信息（从外部文件读取，避免敏感信息硬编码）
 ACCOUNT_CONFIG_FILE = "account_config.json"
