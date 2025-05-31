@@ -445,28 +445,18 @@ def switch_data_source():
         from realtime_data_manager import get_realtime_data_manager
         manager = get_realtime_data_manager()
         
-        # 查找指定数据源
-        target_source = None
-        for source in manager.data_sources:
-            if source.name == source_name:
-                target_source = source
-                break
-        
-        if not target_source:
+        # 使用新的切换方法
+        if manager.switch_to_source(source_name):
+            return jsonify({
+                'status': 'success',
+                'message': f"已切换到数据源: {source_name}",
+                'current_source': source_name
+            })
+        else:
             return jsonify({
                 'status': 'error',
-                'message': f"未找到数据源: {source_name}"
+                'message': f"无法切换到数据源: {source_name}"
             }), 400
-        
-        # 切换数据源
-        manager.current_source = target_source
-        logger.info(f"手动切换到数据源: {source_name}")
-        
-        return jsonify({
-            'status': 'success',
-            'message': f"已切换到数据源: {source_name}",
-            'current_source': source_name
-        })
         
     except Exception as e:
         logger.error(f"切换数据源时出错: {str(e)}")
@@ -474,6 +464,102 @@ def switch_data_source():
             'status': 'error',
             'message': f"切换数据源失败: {str(e)}"
         }), 500
+        
+    except Exception as e:
+        logger.error(f"切换数据源时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f"切换数据源失败: {str(e)}"
+        }), 500
+
+@app.route('/api/realtime/quote/<stock_code>', methods=['GET'])
+def get_realtime_quote(stock_code):
+    """获取单只股票的实时行情"""
+    try:
+        # 直接从实时数据管理器获取数据
+        from realtime_data_manager import get_realtime_data_manager
+        manager = get_realtime_data_manager()
+        
+        start_time = time.time()
+        data = manager.get_realtime_data(stock_code)
+        end_time = time.time()
+        
+        if data:
+            data['response_time_ms'] = round((end_time - start_time) * 1000, 2)
+            return jsonify({
+                'status': 'success',
+                'data': data,
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': f'无法获取{stock_code}的实时数据'
+            }), 404
+            
+    except Exception as e:
+        logger.error(f"获取实时行情时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f'获取实时行情失败: {str(e)}'
+        }), 500
+
+@app.route('/api/realtime/test/<stock_code>', methods=['GET'])
+def test_all_sources(stock_code):
+    """测试所有数据源获取指定股票数据"""
+    try:
+        from realtime_data_manager import get_realtime_data_manager
+        manager = get_realtime_data_manager()
+        
+        results = {}
+        
+        # 测试每个数据源
+        for source in manager.data_sources:
+            start_time = time.time()
+            try:
+                data = source.get_data(stock_code)
+                end_time = time.time()
+                
+                if data:
+                    results[source.name] = {
+                        'success': True,
+                        'data': data,
+                        'response_time_ms': round((end_time - start_time) * 1000, 2),
+                        'error_count': source.error_count,
+                        'is_healthy': source.is_healthy
+                    }
+                else:
+                    results[source.name] = {
+                        'success': False,
+                        'error': '无数据返回',
+                        'response_time_ms': round((end_time - start_time) * 1000, 2),
+                        'error_count': source.error_count,
+                        'is_healthy': source.is_healthy
+                    }
+            except Exception as e:
+                end_time = time.time()
+                results[source.name] = {
+                    'success': False,
+                    'error': str(e),
+                    'response_time_ms': round((end_time - start_time) * 1000, 2),
+                    'error_count': source.error_count,
+                    'is_healthy': source.is_healthy
+                }
+        
+        return jsonify({
+            'status': 'success',
+            'stock_code': stock_code,
+            'results': results,
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+        
+    except Exception as e:
+        logger.error(f"测试所有数据源时出错: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f'测试失败: {str(e)}'
+        }), 500
+
 
 @app.route('/api/debug/status', methods=['GET'])
 def debug_status():

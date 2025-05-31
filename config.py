@@ -56,13 +56,12 @@ STOCK2BUY_FILE = os.path.join(DATA_DIR, "stock2buy.json")
 
 # 实时数据源配置
 REALTIME_DATA_CONFIG = {
-    'enable_multi_source': True,  # 是否启用多数据源
-    'health_check_interval': 30,  # 健康检查间隔（秒）
-    'source_timeout': 5,          # 数据源超时时间（秒）
-    'max_error_count': 3,         # 最大错误次数
-    'preferred_sources': [        # 数据源优先级
+    'enable_multi_source': True,
+    'health_check_interval': 30,
+    'source_timeout': 5,
+    'max_error_count': 3,
+    'preferred_sources': [
         'XtQuant',
-        'Money163', 
         'Mootdx'
     ]
 }
