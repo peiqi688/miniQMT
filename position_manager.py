@@ -275,6 +275,9 @@ class PositionManager:
                 for _, row in memory_positions.iterrows():
                     stock_code = row['stock_code']
                     stock_name = row['stock_name']
+                    volume = row['volume']
+                    available = row['available']
+                    cost_price = row['cost_price']
                     open_date = row['open_date']
                     profit_triggered = row['profit_triggered']
                     highest_price = row['highest_price']
@@ -304,9 +307,9 @@ class PositionManager:
                         # 插入新记录，使用当前日期作为 open_date
                         current_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         cursor.execute("""
-                            INSERT INTO positions (stock_code, stock_name, open_date, profit_triggered, highest_price, stop_loss_price, last_update) 
+                            INSERT INTO positions (stock_code, stock_name, volume, available, cost_price, open_date, profit_triggered, highest_price, stop_loss_price, last_update) 
                             VALUES (?, ?, ?, ?, ?, ?, ?)
-                        """, (stock_code, stock_name, current_date, profit_triggered, highest_price, stop_loss_price, now))
+                        """, (stock_code, stock_name, volume, available, cost_price, current_date, profit_triggered, highest_price, stop_loss_price, now))
                         
                         # 插入新记录后，立即从数据库读取 open_date，以确保内存数据库与数据库一致
                         cursor.execute("SELECT open_date FROM positions WHERE stock_code=?", (stock_code,))
