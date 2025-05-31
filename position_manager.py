@@ -1075,6 +1075,9 @@ class PositionManager:
         """
         计算止损价格 - 统一的止损价格计算逻辑
         
+        注意：当profit_triggered=True时，实际计算的是动态止盈价格，
+        这个价格在首次止盈后作为新的"止损位"来保护已获得的收益
+        
         参数:
         cost_price (float): 成本价
         highest_price (float): 历史最高价
@@ -1185,11 +1188,12 @@ class PositionManager:
                 return None, None
 
             # 4. 优先检查止损条件（最高优先级）
-            if stop_loss_price > 0 and current_price <= stop_loss_price:
-                logger.warning(f"{stock_code} 触发止损条件，当前价格: {current_price:.2f}, 止损价格: {stop_loss_price:.2f}")
+            fixed_stop_loss_price = cost_price * (1 + config.STOP_LOSS_RATIO)
+            if fixed_stop_loss_price > 0 and current_price <= fixed_stop_loss_price:
+                logger.warning(f"{stock_code} 触发固定止损，当前价格: {current_price:.2f}, 止损价格: {fixed_stop_loss_price:.2f}")
                 return 'stop_loss', {
                     'current_price': current_price,
-                    'stop_loss_price': stop_loss_price,
+                    'stop_loss_price': fixed_stop_loss_price,
                     'cost_price': cost_price,
                     'volume': position['volume']
                 }
@@ -1214,37 +1218,31 @@ class PositionManager:
                         'sell_ratio': config.INITIAL_TAKE_PROFIT_RATIO_PERCENTAGE
                     }
             
-            # 7. 动态止盈检查（已触发首次止盈后）
+            # 7. 动态止盈检查（已触发首次止盈后）- ✅ 优化版本
             if profit_triggered and highest_price > 0:
-                # 计算最高价相对持仓成本价的涨幅
-                highest_profit_ratio = (highest_price - cost_price) / cost_price
+                # ✅ 直接调用calculate_stop_loss_price获取动态止盈位
+                dynamic_take_profit_price = self.calculate_stop_loss_price(
+                    cost_price, highest_price, profit_triggered
+                )
                 
-                # ✅ 从高到低遍历，找到最高匹配区间
-                take_profit_coefficient = 1.0  # 默认不止盈
-                matched_level = None
-                
-                for profit_level, coefficient in sorted(config.DYNAMIC_TAKE_PROFIT, reverse=True):
-                    if highest_profit_ratio >= profit_level:
-                        take_profit_coefficient = coefficient
-                        matched_level = profit_level
-                        break  # 找到最高匹配区间后立即停止
-                
-                if matched_level is not None:
-                    # 计算动态止盈位
-                    dynamic_take_profit_price = highest_price * take_profit_coefficient
+                # 如果当前价格跌破动态止盈位，触发止盈
+                if current_price <= dynamic_take_profit_price:
+                    # ✅ 获取匹配的级别信息（用于日志）
+                    matched_level, take_profit_coefficient = self._get_profit_level_info(
+                        cost_price, highest_price
+                    )
                     
-                    # 如果当前价格跌破动态止盈位，触发止盈
-                    if current_price <= dynamic_take_profit_price:
-                        logger.info(f"{stock_code} 触发动态止盈，当前价格: {current_price:.2f}, "
-                                f"止盈位: {dynamic_take_profit_price:.2f}, 最高价: {highest_price:.2f}, "
-                                f"最高达到区间: {matched_level:.1%}（系数{take_profit_coefficient})")
-                        return 'take_profit_full', {
-                            'current_price': current_price,
-                            'dynamic_take_profit_price': dynamic_take_profit_price,
-                            'highest_price': highest_price,
-                            'matched_level': matched_level,
-                            'volume': position['volume']
-                        }
+                    logger.info(f"{stock_code} 触发动态止盈，当前价格: {current_price:.2f}, "
+                            f"止盈位: {dynamic_take_profit_price:.2f}, 最高价: {highest_price:.2f}, "
+                            f"最高达到区间: {matched_level:.1%}（系数{take_profit_coefficient})")
+                            
+                    return 'take_profit_full', {
+                        'current_price': current_price,
+                        'dynamic_take_profit_price': dynamic_take_profit_price,
+                        'highest_price': highest_price,
+                        'matched_level': matched_level,
+                        'volume': position['volume']
+                    }
             
             return None, None
             
@@ -1252,10 +1250,27 @@ class PositionManager:
             logger.error(f"检查 {stock_code} 的交易信号时出错: {str(e)}")
             return None, None
 
-    # ========== 新增：模拟交易持仓调整功能 ==========
-    
-    # 在 PositionManager 类中添加/修改以下方法
+    def _get_profit_level_info(self, cost_price, highest_price):
+        """获取当前匹配的止盈级别信息"""
+        try:
+            if cost_price <= 0 or highest_price <= 0:
+                return 0.0, 1.0
+                
+            highest_profit_ratio = (highest_price - cost_price) / cost_price
+            
+            # 找到匹配的级别
+            for profit_level, coefficient in sorted(config.DYNAMIC_TAKE_PROFIT, reverse=True):
+                if highest_profit_ratio >= profit_level:
+                    return profit_level, coefficient
+                    
+            return 0.0, 1.0  # 未匹配任何级别
+            
+        except Exception as e:
+            logger.error(f"获取止盈级别信息时出错: {str(e)}")
+            return 0.0, 1.0
 
+
+    # ========== 新增：模拟交易持仓调整功能 ==========
     def simulate_buy_position(self, stock_code, buy_volume, buy_price, strategy='simu'):
         """
         模拟交易：买入股票，支持成本价加权平均计算
