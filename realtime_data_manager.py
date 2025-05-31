@@ -9,6 +9,7 @@ import threading
 from datetime import datetime
 import config
 from logger import get_logger
+from mootdx.quotes import Quotes
 
 logger = get_logger("realtime_data_manager")
 
@@ -151,35 +152,52 @@ class XtQuantSource(DataSource):
             return None
 
 class MootdxSource(DataSource):
-    """Mootdx数据源"""
     def __init__(self):
-        super().__init__("Mootdx", timeout=5)
+        self.name = "Mootdx"
+        self.client = Quotes.factory('std')
+        self.error_count = 0
+        self.is_healthy = True
     
     def get_data(self, stock_code):
+        """直接调用mootdx接口获取实时数据"""
         try:
-            from data_manager import get_data_manager
-            data_manager = get_data_manager()
-            result = data_manager.get_latest_data(stock_code)
+            # ✅ 正确：直接调用mootdx的实时接口
+            code = stock_code.split('.')[0] if '.' in stock_code else stock_code
             
-            if result and result.get('lastPrice', 0) > 0:
-                result['source'] = self.name
-                self.reset_errors()
-                return result
-            else:
-                self.record_error()
-                return None
-                
-        except Exception as e:
-            self.record_error()
-            logger.warning(f"Mootdx数据源获取 {stock_code} 失败: {str(e)}")
+            # 使用实时行情接口
+            quotes = self.client.quote(symbol=code)
+            
+            if quotes and len(quotes) > 0:
+                quote = quotes[0]
+                return {
+                    'lastPrice': float(quote.get('price', 0)),
+                    'volume': float(quote.get('vol', 0)),
+                    'amount': float(quote.get('amount', 0)),
+                    'high': float(quote.get('high', 0)),
+                    'low': float(quote.get('low', 0)),
+                    'open': float(quote.get('open', 0)),
+                    'lastClose': float(quote.get('last_close', 0)),
+                    'change': float(quote.get('change', 0)),
+                    'changePercent': float(quote.get('change_pct', 0)),
+                    'source': 'Mootdx_Realtime',
+                    'timestamp': time.time()
+                }
+            
             return None
+            
+        except Exception as e:
+            self.error_count += 1
+            logger.error(f"MootdxSource获取数据失败: {e}")
+            return None
+    
+    def is_available(self):
+        return self.error_count < 3
 
 class RealtimeDataManager:
     """实时数据管理器"""
     def __init__(self):
         self.data_sources = [
             XtQuantSource(),
-            SinaFinanceSource(),  # 替换Money163
             MootdxSource()
         ]
         self.current_source = self.data_sources[0]
