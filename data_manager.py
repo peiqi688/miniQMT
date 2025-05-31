@@ -34,8 +34,8 @@ class DataManager:
         # 已订阅的股票代码列表
         self.subscribed_stocks = []
         
-        # 初始化行情接口 
-        self._init_xtquant()
+        # # 初始化行情接口 
+        # self._init_xtquant()
 
         self.realtime_manager = get_realtime_data_manager()        
 
@@ -143,55 +143,55 @@ class DataManager:
         self.conn.commit()
         logger.info("数据表结构已创建")
     
-    def _init_xtquant(self):
-        """初始化迅投行情接口"""
-        try:
-            # 根据文档，首先调用connect连接到行情服务器
-            if not xt.connect():
-                logger.error("行情服务连接失败")
-                return
+    # def _init_xtquant(self):
+    #     """初始化迅投行情接口"""
+    #     try:
+    #         # 根据文档，首先调用connect连接到行情服务器
+    #         if not xt.connect():
+    #             logger.error("行情服务连接失败")
+    #             return
                 
-            logger.info("行情服务连接成功")
+    #         logger.info("行情服务连接成功")
             
-            # 根据测试结果，我们不使用subscribe_quote方法（会失败）
-            # 改为验证股票代码是否可以通过get_full_tick获取数据
-            valid_stocks = []
-            for stock_code in config.STOCK_POOL:
-                try:
-                    stock_code = self._adjust_stock(stock_code)
-                    # 尝试adjust_stock(stock_code)
-                    # 尝试获取Tick数据验证股票代码有效性
-                    tick_data = xt.get_full_tick([stock_code])
-                    if tick_data and stock_code in tick_data:
-                        valid_stocks.append(stock_code)
-                        logger.info(f"股票 {stock_code} 数据获取成功")
-                    else:
-                        logger.warning(f"无法获取 {stock_code} 的Tick数据")
-                except Exception as e:
-                    logger.warning(f"获取 {stock_code} 的Tick数据失败: {str(e)}")
+    #         # 根据测试结果，我们不使用subscribe_quote方法（会失败）
+    #         # 改为验证股票代码是否可以通过get_full_tick获取数据
+    #         valid_stocks = []
+    #         for stock_code in config.STOCK_POOL:
+    #             try:
+    #                 stock_code = self._adjust_stock(stock_code)
+    #                 # 尝试adjust_stock(stock_code)
+    #                 # 尝试获取Tick数据验证股票代码有效性
+    #                 tick_data = xt.get_full_tick([stock_code])
+    #                 if tick_data and stock_code in tick_data:
+    #                     valid_stocks.append(stock_code)
+    #                     logger.info(f"股票 {stock_code} 数据获取成功")
+    #                 else:
+    #                     logger.warning(f"无法获取 {stock_code} 的Tick数据")
+    #             except Exception as e:
+    #                 logger.warning(f"获取 {stock_code} 的Tick数据失败: {str(e)}")
             
-            self.subscribed_stocks = valid_stocks
+    #         self.subscribed_stocks = valid_stocks
             
-            if self.subscribed_stocks:
-                logger.info(f"成功验证 {len(self.subscribed_stocks)} 只股票可获取数据")
-            else:
-                logger.warning("没有有效的股票，请检查股票代码格式")
+    #         if self.subscribed_stocks:
+    #             logger.info(f"成功验证 {len(self.subscribed_stocks)} 只股票可获取数据")
+    #         else:
+    #             logger.warning("没有有效的股票，请检查股票代码格式")
                 
-        except Exception as e:
-            logger.error(f"初始化迅投行情接口出错: {str(e)}")
+    #     except Exception as e:
+    #         logger.error(f"初始化迅投行情接口出错: {str(e)}")
 
-    # 股票代码转换
-    def _select_data_type(self, stock='600031'):
-        '''
-        选择数据类型
-        '''
-        return Methods.select_data_type(stock)
+    # # 股票代码转换
+    # def _select_data_type(self, stock='600031'):
+    #     '''
+    #     选择数据类型
+    #     '''
+    #     return Methods.select_data_type(stock)
     
-    def _adjust_stock(self, stock='600031.SH'):
-        '''
-        调整代码
-        '''
-        return Methods.add_xt_suffix(stock)
+    # def _adjust_stock(self, stock='600031.SH'):
+    #     '''
+    #     调整代码
+    #     '''
+    #     return Methods.add_xt_suffix(stock)
 
     def download_history_data(self, stock_code, period=None, start_date=None, end_date=None):
         """

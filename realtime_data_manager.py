@@ -8,6 +8,7 @@ import time
 import threading
 from datetime import datetime
 import config
+import Methods
 from logger import get_logger
 
 logger = get_logger("realtime_data_manager")
@@ -46,28 +47,56 @@ class XtQuantSource(DataSource):
         self._init_xtquant()
     
     def _init_xtquant(self):
-        """初始化xtquant连接"""
+        """初始化迅投行情接口"""
         try:
             import xtquant.xtdata as xt
-            self.xt = xt
+
+            # 根据文档，首先调用connect连接到行情服务器
             if not xt.connect():
-                logger.error("XtQuant连接失败")
-                self.is_healthy = False
+                logger.error("行情服务连接失败")
+                return
+                
+            logger.info("行情服务连接成功")
+            
+            # 根据测试结果，我们不使用subscribe_quote方法（会失败）
+            # 改为验证股票代码是否可以通过get_full_tick获取数据
+            valid_stocks = []
+            for stock_code in config.STOCK_POOL:
+                try:
+                    stock_code = self._adjust_stock(stock_code)
+                    # 尝试adjust_stock(stock_code)
+                    # 尝试获取Tick数据验证股票代码有效性
+                    tick_data = xt.get_full_tick([stock_code])
+                    if tick_data and stock_code in tick_data:
+                        valid_stocks.append(stock_code)
+                        logger.info(f"股票 {stock_code} 数据获取成功")
+                    else:
+                        logger.warning(f"无法获取 {stock_code} 的Tick数据")
+                except Exception as e:
+                    logger.warning(f"获取 {stock_code} 的Tick数据失败: {str(e)}")
+            
+            self.subscribed_stocks = valid_stocks
+            
+            if self.subscribed_stocks:
+                logger.info(f"成功验证 {len(self.subscribed_stocks)} 只股票可获取数据")
             else:
-                logger.info("XtQuant连接成功")
+                logger.warning("没有有效的股票，请检查股票代码格式")
+                
         except Exception as e:
-            logger.error(f"XtQuant初始化失败: {str(e)}")
-            self.xt = None
-            self.is_healthy = False
+            logger.error(f"初始化迅投行情接口出错: {str(e)}")
+
+    # 股票代码转换
+    def _select_data_type(self, stock='600031'):
+        '''
+        选择数据类型
+        '''
+        return Methods.select_data_type(stock)
     
-    def _adjust_stock_code(self, stock_code):
-        """调整股票代码格式"""
-        if '.' not in stock_code:
-            if stock_code.startswith(('600', '601', '603', '688', '510')):
-                return f"{stock_code}.SH"
-            else:
-                return f"{stock_code}.SZ"
-        return stock_code.upper()
+    def _adjust_stock(self, stock='600031.SH'):
+        '''
+        调整代码
+        '''
+        return Methods.add_xt_suffix(stock)
     
     def get_data(self, stock_code):
         """直接从xtquant获取数据"""
@@ -76,7 +105,7 @@ class XtQuantSource(DataSource):
                 self.record_error()
                 return None
                 
-            formatted_code = self._adjust_stock_code(stock_code)
+            formatted_code = self._adjust_code(stock_code)
             
             # 直接调用xtquant接口
             tick_data = self.xt.get_full_tick([formatted_code])
@@ -206,32 +235,38 @@ class RealtimeDataManager:
     def __init__(self):
         self.data_sources = []
         self.current_source = None
-        
-        # 初始化数据源
-        try:
-            xtquant_source = XtQuantSource()
-            self.data_sources.append(xtquant_source)
-            logger.info("XtQuant数据源初始化成功")
-        except Exception as e:
-            logger.error(f"XtQuant数据源初始化失败: {str(e)}")
-        
-        try:
-            mootdx_source = MootdxSource()
-            self.data_sources.append(mootdx_source)
-            logger.info("Mootdx数据源初始化成功")
-        except Exception as e:
-            logger.error(f"Mootdx数据源初始化失败: {str(e)}")
-        
-        # 设置默认数据源
-        if self.data_sources:
-            self.current_source = self.data_sources[0]
-            logger.info(f"默认数据源设置为: {self.current_source.name}")
-        else:
-            logger.error("没有可用的数据源！")
+
+        # 根据交易模式初始化数据源
+        self._init_data_sources_by_mode()
         
         # 健康检查配置
         self.health_check_interval = getattr(config, 'REALTIME_DATA_CONFIG', {}).get('health_check_interval', 30)
         self.last_health_check = 0
+
+    def _init_data_sources_by_mode(self):
+        """根据交易模式初始化数据源"""
+        # 始终添加XtQuant数据源
+        try:
+            xtquant_source = XtQuantSource()
+            self.data_sources.append(xtquant_source)
+            self.current_source = xtquant_source  # 默认使用XtQuant
+            logger.info("XtQuant数据源初始化成功")
+        except Exception as e:
+            logger.error(f"XtQuant数据源初始化失败: {str(e)}")
+        
+        # 仅在模拟交易模式下添加Mootdx数据源
+        if getattr(config, 'ENABLE_SIMULATION_MODE', False):
+            try:
+                mootdx_source = MootdxSource()
+                self.data_sources.append(mootdx_source)
+                logger.info("模拟交易模式：Mootdx数据源已添加")
+            except Exception as e:
+                logger.error(f"Mootdx数据源初始化失败: {str(e)}")
+        else:
+            logger.info("实盘交易模式：仅使用XtQuant数据源")
+        
+        if not self.data_sources:
+            logger.error("没有可用的数据源！")
     
     def _health_check(self):
         """健康检查"""
@@ -251,61 +286,75 @@ class RealtimeDataManager:
                         source.is_healthy = True
     
     def get_realtime_data(self, stock_code):
-        """获取实时数据 - 核心方法"""
+        """获取实时数据 - 根据交易模式优化"""
         try:
-            # 检查是否有可用数据源
             if not self.data_sources:
                 logger.error("没有可用的数据源")
                 return None
             
-            # 如果当前数据源为空，设置默认数据源
-            if not self.current_source:
-                self.current_source = self.data_sources[0]
-                logger.info(f"设置默认数据源: {self.current_source.name}")
+            # 实盘模式：仅使用XtQuant，不进行切换
+            if not getattr(config, 'ENABLE_SIMULATION_MODE', False):
+                return self._get_data_from_xtquant_only(stock_code)
             
-            self._health_check()
-            
-            # 首先尝试当前数据源
-            if self.current_source and self.current_source.is_healthy:
-                try:
-                    data = self.current_source.get_data(stock_code)
-                    if data and data.get('lastPrice', 0) > 0:
-                        return data
-                except Exception as e:
-                    logger.warning(f"当前数据源 {self.current_source.name} 获取数据失败: {str(e)}")
-            
-            # 尝试其他健康的数据源
-            for source in self.data_sources:
-                if source != self.current_source and source.is_healthy:
-                    try:
-                        logger.info(f"尝试使用 {source.name} 获取 {stock_code} 数据")
-                        data = source.get_data(stock_code)
-                        if data and data.get('lastPrice', 0) > 0:
-                            logger.info(f"切换到 {source.name} 成功")
-                            self.current_source = source
-                            return data
-                    except Exception as e:
-                        logger.warning(f"数据源 {source.name} 获取数据失败: {str(e)}")
-            
-            # 如果所有健康数据源都失败，尝试不健康的数据源（给一次机会）
-            for source in self.data_sources:
-                if not source.is_healthy:
-                    try:
-                        logger.info(f"尝试使用不健康数据源 {source.name} 获取 {stock_code} 数据")
-                        data = source.get_data(stock_code)
-                        if data and data.get('lastPrice', 0) > 0:
-                            logger.info(f"不健康数据源 {source.name} 恢复成功")
-                            self.current_source = source
-                            return data
-                    except Exception as e:
-                        logger.warning(f"不健康数据源 {source.name} 仍然失败: {str(e)}")
-            
-            logger.error(f"所有数据源都失败，无法获取 {stock_code} 的实时数据")
-            return None
+            # 模拟模式：使用多数据源和智能切换
+            return self._get_data_with_fallback(stock_code)
             
         except Exception as e:
             logger.error(f"获取实时数据时发生异常: {str(e)}")
             return None
+
+    def _get_data_from_xtquant_only(self, stock_code):
+        """实盘模式：仅从XtQuant获取数据"""
+        xtquant_source = None
+        for source in self.data_sources:
+            if source.name == "XtQuant":
+                xtquant_source = source
+                break
+        
+        if not xtquant_source:
+            logger.error("未找到XtQuant数据源")
+            return None
+        
+        try:
+            data = xtquant_source.get_data(stock_code)
+            if data and data.get('lastPrice', 0) > 0:
+                return data
+            else:
+                logger.warning(f"XtQuant无法获取{stock_code}的有效数据")
+                return None
+        except Exception as e:
+            logger.error(f"XtQuant获取{stock_code}数据失败: {str(e)}")
+            return None
+
+    def _get_data_with_fallback(self, stock_code):
+        """模拟模式：使用原有的多数据源切换逻辑"""
+        # 这里保持原有的智能切换逻辑
+        self._health_check()
+        
+        # 首先尝试当前数据源
+        if self.current_source and self.current_source.is_healthy:
+            try:
+                data = self.current_source.get_data(stock_code)
+                if data and data.get('lastPrice', 0) > 0:
+                    return data
+            except Exception as e:
+                logger.warning(f"当前数据源 {self.current_source.name} 获取数据失败: {str(e)}")
+        
+        # 尝试其他健康的数据源
+        for source in self.data_sources:
+            if source != self.current_source and source.is_healthy:
+                try:
+                    logger.info(f"尝试使用 {source.name} 获取 {stock_code} 数据")
+                    data = source.get_data(stock_code)
+                    if data and data.get('lastPrice', 0) > 0:
+                        logger.info(f"切换到 {source.name} 成功")
+                        self.current_source = source
+                        return data
+                except Exception as e:
+                    logger.warning(f"数据源 {source.name} 获取数据失败: {str(e)}")
+        
+        logger.error(f"所有数据源都失败，无法获取 {stock_code} 的实时数据")
+        return None
     
     def get_source_status(self):
         """获取数据源状态"""
@@ -325,8 +374,14 @@ class RealtimeDataManager:
             return []
     
     def switch_to_source(self, source_name: str) -> bool:
-        """切换到指定数据源"""
+        """切换到指定数据源 - 仅在模拟模式下允许"""
         try:
+            # 实盘模式下不允许切换
+            if not getattr(config, 'ENABLE_SIMULATION_MODE', False):
+                logger.warning("实盘交易模式下不允许切换数据源")
+                return False
+            
+            # 原有的切换逻辑
             target_source = None
             for source in self.data_sources:
                 if source.name == source_name:
@@ -340,8 +395,6 @@ class RealtimeDataManager:
             
             old_source_name = self.current_source.name if self.current_source else "None"
             self.current_source = target_source
-            
-            # 重置目标数据源的错误计数
             target_source.reset_errors()
             
             logger.info(f"数据源已从 {old_source_name} 切换到 {source_name}")
