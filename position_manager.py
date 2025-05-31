@@ -1677,37 +1677,37 @@ class PositionManager:
 
     # ========== 保留原有功能，向后兼容 ==========
     
-    def check_stop_loss(self, stock_code):
-        """
-        检查止损条件 - 向后兼容的接口
+    # def check_stop_loss(self, stock_code):
+    #     """
+    #     检查止损条件 - 向后兼容的接口
         
-        参数:
-        stock_code (str): 股票代码
+    #     参数:
+    #     stock_code (str): 股票代码
         
-        返回:
-        bool: 是否触发止损
-        """
-        signal_type, signal_info = self.check_trading_signals(stock_code)
-        return signal_type == 'stop_loss'
+    #     返回:
+    #     bool: 是否触发止损
+    #     """
+    #     signal_type, signal_info = self.check_trading_signals(stock_code)
+    #     return signal_type == 'stop_loss'
 
-    def check_dynamic_take_profit(self, stock_code):
-        """
-        检查动态止盈条件 - 向后兼容的接口
+    # def check_dynamic_take_profit(self, stock_code):
+    #     """
+    #     检查动态止盈条件 - 向后兼容的接口
         
-        参数:
-        stock_code (str): 股票代码
+    #     参数:
+    #     stock_code (str): 股票代码
         
-        返回:
-        tuple: (是否触发止盈, 止盈信号类型)
-        """
-        signal_type, signal_info = self.check_trading_signals(stock_code)
+    #     返回:
+    #     tuple: (是否触发止盈, 止盈信号类型)
+    #     """
+    #     signal_type, signal_info = self.check_trading_signals(stock_code)
         
-        if signal_type == 'take_profit_half':
-            return True, 'HALF'
-        elif signal_type == 'take_profit_full':
-            return True, 'FULL'
-        else:
-            return False, None
+    #     if signal_type == 'take_profit_half':
+    #         return True, 'HALF'
+    #     elif signal_type == 'take_profit_full':
+    #         return True, 'FULL'
+    #     else:
+    #         return False, None
 
     def mark_profit_triggered(self, stock_code):
         """标记股票已触发首次止盈"""

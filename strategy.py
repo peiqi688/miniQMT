@@ -191,51 +191,51 @@ class TradingStrategy:
             logger.error(f"执行 {stock_code} 的 {signal_type} 信号时出错: {str(e)}")
             return False
             
-    def execute_trading_signal(self, stock_code):
-        """
-        执行统一的交易信号处理 - 优化版本
+    # def execute_trading_signal(self, stock_code):
+    #     """
+    #     执行统一的交易信号处理 - 优化版本
         
-        参数:
-        stock_code (str): 股票代码
+    #     参数:
+    #     stock_code (str): 股票代码
         
-        返回:
-        bool: 是否执行了交易操作
-        """
-        try:
-            # 使用统一的信号检查函数
-            signal_type, signal_info = self.position_manager.check_trading_signals(stock_code)
+    #     返回:
+    #     bool: 是否执行了交易操作
+    #     """
+    #     try:
+    #         # 使用统一的信号检查函数
+    #         signal_type, signal_info = self.position_manager.check_trading_signals(stock_code)
             
-            if not signal_type:
-                return False
+    #         if not signal_type:
+    #             return False
             
-            # 检查是否已处理过该信号（防重复处理）
-            signal_key = f"{signal_type}_{stock_code}_{datetime.now().strftime('%Y%m%d_%H')}"
-            if signal_key in self.processed_signals:
-                logger.debug(f"{stock_code} {signal_type} 信号已处理，跳过")
-                return False
+    #         # 检查是否已处理过该信号（防重复处理）
+    #         signal_key = f"{signal_type}_{stock_code}_{datetime.now().strftime('%Y%m%d_%H')}"
+    #         if signal_key in self.processed_signals:
+    #             logger.debug(f"{stock_code} {signal_type} 信号已处理，跳过")
+    #             return False
             
-            logger.info(f"处理 {stock_code} 的 {signal_type} 信号")
+    #         logger.info(f"处理 {stock_code} 的 {signal_type} 信号")
             
-            # 根据信号类型执行相应操作
-            success = False
+    #         # 根据信号类型执行相应操作
+    #         success = False
             
-            if signal_type == 'stop_loss':
-                success = self._execute_stop_loss_signal(stock_code, signal_info)
-            elif signal_type == 'take_profit_half':
-                success = self._execute_take_profit_half_signal(stock_code, signal_info)
-            elif signal_type == 'take_profit_full':
-                success = self._execute_take_profit_full_signal(stock_code, signal_info)
+    #         if signal_type == 'stop_loss':
+    #             success = self._execute_stop_loss_signal(stock_code, signal_info)
+    #         elif signal_type == 'take_profit_half':
+    #             success = self._execute_take_profit_half_signal(stock_code, signal_info)
+    #         elif signal_type == 'take_profit_full':
+    #             success = self._execute_take_profit_full_signal(stock_code, signal_info)
             
-            if success:
-                # 记录已处理信号
-                self.processed_signals.add(signal_key)
-                logger.info(f"{stock_code} {signal_type} 信号处理成功")
+    #         if success:
+    #             # 记录已处理信号
+    #             self.processed_signals.add(signal_key)
+    #             logger.info(f"{stock_code} {signal_type} 信号处理成功")
             
-            return success
+    #         return success
             
-        except Exception as e:
-            logger.error(f"执行 {stock_code} 的交易信号时出错: {str(e)}")
-            return False
+    #     except Exception as e:
+    #         logger.error(f"执行 {stock_code} 的交易信号时出错: {str(e)}")
+    #         return False
 
     def _execute_stop_loss_signal(self, stock_code, signal_info):
         """
@@ -387,74 +387,74 @@ class TradingStrategy:
 
     # ========== 向后兼容的旧版本接口 ==========
     
-    def execute_stop_loss(self, stock_code):
-        """
-        执行止损策略 - 向后兼容接口
+    # def execute_stop_loss(self, stock_code):
+    #     """
+    #     执行止损策略 - 向后兼容接口
         
-        参数:
-        stock_code (str): 股票代码
+    #     参数:
+    #     stock_code (str): 股票代码
         
-        返回:
-        bool: 是否执行成功
-        """
-        try:
-            # 使用新的统一信号检查
-            signal_type, signal_info = self.position_manager.check_trading_signals(stock_code)
+    #     返回:
+    #     bool: 是否执行成功
+    #     """
+    #     try:
+    #         # 使用新的统一信号检查
+    #         signal_type, signal_info = self.position_manager.check_trading_signals(stock_code)
             
-            if signal_type == 'stop_loss':
-                # 检查是否已处理过该信号
-                signal_key = f"stop_loss_{stock_code}_{datetime.now().strftime('%Y%m%d')}"
-                if signal_key in self.processed_signals:
-                    logger.debug(f"{stock_code} 止损信号已处理，跳过")
-                    return False
+    #         if signal_type == 'stop_loss':
+    #             # 检查是否已处理过该信号
+    #             signal_key = f"stop_loss_{stock_code}_{datetime.now().strftime('%Y%m%d')}"
+    #             if signal_key in self.processed_signals:
+    #                 logger.debug(f"{stock_code} 止损信号已处理，跳过")
+    #                 return False
                 
-                success = self._execute_stop_loss_signal(stock_code, signal_info)
-                if success:
-                    self.processed_signals.add(signal_key)
-                return success
+    #             success = self._execute_stop_loss_signal(stock_code, signal_info)
+    #             if success:
+    #                 self.processed_signals.add(signal_key)
+    #             return success
             
-            return False
+    #         return False
             
-        except Exception as e:
-            logger.error(f"执行 {stock_code} 的止损策略时出错: {str(e)}")
-            return False
+    #     except Exception as e:
+    #         logger.error(f"执行 {stock_code} 的止损策略时出错: {str(e)}")
+    #         return False
     
-    def execute_dynamic_take_profit(self, stock_code):
-        """
-        执行动态止盈策略 - 向后兼容接口
+    # def execute_dynamic_take_profit(self, stock_code):
+    #     """
+    #     执行动态止盈策略 - 向后兼容接口
         
-        参数:
-        stock_code (str): 股票代码
+    #     参数:
+    #     stock_code (str): 股票代码
         
-        返回:
-        bool: 是否执行成功
-        """
-        try:
-            # 使用新的统一信号检查
-            signal_type, signal_info = self.position_manager.check_trading_signals(stock_code)
+    #     返回:
+    #     bool: 是否执行成功
+    #     """
+    #     try:
+    #         # 使用新的统一信号检查
+    #         signal_type, signal_info = self.position_manager.check_trading_signals(stock_code)
             
-            if signal_type in ['take_profit_half', 'take_profit_full']:
-                # 检查是否已处理过该信号
-                signal_key = f"take_profit_{stock_code}_{signal_type}_{datetime.now().strftime('%Y%m%d')}"
-                if signal_key in self.processed_signals:
-                    logger.debug(f"{stock_code} {signal_type} 止盈信号已处理，跳过")
-                    return False
+    #         if signal_type in ['take_profit_half', 'take_profit_full']:
+    #             # 检查是否已处理过该信号
+    #             signal_key = f"take_profit_{stock_code}_{signal_type}_{datetime.now().strftime('%Y%m%d')}"
+    #             if signal_key in self.processed_signals:
+    #                 logger.debug(f"{stock_code} {signal_type} 止盈信号已处理，跳过")
+    #                 return False
                 
-                success = False
-                if signal_type == 'take_profit_half':
-                    success = self._execute_take_profit_half_signal(stock_code, signal_info)
-                elif signal_type == 'take_profit_full':
-                    success = self._execute_take_profit_full_signal(stock_code, signal_info)
+    #             success = False
+    #             if signal_type == 'take_profit_half':
+    #                 success = self._execute_take_profit_half_signal(stock_code, signal_info)
+    #             elif signal_type == 'take_profit_full':
+    #                 success = self._execute_take_profit_full_signal(stock_code, signal_info)
                 
-                if success:
-                    self.processed_signals.add(signal_key)
-                return success
+    #             if success:
+    #                 self.processed_signals.add(signal_key)
+    #             return success
             
-            return False
+    #         return False
             
-        except Exception as e:
-            logger.error(f"执行 {stock_code} 的动态止盈策略时出错: {str(e)}")
-            return False
+    #     except Exception as e:
+    #         logger.error(f"执行 {stock_code} 的动态止盈策略时出错: {str(e)}")
+    #         return False
     
     def execute_buy_strategy(self, stock_code):
         """
