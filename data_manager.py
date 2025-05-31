@@ -477,18 +477,31 @@ class DataManager:
             return
         
         try:
-            # 检查必要的列是否存在
-            required_columns = ['date', 'open', 'high', 'low', 'close', 'volume', 'amount']
-            for col in required_columns:
-                if col not in data_df.columns:
-                    logger.error(f"{stock_code} 的数据缺少必要的列: {col}")
-                    return
+            # ✅ 立即创建工作副本
+            work_df = data_df.copy()
             
-            # 准备数据
-            data_df['stock_code'] = stock_code
-
-            # Ensure 'close' column is numeric
-            data_df['close'] = pd.to_numeric(data_df['close'], errors='coerce')
+            # 数据验证和清理
+            required_columns = ['date', 'open', 'high', 'low', 'close', 'volume', 'amount']
+            missing_cols = [col for col in required_columns if col not in work_df.columns]
+            if missing_cols:
+                logger.error(f"{stock_code} 缺少必要列: {missing_cols}")
+                return
+            
+            # 清理空数据
+            initial_count = len(work_df)
+            work_df = work_df.dropna(subset=['date'])
+            final_count = len(work_df)
+            
+            if initial_count != final_count:
+                logger.warning(f"{stock_code} 过滤了 {initial_count - final_count} 行空date数据")
+            
+            if work_df.empty:
+                logger.warning(f"{stock_code} 无有效数据可保存")
+                return
+            
+            # 数据处理
+            work_df['stock_code'] = stock_code
+            work_df['close'] = pd.to_numeric(work_df['close'], errors='coerce')
             
             # Delete existing data for the stock_code
             cursor = self.conn.cursor()
@@ -497,7 +510,7 @@ class DataManager:
             # logger.info(f"已清除 {stock_code} 在 stock_daily_data 表中的原有数据")
 
             # 保存到数据库
-            data_df[['stock_code', 'date', 'open', 'high', 'low', 'close', 'volume', 'amount']].to_sql(
+            work_df[['stock_code', 'date', 'open', 'high', 'low', 'close', 'volume', 'amount']].to_sql(
                 'stock_daily_data', 
                 self.conn, 
                 if_exists='append', 

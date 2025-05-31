@@ -721,7 +721,7 @@ class TradingStrategy:
 
             # 根据交易模式选择策略标识
             is_simulation = hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE
-            strategy = 'manual_simu' if is_simulation else 'manual_real'
+            strategy = 'M_simu' if is_simulation else 'M_real'
 
             order_id = self.trading_executor.buy_stock(
                 stock_code, volume, price, amount, strategy=strategy
