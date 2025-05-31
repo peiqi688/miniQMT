@@ -316,6 +316,7 @@ class TradingStrategy:
                 )
                 
                 if success:
+                    self.position_manager.mark_profit_triggered(stock_code)
                     logger.info(f"[模拟交易] {stock_code} 首次止盈执行完成")
                 return success
             else:
@@ -602,20 +603,30 @@ class TradingStrategy:
                     
                     logger.info(f"{stock_code} 处理待执行的{signal_type}信号")
                     
-                    # 检查是否已处理过该信号（防重复）
-                    signal_key = f"{signal_type}_{stock_code}_{datetime.now().strftime('%Y%m%d_%H')}"
-                    if signal_key not in self.processed_signals:
+                    # 检查是否已处理过该信号（防重复,每分钟3次）
+                    retry_key  = f"{signal_type}_{stock_code}_{datetime.now().strftime('%Y%m%d_%H%M')}"
+                    retry_count = self.retry_counts.get(retry_key, 0)
+                    if retry_count >= 3:  # 每日最多重试3次
+                        logger.warning(f"{stock_code} {signal_type}信号重试次数已达上限")
+                        self.position_manager.mark_signal_processed(stock_code)
+                        return
+                    
+                       
+                    if config.ENABLE_AUTO_TRADING:
+                        success = self.execute_trading_signal_direct(stock_code, signal_type, signal_info)
                         
-                        if config.ENABLE_AUTO_TRADING:
-                            # 执行交易信号
-                            if self.execute_trading_signal_direct(stock_code, signal_type, signal_info):
-                                logger.info(f"{stock_code} 执行{signal_type}策略成功")
-                                self.processed_signals.add(signal_key)
-                                self.position_manager.mark_signal_processed(stock_code)
-                                return
-                        else:
-                            logger.info(f"{stock_code} 检测到{signal_type}信号，但自动交易已关闭")
+                        if success:
+                            # ✅ 只有成功才标记为已处理
                             self.position_manager.mark_signal_processed(stock_code)
+                            # 清除重试计数
+                            self.retry_counts.pop(retry_key, None)
+                        else:
+                            # ✅ 失败时增加重试计数，但不标记为已处理
+                            self.retry_counts[retry_key] = retry_count + 1
+                            logger.warning(f"{stock_code} {signal_type}执行失败，重试次数: {retry_count + 1}")
+                    else:
+                        logger.info(f"{stock_code} 检测到{signal_type}信号，但自动交易已关闭")
+                        self.position_manager.mark_signal_processed(stock_code)
             
             # 2. 检查网格交易信号（如果启用）
             if config.ENABLE_GRID_TRADING:

@@ -1574,7 +1574,8 @@ class PositionManager:
                 # 如果是首次止盈卖出，标记profit_triggered为True
                 if sell_type == 'partial' and not profit_triggered:
                     profit_triggered = True
-                    logger.info(f"[模拟交易] {stock_code} 标记为已触发首次止盈")
+                    self.mark_profit_triggered(stock_code)
+                    logger.info(f"[模拟交易] {stock_code} 首次止盈完成，已标记profit_triggered=True")
                 
                 # 重新计算止损价格
                 new_stop_loss_price = self.calculate_stop_loss_price(
