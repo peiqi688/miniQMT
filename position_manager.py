@@ -1779,7 +1779,7 @@ class PositionManager:
                 # 批量获取所有股票的最新行情（如果交易时间）
                 if config.is_trade_time():
                     for stock_code in stock_codes:
-                        latest_data = self.data_manager.get_latest_xtdata(stock_code)
+                        latest_data = self.data_manager.get_latest_data(stock_code)
                         if latest_data:
                             all_latest_data[stock_code] = latest_data
                 

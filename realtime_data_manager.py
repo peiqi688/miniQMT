@@ -40,18 +40,67 @@ class DataSource:
             logger.warning(f"数据源 {self.name} 错误次数达到上限，标记为不健康")
 
 class XtQuantSource(DataSource):
-    """XtQuant数据源"""
+    """XtQuant数据源 - 直接实现数据获取"""
     def __init__(self):
         super().__init__("XtQuant", timeout=5)
+        self._init_xtquant()
+    
+    def _init_xtquant(self):
+        """初始化xtquant连接"""
+        try:
+            import xtquant.xtdata as xt
+            self.xt = xt
+            if not xt.connect():
+                logger.error("XtQuant连接失败")
+                self.is_healthy = False
+            else:
+                logger.info("XtQuant连接成功")
+        except Exception as e:
+            logger.error(f"XtQuant初始化失败: {str(e)}")
+            self.xt = None
+            self.is_healthy = False
+    
+    def _adjust_stock_code(self, stock_code):
+        """调整股票代码格式"""
+        if '.' not in stock_code:
+            if stock_code.startswith(('600', '601', '603', '688', '510')):
+                return f"{stock_code}.SH"
+            else:
+                return f"{stock_code}.SZ"
+        return stock_code.upper()
     
     def get_data(self, stock_code):
+        """直接从xtquant获取数据"""
         try:
-            from data_manager import get_data_manager
-            data_manager = get_data_manager()
-            result = data_manager.get_latest_xtdata(stock_code)
+            if not self.xt:
+                self.record_error()
+                return None
+                
+            formatted_code = self._adjust_stock_code(stock_code)
             
-            if result and result.get('lastPrice', 0) > 0:
-                result['source'] = self.name
+            # 直接调用xtquant接口
+            tick_data = self.xt.get_full_tick([formatted_code])
+            
+            if not tick_data or formatted_code not in tick_data:
+                self.record_error()
+                return None
+            
+            tick = tick_data[formatted_code]
+            
+            result = {
+                'stock_code': stock_code,
+                'lastPrice': float(getattr(tick, 'lastPrice', 0)),
+                'open': float(getattr(tick, 'open', 0)),
+                'high': float(getattr(tick, 'high', 0)),
+                'low': float(getattr(tick, 'low', 0)),
+                'volume': int(getattr(tick, 'volume', 0)),
+                'amount': float(getattr(tick, 'amount', 0)),
+                'lastClose': float(getattr(tick, 'lastClose', 0)),
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'source': self.name
+            }
+            
+            if result['lastPrice'] > 0:
                 self.reset_errors()
                 return result
             else:
@@ -60,7 +109,7 @@ class XtQuantSource(DataSource):
                 
         except Exception as e:
             self.record_error()
-            logger.warning(f"XtQuant数据源获取 {stock_code} 失败: {str(e)}")
+            logger.warning(f"XtQuant获取{stock_code}数据失败: {str(e)}")
             return None
 
 class MootdxSource(DataSource):
