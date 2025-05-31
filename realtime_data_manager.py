@@ -50,10 +50,12 @@ class XtQuantSource(DataSource):
         """初始化迅投行情接口"""
         try:
             import xtquant.xtdata as xt
+            self.xt = xt
 
             # 根据文档，首先调用connect连接到行情服务器
             if not xt.connect():
                 logger.error("行情服务连接失败")
+                self.xt = None  # 连接失败时设置为None
                 return
                 
             logger.info("行情服务连接成功")
@@ -105,7 +107,7 @@ class XtQuantSource(DataSource):
                 self.record_error()
                 return None
                 
-            formatted_code = self._adjust_code(stock_code)
+            formatted_code = self._adjust_stock(stock_code)
             
             # 直接调用xtquant接口
             tick_data = self.xt.get_full_tick([formatted_code])
