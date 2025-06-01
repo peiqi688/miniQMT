@@ -545,7 +545,7 @@ class DataManager:
             if config.is_trade_time():
                 realtime_data = self.realtime_manager.get_realtime_data(stock_code)
                 if realtime_data and realtime_data.get('lastPrice', 0) > 0:
-                    logger.info(f"使用 {realtime_data['source']} 获取 {stock_code} 实时数据 {realtime_data.get('lastPrice')} ")
+                    logger.debug(f"使用 {realtime_data['source']} 获取 {stock_code} 实时数据 {realtime_data.get('lastPrice')} ")
                     return realtime_data
             
             # 继续尝试从Mootdx获取数据

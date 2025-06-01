@@ -85,7 +85,7 @@ class PositionManager:
         CREATE TABLE IF NOT EXISTS positions (
             stock_code TEXT PRIMARY KEY,
             stock_name TEXT,
-            volume INTEGER,
+            volume REAL,
             available REAL,           
             cost_price REAL,
             current_price REAL,
@@ -857,7 +857,7 @@ class PositionManager:
 
             # 如果是模拟交易模式，直接返回模拟账户信息（由trading_executor模块管理）
             if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
-                logger.info(f"返回模拟账户信息，余额: {config.SIMULATION_BALANCE}")
+                logger.debug(f"返回模拟账户信息，余额: {config.SIMULATION_BALANCE}")
                 # 计算持仓市值
                 positions = self.get_all_positions()
                 market_value = 0
