@@ -56,10 +56,14 @@ class PositionManager:
         self.position_update_interval = 3  # 3秒更新间隔
         self.positions_cache = None        
 
-        # ✅ 新增，持仓数据版本控制
+        # 新增，持仓数据版本控制
         self.data_version = 0
         self.data_changed = False
         self.version_lock = threading.Lock()
+
+        # ✅新增：全量刷新控制 - 在这里添加缺失的属性
+        self.last_full_refresh_time = 0
+        self.full_refresh_interval = 60  # 1分钟全量刷新间隔
 
         # 定时同步线程
         self.sync_thread = None
@@ -69,7 +73,8 @@ class PositionManager:
         # 添加信号状态管理
         self.signal_lock = threading.Lock()
         self.latest_signals = {}  # 存储最新检测到的信号
-        self.signal_timestamps = {}  # 信号时间戳        
+        self.signal_timestamps = {}  # 信号时间戳      
+
 
     def _increment_data_version(self):
         """递增数据版本号"""
@@ -345,7 +350,15 @@ class PositionManager:
             try:
                 # 原有的数据库同步
                 self._sync_memory_to_db()
-                
+
+                # ✅ 新增：每1分钟执行一次全量刷新
+                current_time = time.time()
+                if (current_time - self.last_full_refresh_time) >= self.full_refresh_interval:
+                    if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
+                        logger.info("执行模拟交易全量数据刷新")
+                        self._full_refresh_simulation_data()
+                        self.last_full_refresh_time = current_time
+
                 # ✅ 新增：模拟交易模式下的价格更新
                 if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
                     # 在交易时间内更频繁地更新价格
@@ -1731,39 +1744,126 @@ class PositionManager:
             self.conn.rollback()
             return False
 
-    # ========== 保留原有功能，向后兼容 ==========
-    
-    # def check_stop_loss(self, stock_code):
-    #     """
-    #     检查止损条件 - 向后兼容的接口
-        
-    #     参数:
-    #     stock_code (str): 股票代码
-        
-    #     返回:
-    #     bool: 是否触发止损
-    #     """
-    #     signal_type, signal_info = self.check_trading_signals(stock_code)
-    #     return signal_type == 'stop_loss'
+    def _full_refresh_simulation_data(self):
+        """模拟交易模式下的全量数据刷新"""
+        try:
+            logger.info("开始执行模拟交易全量数据刷新")
+            
+            # 1. 获取所有持仓
+            positions = self.get_all_positions()
+            if positions.empty:
+                logger.debug("没有持仓数据，跳过全量刷新")
+                return
+            
+            refresh_count = 0
+            
+            # 2. 逐个更新每只股票的完整数据
+            for _, position in positions.iterrows():
+                stock_code = position['stock_code']
+                if stock_code is None:
+                    continue
+                    
+                try:
+                    success = self._refresh_single_position_full_data(stock_code, position)
+                    if success:
+                        refresh_count += 1
+                        
+                except Exception as e:
+                    logger.error(f"刷新 {stock_code} 完整数据时出错: {str(e)}")
+                    continue
+            
+            # 3. 强制触发版本更新
+            self._increment_data_version()
+            
+            logger.info(f"模拟交易全量刷新完成，更新了 {refresh_count} 只股票的数据")
+            
+        except Exception as e:
+            logger.error(f"执行模拟交易全量刷新时出错: {str(e)}")
 
-    # def check_dynamic_take_profit(self, stock_code):
-    #     """
-    #     检查动态止盈条件 - 向后兼容的接口
-        
-    #     参数:
-    #     stock_code (str): 股票代码
-        
-    #     返回:
-    #     tuple: (是否触发止盈, 止盈信号类型)
-    #     """
-    #     signal_type, signal_info = self.check_trading_signals(stock_code)
-        
-    #     if signal_type == 'take_profit_half':
-    #         return True, 'HALF'
-    #     elif signal_type == 'take_profit_full':
-    #         return True, 'FULL'
-    #     else:
-    #         return False, None
+    def _refresh_single_position_full_data(self, stock_code, position):
+        """刷新单只股票的完整持仓数据"""
+        try:
+            # 1. 获取最新行情数据
+            latest_quote = self.data_manager.get_latest_data(stock_code)
+            if not latest_quote:
+                logger.debug(f"无法获取 {stock_code} 的最新行情，跳过刷新")
+                return False
+            
+            current_price = float(latest_quote.get('lastPrice', 0))
+            if current_price <= 0:
+                logger.debug(f"{stock_code} 最新价格无效: {current_price}")
+                return False
+            
+            # 2. 提取现有持仓数据
+            volume = int(position.get('volume', 0))
+            cost_price = float(position.get('cost_price', 0))
+            available = int(position.get('available', volume))
+            profit_triggered = bool(position.get('profit_triggered', False))
+            open_date = position.get('open_date')
+            stock_name = position.get('stock_name')
+            
+            # 3. 计算/更新最高价（重要：基于历史数据重新计算）
+            updated_highest_price = self._calculate_highest_price_since_open(stock_code, open_date, current_price)
+            
+            # 4. 重新计算所有衍生数据
+            market_value = round(volume * current_price, 2)
+            profit_ratio = round(100 * (current_price - cost_price) / cost_price, 2) if cost_price > 0 else 0.0
+            
+            # 5. 重新计算动态止损价格
+            stop_loss_price = self.calculate_stop_loss_price(cost_price, updated_highest_price, profit_triggered)
+            
+            # 6. 执行数据库更新
+            cursor = self.memory_conn.cursor()
+            cursor.execute("""
+                UPDATE positions 
+                SET current_price=?, market_value=?, profit_ratio=?, highest_price=?, 
+                    stop_loss_price=?, last_update=?
+                WHERE stock_code=?
+            """, (
+                round(current_price, 2), 
+                market_value, 
+                profit_ratio, 
+                round(updated_highest_price, 2),
+                round(stop_loss_price, 2) if stop_loss_price else None,
+                datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
+                stock_code
+            ))
+            
+            self.memory_conn.commit()
+            
+            logger.debug(f"全量刷新 {stock_code}: 价格={current_price:.2f}, 最高价={updated_highest_price:.2f}, "
+                        f"盈亏率={profit_ratio:.2f}%, 止损价={stop_loss_price:.2f}")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"刷新 {stock_code} 完整数据时出错: {str(e)}")
+            self.memory_conn.rollback()
+            return False
+
+    def _calculate_highest_price_since_open(self, stock_code, open_date, current_price):
+        """计算开仓以来的最高价 - 基于历史数据"""
+        try:
+            # 1. 从持仓记录获取当前最高价
+            position = self.get_position(stock_code)
+            current_highest = float(position.get('highest_price', current_price)) if position else current_price
+            
+            # 2. 在交易时间内，尝试获取当日高点
+            if config.is_trade_time():
+                latest_quote = self.data_manager.get_latest_data(stock_code)
+                if latest_quote:
+                    today_high = latest_quote.get('high', current_price)
+                    if today_high and today_high > current_highest:
+                        current_highest = float(today_high)
+            
+            # 3. 确保最高价不低于当前价
+            final_highest = max(current_highest, current_price)
+            
+            return final_highest
+            
+        except Exception as e:
+            logger.error(f"计算 {stock_code} 开仓以来最高价时出错: {str(e)}")
+            return current_price
 
     def mark_profit_triggered(self, stock_code):
         """标记股票已触发首次止盈"""
