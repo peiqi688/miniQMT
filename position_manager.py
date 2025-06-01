@@ -1811,15 +1811,32 @@ class PositionManager:
             return pd.DataFrame()
 
     def get_pending_signals(self):
-        """获取待处理的信号"""
+        """获取待处理的信号 - 增加时效性检查"""
         with self.signal_lock:
-            return dict(self.latest_signals)
+            current_time = datetime.now()
+            valid_signals = {}
+            
+            for stock_code, signal_data in self.latest_signals.items():
+                signal_timestamp = signal_data.get('timestamp', current_time)
+                # 信号有效期5分钟
+                if (current_time - signal_timestamp).total_seconds() < 300:
+                    valid_signals[stock_code] = signal_data
+                else:
+                    logger.debug(f"{stock_code} 信号已过期，自动清除")
+            
+            # 更新有效信号
+            self.latest_signals = valid_signals
+            return dict(valid_signals)
     
     def mark_signal_processed(self, stock_code):
-        """标记信号已处理"""
+        """标记信号已处理 - 增加状态跟踪"""
         with self.signal_lock:
-            self.latest_signals.pop(stock_code, None)
-            logger.debug(f"{stock_code} 信号已标记为已处理")
+            if stock_code in self.latest_signals:
+                signal_type = self.latest_signals[stock_code]['type']
+                logger.info(f"{stock_code} {signal_type}信号已标记为已处理并清除")
+                self.latest_signals.pop(stock_code, None)
+            else:
+                logger.debug(f"{stock_code} 信号已不存在，无需处理")
 
     def _position_monitor_loop(self):
         """持仓监控循环 - 优化版本，使用统一的信号检查"""

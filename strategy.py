@@ -37,6 +37,9 @@ class TradingStrategy:
         
         # 已处理的止盈止损信号记录
         self.processed_signals = set()
+
+        # ✅ 添加这行 - 重试计数器
+        self.retry_counts = {}
     
     def init_grid_trading(self, stock_code):
         """
@@ -186,7 +189,7 @@ class TradingStrategy:
             else:
                 logger.warning(f"未知的信号类型: {signal_type}")
                 return False
-                
+
         except Exception as e:
             logger.error(f"执行 {stock_code} 的 {signal_type} 信号时出错: {str(e)}")
             return False
@@ -316,8 +319,15 @@ class TradingStrategy:
                 )
                 
                 if success:
-                    self.position_manager.mark_profit_triggered(stock_code)
-                    logger.info(f"[模拟交易] {stock_code} 首次止盈执行完成")
+                    # 验证执行结果
+                    updated_position = self.position_manager.get_position(stock_code)
+                    if updated_position and updated_position.get('profit_triggered'):
+                        logger.info(f"[验证成功] {stock_code} 首次止盈执行完成并已标记")
+                        return True
+                    else:
+                        logger.error(f"[验证失败] {stock_code} 首次止盈执行后状态异常")
+                        return False
+            
                 return success
             else:
                 # 实盘交易：调用交易接口（先注释掉）
@@ -588,6 +598,9 @@ class TradingStrategy:
         策略检测始终运行，但交易执行依赖ENABLE_AUTO_TRADING
         """
         try:
+            # ✅ 添加调试日志
+            logger.debug(f"开始检查 {stock_code} 的交易策略，自动交易状态: {config.ENABLE_AUTO_TRADING}")
+            
             # 更新数据（始终执行）
             self.data_manager.update_stock_data(stock_code)
             self.indicator_calculator.calculate_all_indicators(stock_code)
@@ -595,6 +608,9 @@ class TradingStrategy:
             # 1. 检查止盈止损信号（如果启用）
             if config.ENABLE_DYNAMIC_STOP_PROFIT:
                 pending_signals = self.position_manager.get_pending_signals()
+                
+                # ✅ 添加调试日志
+                logger.debug(f"{stock_code} 待处理信号: {list(pending_signals.keys())}")
                 
                 if stock_code in pending_signals:
                     signal_data = pending_signals[stock_code]
@@ -604,29 +620,31 @@ class TradingStrategy:
                     logger.info(f"{stock_code} 处理待执行的{signal_type}信号")
                     
                     # 检查是否已处理过该信号（防重复,每分钟3次）
-                    retry_key  = f"{signal_type}_{stock_code}_{datetime.now().strftime('%Y%m%d_%H%M')}"
+                    retry_key = f"{signal_type}_{stock_code}_{datetime.now().strftime('%Y%m%d_%H%M')}"
                     retry_count = self.retry_counts.get(retry_key, 0)
-                    if retry_count >= 3:  # 每日最多重试3次
+                    if retry_count >= 3:
                         logger.warning(f"{stock_code} {signal_type}信号重试次数已达上限")
                         self.position_manager.mark_signal_processed(stock_code)
                         return
                     
-                       
                     if config.ENABLE_AUTO_TRADING:
+                        # ✅ 添加调试日志
+                        logger.info(f"{stock_code} 开始执行{signal_type}信号，重试次数: {retry_count}")
+                        
                         success = self.execute_trading_signal_direct(stock_code, signal_type, signal_info)
                         
                         if success:
-                            # ✅ 只有成功才标记为已处理
                             self.position_manager.mark_signal_processed(stock_code)
-                            # 清除重试计数
                             self.retry_counts.pop(retry_key, None)
+                            logger.info(f"{stock_code} {signal_type}信号执行成功")
                         else:
-                            # ✅ 失败时增加重试计数，但不标记为已处理
                             self.retry_counts[retry_key] = retry_count + 1
                             logger.warning(f"{stock_code} {signal_type}执行失败，重试次数: {retry_count + 1}")
                     else:
                         logger.info(f"{stock_code} 检测到{signal_type}信号，但自动交易已关闭")
                         self.position_manager.mark_signal_processed(stock_code)
+                else:
+                    logger.debug(f"{stock_code} 当前无待处理信号")
             
             # 2. 检查网格交易信号（如果启用）
             if config.ENABLE_GRID_TRADING:
@@ -711,7 +729,7 @@ class TradingStrategy:
                     logger.info("交易策略执行完成")
                 
                 # 等待下一次策略执行
-                for _ in range(300):  # 每5分钟执行一次策略
+                for _ in range(30):  # 每30s执行一次策略
                     if self.stop_flag:
                         break
                     time.sleep(1)
