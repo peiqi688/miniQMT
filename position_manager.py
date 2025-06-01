@@ -1593,14 +1593,26 @@ class PositionManager:
                 open_date = position.get('open_date')
                 stock_name = position.get('stock_name')
                 
-                # 关键优化：成本价保持不变（符合实际交易逻辑）
-                final_cost_price = current_cost_price
-                
-                # 如果是首次止盈卖出，标记profit_triggered为True
+                # ✅ 关键修改：动态成本价计算
                 if sell_type == 'partial' and not profit_triggered:
+                    # 首次止盈卖出，计算获利分摊后的新成本价
+                    sell_cost = sell_volume * current_cost_price  # 卖出部分的原成本
+                    sell_profit = revenue - sell_cost  # 卖出获利
+                    remaining_cost = new_volume * current_cost_price  # 剩余持仓原成本
+                    
+                    # 将获利分摊到剩余持仓，降低成本价
+                    final_cost_price = max(0.01, (remaining_cost - sell_profit) / new_volume)
+                    
+                    logger.info(f"[模拟交易] {stock_code} 动态成本价计算:")
+                    logger.info(f"  - 卖出获利: {sell_profit:.2f}元")
+                    logger.info(f"  - 原成本价: {current_cost_price:.2f} -> 新成本价: {final_cost_price:.2f}")
+                    
                     profit_triggered = True
                     self.mark_profit_triggered(stock_code)
                     logger.info(f"[模拟交易] {stock_code} 首次止盈完成，已标记profit_triggered=True")
+                else:
+                    # 其他情况保持原成本价
+                    final_cost_price = current_cost_price
                 
                 # 重新计算止损价格
                 new_stop_loss_price = self.calculate_stop_loss_price(
