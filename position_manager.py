@@ -338,15 +338,32 @@ class PositionManager:
             self.sync_thread.join(timeout=5)
             logger.info("定时同步线程已停止")
 
+    # position_manager.py:_sync_loop() 方法修改
     def _sync_loop(self):
-        """定时同步循环"""
+        """定时同步循环 - 增强版"""
         while not self.sync_stop_flag:
             try:
+                # 原有的数据库同步
                 self._sync_memory_to_db()
-                for _ in range(5):
+                
+                # ✅ 新增：模拟交易模式下的价格更新
+                if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
+                    # 在交易时间内更频繁地更新价格
+                    if config.is_trade_time():
+                        logger.debug("模拟交易模式：更新持仓价格和指标")
+                        self.update_all_positions_price()  # 更新价格
+                        self._increment_data_version()      # 触发版本更新
+                
+                # 调整休眠时间
+                sleep_time = 3 if (hasattr(config, 'ENABLE_SIMULATION_MODE') and 
+                                config.ENABLE_SIMULATION_MODE and 
+                                config.is_trade_time()) else 5
+                
+                for _ in range(sleep_time):
                     if self.sync_stop_flag:
                         break
                     time.sleep(1)
+                    
             except Exception as e:
                 logger.error(f"定时同步循环出错: {str(e)}")
                 time.sleep(60)  # 出错后等待一分钟再继续
@@ -1492,6 +1509,7 @@ class PositionManager:
             self.memory_conn.commit()
             
             # 注意：这里不调用 _increment_data_version()，由调用方决定何时触发
+            self._increment_data_version()
             logger.debug(f"[模拟交易] 内存数据库更新成功: {stock_code}")
             return True
             
