@@ -251,7 +251,8 @@ class PositionManager:
                 return
         
             # 获取内存数据库中的所有股票代码
-            memory_positions = pd.read_sql_query("SELECT stock_code, stock_name, open_date, profit_triggered, highest_price, stop_loss_price FROM positions", self.memory_conn)
+            # memory_positions = pd.read_sql_query("SELECT stock_code, stock_name, open_date, profit_triggered, highest_price, stop_loss_price FROM positions", self.memory_conn)
+            memory_positions = pd.read_sql_query("SELECT * FROM positions", self.memory_conn)
             memory_stock_codes = set(memory_positions['stock_code'].tolist()) if not memory_positions.empty else set()
             
             # ✅ 获取SQLite数据库中的所有股票代码

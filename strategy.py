@@ -269,18 +269,18 @@ class TradingStrategy:
                 
                 if success:
                     logger.warning(f"[模拟交易] {stock_code} 止损执行完成，持仓已清零")
-                return success
+                    return success
             else:
                 # 实盘交易：调用交易接口（先注释掉）
                 logger.warning(f"[实盘交易] {stock_code} 止损信号已识别，但实盘交易功能已注释")
                 
-                # TODO: 实盘交易功能开发完成后启用以下代码
+                # 实盘交易功能
                 order_id = self.trading_executor.sell_stock(
-                    stock_code, volume, price_type=1, strategy='stop_loss'
+                    stock_code, volume, price_type=5, strategy='stop_loss'
                 )
                 return order_id is not None
-                
-                return False  # 暂时返回False，表示未执行实盘交易
+            
+            return False  # 暂时返回False，表示未执行实盘交易
                 
         except Exception as e:
             logger.error(f"执行 {stock_code} 止损信号时出错: {str(e)}")
@@ -330,12 +330,12 @@ class TradingStrategy:
             
                 return success
             else:
-                # 实盘交易：调用交易接口（先注释掉）
+                # 实盘交易：调用交易接口
                 logger.info(f"[实盘交易] {stock_code} 首次止盈信号已识别，但实盘交易功能已注释")
                 
-                # TODO: 实盘交易功能开发完成后启用以下代码
+                # 实盘交易
                 order_id = self.trading_executor.sell_stock(
-                    stock_code, sell_volume, price_type=0, strategy='take_profit_half'
+                    stock_code, sell_volume, price_type=5, strategy='take_profit_half'
                 )
                 if order_id:
                     # 标记已触发首次止盈
@@ -379,18 +379,18 @@ class TradingStrategy:
                 
                 if success:
                     logger.info(f"[模拟交易] {stock_code} 动态止盈执行完成，持仓已清零")
-                return success
+                    return success
             else:
-                # 实盘交易：调用交易接口（先注释掉）
+                # 实盘交易：调用交易接口
                 logger.info(f"[实盘交易] {stock_code} 动态止盈信号已识别，但实盘交易功能已注释")
                 
-                # TODO: 实盘交易功能开发完成后启用以下代码
+                # 实盘交易
                 order_id = self.trading_executor.sell_stock(
-                    stock_code, volume, price_type=0, strategy='take_profit_full'
+                    stock_code, volume, price_type=5, strategy='take_profit_full'
                 )
                 return order_id is not None
                 
-                return False  # 暂时返回False，表示未执行实盘交易
+            return False  # 暂时返回False，表示未执行实盘交易
                 
         except Exception as e:
             logger.error(f"执行 {stock_code} 动态止盈信号时出错: {str(e)}")

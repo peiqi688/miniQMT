@@ -35,14 +35,49 @@ class DataManager:
         self.subscribed_stocks = []
         
         # # 初始化行情接口 
-        # self._init_xtquant()
-
-        self.realtime_manager = get_realtime_data_manager()        
+        self._init_xtquant()
+        # self.realtime_manager = get_realtime_data_manager()        
 
         # 数据更新线程
         self.update_thread = None
         self.stop_flag = False
-    
+
+    def _init_xtquant(self):
+        """初始化迅投行情接口 - 使用共享连接"""
+        try:
+            import xtquant.xtdata as xt
+            self.xt = xt
+            
+            if xt.connect():
+                logger.info("xtquant行情服务连接成功")
+            else:
+                logger.error("xtquant行情服务连接失败")
+                self.xt = None
+                return
+                
+            # 验证连接状态
+            self._verify_connection()
+                
+        except Exception as e:
+            logger.error(f"初始化迅投行情接口出错: {str(e)}")
+            self.xt = None
+
+    def _verify_connection(self):
+        """验证连接状态"""
+        try:
+            # 使用一个简单的测试来验证连接
+            test_codes = ['000001.SZ']  # 测试股票
+            test_data = self.xt.get_full_tick(test_codes)
+            if test_data:
+                logger.debug("xtquant连接状态验证成功")
+                return True
+            else:
+                logger.warning("xtquant连接状态验证失败")
+                return False
+        except Exception as e:
+            logger.warning(f"xtquant连接验证出错: {str(e)}")
+            return False
+
     def _connect_db(self):
         """连接SQLite数据库"""
         try:
@@ -541,13 +576,28 @@ class DataManager:
         dict: 最新行情数据
         """
         try:
-            #当前是交易时间，先尝试从xtdata接口获取tick数据
+            # 在交易时间内，优先使用实时数据管理器
             if config.is_trade_time():
-                realtime_data = self.realtime_manager.get_realtime_data(stock_code)
-                if realtime_data and realtime_data.get('lastPrice', 0) > 0:
-                    logger.debug(f"使用 {realtime_data['source']} 获取 {stock_code} 实时数据 {realtime_data.get('lastPrice')} ")
-                    return realtime_data
-            
+                # 添加频率控制，避免过于频繁调用
+                if not hasattr(self, '_last_realtime_call_time'):
+                    self._last_realtime_call_time = {}
+                
+                current_time = time.time()
+                last_call_time = self._last_realtime_call_time.get(stock_code, 0)
+                
+                # 限制调用频率：每只股票最多每秒调用一次
+                if current_time - last_call_time >= 1.0:
+                    self._last_realtime_call_time[stock_code] = current_time
+                    
+                    try:
+                        # realtime_data = self.realtime_manager.get_realtime_data(stock_code)
+                        realtime_data = self.get_latest_xtdata(stock_code)
+                        if realtime_data and realtime_data.get('lastPrice', 0) > 0:
+                            logger.debug(f"使用 {realtime_data['source']} 获取 {stock_code} 实时数据 {realtime_data.get('lastPrice')}")
+                            return realtime_data
+                    except Exception as e:
+                        logger.debug(f"实时数据管理器获取{stock_code}失败，降级到Mootdx: {str(e)}")
+                    
             # 继续尝试从Mootdx获取数据
             # Adjust stock code if necessary
             if stock_code.endswith((".SH", ".SZ")):

@@ -41,51 +41,54 @@ class DataSource:
             logger.warning(f"数据源 {self.name} 错误次数达到上限，标记为不健康")
 
 class XtQuantSource(DataSource):
-    """XtQuant数据源 - 直接实现数据获取"""
+    _shared_connection = None  # 类级别的共享连接
+    _connection_lock = threading.Lock()
+    
     def __init__(self):
         super().__init__("XtQuant", timeout=5)
+        self.max_errors = 10  # 放宽错误限制
         self._init_xtquant()
     
     def _init_xtquant(self):
-        """初始化迅投行情接口"""
+        """初始化迅投行情接口 - 使用共享连接"""
         try:
             import xtquant.xtdata as xt
             self.xt = xt
-
-            # 根据文档，首先调用connect连接到行情服务器
-            if not xt.connect():
-                logger.error("行情服务连接失败")
-                self.xt = None  # 连接失败时设置为None
-                return
-                
-            logger.info("行情服务连接成功")
             
-            # 根据测试结果，我们不使用subscribe_quote方法（会失败）
-            # 改为验证股票代码是否可以通过get_full_tick获取数据
-            valid_stocks = []
-            for stock_code in config.STOCK_POOL:
-                try:
-                    stock_code = self._adjust_stock(stock_code)
-                    # 尝试adjust_stock(stock_code)
-                    # 尝试获取Tick数据验证股票代码有效性
-                    tick_data = xt.get_full_tick([stock_code])
-                    if tick_data and stock_code in tick_data:
-                        valid_stocks.append(stock_code)
-                        logger.info(f"股票 {stock_code} 数据获取成功")
+            with self._connection_lock:
+                # 检查是否已有连接
+                if XtQuantSource._shared_connection is None:
+                    # 只在没有连接时才创建新连接
+                    if xt.connect():
+                        XtQuantSource._shared_connection = True
+                        logger.info("xtquant行情服务连接成功")
                     else:
-                        logger.warning(f"无法获取 {stock_code} 的Tick数据")
-                except Exception as e:
-                    logger.warning(f"获取 {stock_code} 的Tick数据失败: {str(e)}")
-            
-            self.subscribed_stocks = valid_stocks
-            
-            if self.subscribed_stocks:
-                logger.info(f"成功验证 {len(self.subscribed_stocks)} 只股票可获取数据")
-            else:
-                logger.warning("没有有效的股票，请检查股票代码格式")
+                        logger.error("xtquant行情服务连接失败")
+                        self.xt = None
+                        return
+                
+            # 验证连接状态
+            self._verify_connection()
                 
         except Exception as e:
             logger.error(f"初始化迅投行情接口出错: {str(e)}")
+            self.xt = None
+    
+    def _verify_connection(self):
+        """验证连接状态"""
+        try:
+            # 使用一个简单的测试来验证连接
+            test_codes = ['000001.SZ']  # 测试股票
+            test_data = self.xt.get_full_tick(test_codes)
+            if test_data:
+                logger.debug("xtquant连接状态验证成功")
+                return True
+            else:
+                logger.warning("xtquant连接状态验证失败")
+                return False
+        except Exception as e:
+            logger.warning(f"xtquant连接验证出错: {str(e)}")
+            return False
 
     # 股票代码转换
     def _select_data_type(self, stock='600031'):
@@ -101,47 +104,74 @@ class XtQuantSource(DataSource):
         return Methods.add_xt_suffix(stock)
     
     def get_data(self, stock_code):
-        """直接从xtquant获取数据"""
-        try:
-            if not self.xt:
-                self.record_error()
-                return None
-                
-            formatted_code = self._adjust_stock(stock_code)
-            
-            # 直接调用xtquant接口
-            tick_data = self.xt.get_full_tick([formatted_code])
-            
-            if not tick_data or formatted_code not in tick_data:
-                self.record_error()
-                return None
-            
-            tick = tick_data[formatted_code]
-            
-            result = {
-                'stock_code': stock_code,
-                'lastPrice': float(getattr(tick, 'lastPrice', 0)),
-                'open': float(getattr(tick, 'open', 0)),
-                'high': float(getattr(tick, 'high', 0)),
-                'low': float(getattr(tick, 'low', 0)),
-                'volume': int(getattr(tick, 'volume', 0)),
-                'amount': float(getattr(tick, 'amount', 0)),
-                'lastClose': float(getattr(tick, 'lastClose', 0)),
-                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'source': self.name
-            }
-            
-            if result['lastPrice'] > 0:
-                self.reset_errors()
-                return result
-            else:
-                self.record_error()
-                return None
-                
-        except Exception as e:
+        """获取数据 - 增加重试和连接检查"""
+        if not self.xt:
             self.record_error()
-            logger.warning(f"XtQuant获取{stock_code}数据失败: {str(e)}")
             return None
+        
+        # 重试机制
+        max_retries = 2
+        for attempt in range(max_retries):
+            try:
+                formatted_code = self._adjust_stock(stock_code)
+                
+                # 调用接口获取数据
+                tick_data = self.xt.get_full_tick([formatted_code])
+                
+                if not tick_data or formatted_code not in tick_data:
+                    if attempt < max_retries - 1:
+                        time.sleep(0.1)  # 短暂等待后重试
+                        continue
+                    else:
+                        self.record_error()
+                        return None
+                
+                tick = tick_data[formatted_code]
+                
+                result = {
+                    'stock_code': stock_code,
+                    'lastPrice': float(getattr(tick, 'lastPrice', 0)),
+                    'open': float(getattr(tick, 'open', 0)),
+                    'high': float(getattr(tick, 'high', 0)),
+                    'low': float(getattr(tick, 'low', 0)),
+                    'volume': int(getattr(tick, 'volume', 0)),
+                    'amount': float(getattr(tick, 'amount', 0)),
+                    'lastClose': float(getattr(tick, 'lastClose', 0)),
+                    'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    'source': self.name
+                }
+                
+                if result['lastPrice'] > 0:
+                    self.reset_errors()  # 成功时重置错误计数
+                    return result
+                else:
+                    if attempt < max_retries - 1:
+                        time.sleep(0.1)
+                        continue
+                    else:
+                        self.record_error()
+                        return None
+                        
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    logger.debug(f"XtQuant获取{stock_code}数据重试 {attempt + 1}: {str(e)}")
+                    time.sleep(0.1)
+                    continue
+                else:
+                    self.record_error()
+                    logger.warning(f"XtQuant获取{stock_code}数据失败: {str(e)}")
+                    return None
+        
+        return None
+    
+    def record_error(self):
+        """记录错误 - 优化版"""
+        self.error_count += 1
+        if self.error_count >= self.max_errors:
+            self.is_healthy = False
+            logger.warning(f"数据源 {self.name} 错误次数达到上限 {self.max_errors}，标记为不健康")
+        elif self.error_count > 5:  # 错误较多时给出警告
+            logger.warning(f"数据源 {self.name} 错误次数: {self.error_count}")
 
 class MootdxSource(DataSource):
     """Mootdx数据源"""
@@ -290,6 +320,10 @@ class RealtimeDataManager:
         self.health_check_interval = getattr(config, 'REALTIME_DATA_CONFIG', {}).get('health_check_interval', 30)
         self.last_health_check = 0
 
+        # 增加调用频率控制
+        self._call_frequency_control = {}
+        self._min_call_interval = 0.5  # 最小调用间隔500ms
+
     def _init_data_sources_by_mode(self):
         """根据交易模式初始化数据源"""
         # 获取当前交易模式
@@ -357,9 +391,20 @@ class RealtimeDataManager:
     def get_realtime_data(self, stock_code):
         """获取实时数据 - 修改版：检查交易模式变化"""
         try:
+            # 频率控制
+            current_time = time.time()
+            last_call_time = self._call_frequency_control.get(stock_code, 0)
+            
+            if current_time - last_call_time < self._min_call_interval:
+                logger.debug(f"{stock_code} 调用过于频繁，跳过本次请求")
+                return None
+            
+            self._call_frequency_control[stock_code] = current_time
+            
+            # 原有逻辑
             if not self.data_sources:
                 logger.error("没有可用的数据源")
-                return None
+                return None            
             
             # 🔥 检查交易模式是否发生变化
             current_mode = 'simulation' if getattr(config, 'ENABLE_SIMULATION_MODE', False) else 'real'
