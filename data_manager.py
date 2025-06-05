@@ -11,7 +11,7 @@ import xtquant.xtdata as xt
 import Methods
 import config
 from logger import get_logger
-from realtime_data_manager import get_realtime_data_manager
+# from realtime_data_manager import get_realtime_data_manager
 
 # 获取logger
 logger = get_logger("data_manager")
@@ -222,11 +222,11 @@ class DataManager:
     #     '''
     #     return Methods.select_data_type(stock)
     
-    # def _adjust_stock(self, stock='600031.SH'):
-    #     '''
-    #     调整代码
-    #     '''
-    #     return Methods.add_xt_suffix(stock)
+    def _adjust_stock(self, stock='600031.SH'):
+        '''
+        调整代码
+        '''
+        return Methods.add_xt_suffix(stock)
 
     def download_history_data(self, stock_code, period=None, start_date=None, end_date=None):
         """
@@ -578,25 +578,25 @@ class DataManager:
         try:
             # 在交易时间内，优先使用实时数据管理器
             if config.is_trade_time():
-                # 添加频率控制，避免过于频繁调用
-                if not hasattr(self, '_last_realtime_call_time'):
-                    self._last_realtime_call_time = {}
+                # # 添加频率控制，避免过于频繁调用
+                # if not hasattr(self, '_last_realtime_call_time'):
+                #     self._last_realtime_call_time = {}
                 
-                current_time = time.time()
-                last_call_time = self._last_realtime_call_time.get(stock_code, 0)
+                # current_time = time.time()
+                # last_call_time = self._last_realtime_call_time.get(stock_code, 0)
                 
-                # 限制调用频率：每只股票最多每秒调用一次
-                if current_time - last_call_time >= 1.0:
-                    self._last_realtime_call_time[stock_code] = current_time
+                # # 限制调用频率：每只股票最多每秒调用一次
+                # if current_time - last_call_time >= 1.0:
+                #     self._last_realtime_call_time[stock_code] = current_time
                     
-                    try:
-                        # realtime_data = self.realtime_manager.get_realtime_data(stock_code)
-                        realtime_data = self.get_latest_xtdata(stock_code)
-                        if realtime_data and realtime_data.get('lastPrice', 0) > 0:
-                            logger.debug(f"使用 {realtime_data['source']} 获取 {stock_code} 实时数据 {realtime_data.get('lastPrice')}")
-                            return realtime_data
-                    except Exception as e:
-                        logger.debug(f"实时数据管理器获取{stock_code}失败，降级到Mootdx: {str(e)}")
+                try:
+                    # realtime_data = self.realtime_manager.get_realtime_data(stock_code)
+                    realtime_data = self.get_latest_xtdata(stock_code)
+                    if realtime_data and realtime_data.get('lastPrice', 0) > 0:
+                        logger.debug(f"XT获取 {stock_code} 实时数据 {realtime_data.get('lastPrice')}")
+                        return realtime_data
+                except Exception as e:
+                    logger.debug(f"实时数据管理器获取{stock_code}失败，降级到Mootdx: {str(e)}")
                     
             # 继续尝试从Mootdx获取数据
             # Adjust stock code if necessary
@@ -606,7 +606,7 @@ class DataManager:
             # Get the latest data using Mootdx (e.g., get last 1 day)
             df = Methods.getStockData(
                 code=stock_code,
-                offset=1,  # Get only the latest data
+                offset=2,  # Get only the latest data
                 freq=9,  # 日线
                 adjustflag='qfq'
             )
@@ -617,10 +617,12 @@ class DataManager:
 
             # Extract the latest data
             latest_data = df.iloc[-1].to_dict()
+            lastday_data = df.iloc[-2].to_dict()
 
             # Rename columns to match expected format
             latest_data = {
                 'lastPrice': float(latest_data.get('close', 0)),
+                'lastClose': float(lastday_data.get('close', 0)),
                 'volume': float(latest_data.get('volume', 0)),
                 'amount': float(latest_data.get('amount', 0)),
                 'date': latest_data.get('datetime', None)
