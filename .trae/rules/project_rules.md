@@ -25,7 +25,7 @@
 2. 所有可配置参数集中管理，有调试开关和丰富的代码注释和调试信息；
 3. 如果有log文件，定期清理，不过多占用存储空间；
 4. xtquant的api参考https://dict.thinktrader.net；
-
+5. pywencai: 通过python获取问财数据，用于量化研究和学习 https://github.com/zsrl/pywencai  使用pywencai库的时候,要注释说明.
 # AI 优化提词
 请按照以下架构使用QMT Python API实现量化交易系统：
 ```python
