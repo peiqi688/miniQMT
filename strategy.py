@@ -271,8 +271,8 @@ class TradingStrategy:
                     logger.warning(f"[模拟交易] {stock_code} 止损执行完成，持仓已清零")
                     return success
             else:
-                # 实盘交易：调用交易接口（先注释掉）
-                logger.warning(f"[实盘交易] {stock_code} 止损信号已识别，但实盘交易功能已注释")
+                # 实盘交易：调用交易接口
+                logger.warning(f"[实盘交易] {stock_code} 止损信号已识别，执行实盘交易stop_loss")
                 
                 # 实盘交易功能
                 order_id = self.trading_executor.sell_stock(
@@ -331,7 +331,7 @@ class TradingStrategy:
                 return success
             else:
                 # 实盘交易：调用交易接口
-                logger.info(f"[实盘交易] {stock_code} 首次止盈信号已识别，但实盘交易功能已注释")
+                logger.info(f"[实盘交易] {stock_code} 首次止盈信号已识别，执行实盘卖出交易take_profit_half")
                 
                 # 实盘交易
                 order_id = self.trading_executor.sell_stock(
@@ -382,7 +382,7 @@ class TradingStrategy:
                     return success
             else:
                 # 实盘交易：调用交易接口
-                logger.info(f"[实盘交易] {stock_code} 动态止盈信号已识别，但实盘交易功能已注释")
+                logger.info(f"[实盘交易] {stock_code} 动态止盈信号已识别，执行实盘卖出交易take_profit_full")
                 
                 # 实盘交易
                 order_id = self.trading_executor.sell_stock(
