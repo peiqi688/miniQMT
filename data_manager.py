@@ -11,6 +11,7 @@ import xtquant.xtdata as xt
 import Methods
 import config
 from logger import get_logger
+# from realtime_data_manager import get_realtime_data_manager
 
 # 获取logger
 logger = get_logger("data_manager")
@@ -33,13 +34,50 @@ class DataManager:
         # 已订阅的股票代码列表
         self.subscribed_stocks = []
         
-        # 初始化行情接口 
+        # # 初始化行情接口 
         self._init_xtquant()
-        
+        # self.realtime_manager = get_realtime_data_manager()        
+
         # 数据更新线程
         self.update_thread = None
         self.stop_flag = False
-    
+
+    def _init_xtquant(self):
+        """初始化迅投行情接口 - 使用共享连接"""
+        try:
+            import xtquant.xtdata as xt
+            self.xt = xt
+            
+            if xt.connect():
+                logger.info("xtquant行情服务连接成功")
+            else:
+                logger.error("xtquant行情服务连接失败")
+                self.xt = None
+                return
+                
+            # 验证连接状态
+            self._verify_connection()
+                
+        except Exception as e:
+            logger.error(f"初始化迅投行情接口出错: {str(e)}")
+            self.xt = None
+
+    def _verify_connection(self):
+        """验证连接状态"""
+        try:
+            # 使用一个简单的测试来验证连接
+            test_codes = ['000001.SZ']  # 测试股票
+            test_data = self.xt.get_full_tick(test_codes)
+            if test_data:
+                logger.debug("xtquant连接状态验证成功")
+                return True
+            else:
+                logger.warning("xtquant连接状态验证失败")
+                return False
+        except Exception as e:
+            logger.warning(f"xtquant连接验证出错: {str(e)}")
+            return False
+
     def _connect_db(self):
         """连接SQLite数据库"""
         try:
@@ -140,49 +178,49 @@ class DataManager:
         self.conn.commit()
         logger.info("数据表结构已创建")
     
-    def _init_xtquant(self):
-        """初始化迅投行情接口"""
-        try:
-            # 根据文档，首先调用connect连接到行情服务器
-            if not xt.connect():
-                logger.error("行情服务连接失败")
-                return
+    # def _init_xtquant(self):
+    #     """初始化迅投行情接口"""
+    #     try:
+    #         # 根据文档，首先调用connect连接到行情服务器
+    #         if not xt.connect():
+    #             logger.error("行情服务连接失败")
+    #             return
                 
-            logger.info("行情服务连接成功")
+    #         logger.info("行情服务连接成功")
             
-            # 根据测试结果，我们不使用subscribe_quote方法（会失败）
-            # 改为验证股票代码是否可以通过get_full_tick获取数据
-            valid_stocks = []
-            for stock_code in config.STOCK_POOL:
-                try:
-                    stock_code = self._adjust_stock(stock_code)
-                    # 尝试adjust_stock(stock_code)
-                    # 尝试获取Tick数据验证股票代码有效性
-                    tick_data = xt.get_full_tick([stock_code])
-                    if tick_data and stock_code in tick_data:
-                        valid_stocks.append(stock_code)
-                        logger.info(f"股票 {stock_code} 数据获取成功")
-                    else:
-                        logger.warning(f"无法获取 {stock_code} 的Tick数据")
-                except Exception as e:
-                    logger.warning(f"获取 {stock_code} 的Tick数据失败: {str(e)}")
+    #         # 根据测试结果，我们不使用subscribe_quote方法（会失败）
+    #         # 改为验证股票代码是否可以通过get_full_tick获取数据
+    #         valid_stocks = []
+    #         for stock_code in config.STOCK_POOL:
+    #             try:
+    #                 stock_code = self._adjust_stock(stock_code)
+    #                 # 尝试adjust_stock(stock_code)
+    #                 # 尝试获取Tick数据验证股票代码有效性
+    #                 tick_data = xt.get_full_tick([stock_code])
+    #                 if tick_data and stock_code in tick_data:
+    #                     valid_stocks.append(stock_code)
+    #                     logger.info(f"股票 {stock_code} 数据获取成功")
+    #                 else:
+    #                     logger.warning(f"无法获取 {stock_code} 的Tick数据")
+    #             except Exception as e:
+    #                 logger.warning(f"获取 {stock_code} 的Tick数据失败: {str(e)}")
             
-            self.subscribed_stocks = valid_stocks
+    #         self.subscribed_stocks = valid_stocks
             
-            if self.subscribed_stocks:
-                logger.info(f"成功验证 {len(self.subscribed_stocks)} 只股票可获取数据")
-            else:
-                logger.warning("没有有效的股票，请检查股票代码格式")
+    #         if self.subscribed_stocks:
+    #             logger.info(f"成功验证 {len(self.subscribed_stocks)} 只股票可获取数据")
+    #         else:
+    #             logger.warning("没有有效的股票，请检查股票代码格式")
                 
-        except Exception as e:
-            logger.error(f"初始化迅投行情接口出错: {str(e)}")
+    #     except Exception as e:
+    #         logger.error(f"初始化迅投行情接口出错: {str(e)}")
 
-    # 股票代码转换
-    def _select_data_type(self, stock='600031'):
-        '''
-        选择数据类型
-        '''
-        return Methods.select_data_type(stock)
+    # # 股票代码转换
+    # def _select_data_type(self, stock='600031'):
+    #     '''
+    #     选择数据类型
+    #     '''
+    #     return Methods.select_data_type(stock)
     
     def _adjust_stock(self, stock='600031.SH'):
         '''
@@ -477,18 +515,31 @@ class DataManager:
             return
         
         try:
-            # 检查必要的列是否存在
-            required_columns = ['date', 'open', 'high', 'low', 'close', 'volume', 'amount']
-            for col in required_columns:
-                if col not in data_df.columns:
-                    logger.error(f"{stock_code} 的数据缺少必要的列: {col}")
-                    return
+            # ✅ 立即创建工作副本
+            work_df = data_df.copy()
             
-            # 准备数据
-            data_df['stock_code'] = stock_code
-
-            # Ensure 'close' column is numeric
-            data_df['close'] = pd.to_numeric(data_df['close'], errors='coerce')
+            # 数据验证和清理
+            required_columns = ['date', 'open', 'high', 'low', 'close', 'volume', 'amount']
+            missing_cols = [col for col in required_columns if col not in work_df.columns]
+            if missing_cols:
+                logger.error(f"{stock_code} 缺少必要列: {missing_cols}")
+                return
+            
+            # 清理空数据
+            initial_count = len(work_df)
+            work_df = work_df.dropna(subset=['date'])
+            final_count = len(work_df)
+            
+            if initial_count != final_count:
+                logger.warning(f"{stock_code} 过滤了 {initial_count - final_count} 行空date数据")
+            
+            if work_df.empty:
+                logger.warning(f"{stock_code} 无有效数据可保存")
+                return
+            
+            # 数据处理
+            work_df['stock_code'] = stock_code
+            work_df['close'] = pd.to_numeric(work_df['close'], errors='coerce')
             
             # Delete existing data for the stock_code
             cursor = self.conn.cursor()
@@ -497,7 +548,7 @@ class DataManager:
             # logger.info(f"已清除 {stock_code} 在 stock_daily_data 表中的原有数据")
 
             # 保存到数据库
-            data_df[['stock_code', 'date', 'open', 'high', 'low', 'close', 'volume', 'amount']].to_sql(
+            work_df[['stock_code', 'date', 'open', 'high', 'low', 'close', 'volume', 'amount']].to_sql(
                 'stock_daily_data', 
                 self.conn, 
                 if_exists='append', 
@@ -525,12 +576,28 @@ class DataManager:
         dict: 最新行情数据
         """
         try:
-            #当前是交易时间，先尝试从xtdata接口获取tick数据
+            # 在交易时间内，优先使用实时数据管理器
             if config.is_trade_time():
-                latest_quote = self.get_latest_xtdata(stock_code=stock_code)
-                if latest_quote and isinstance(latest_quote, dict) and 'lastPrice' in latest_quote:
-                     return latest_quote
-            
+                # # 添加频率控制，避免过于频繁调用
+                # if not hasattr(self, '_last_realtime_call_time'):
+                #     self._last_realtime_call_time = {}
+                
+                # current_time = time.time()
+                # last_call_time = self._last_realtime_call_time.get(stock_code, 0)
+                
+                # # 限制调用频率：每只股票最多每秒调用一次
+                # if current_time - last_call_time >= 1.0:
+                #     self._last_realtime_call_time[stock_code] = current_time
+                    
+                try:
+                    # realtime_data = self.realtime_manager.get_realtime_data(stock_code)
+                    realtime_data = self.get_latest_xtdata(stock_code)
+                    if realtime_data and realtime_data.get('lastPrice', 0) > 0:
+                        logger.debug(f"XT获取 {stock_code} 实时数据 {realtime_data.get('lastPrice')}")
+                        return realtime_data
+                except Exception as e:
+                    logger.debug(f"实时数据管理器获取{stock_code}失败，降级到Mootdx: {str(e)}")
+                    
             # 继续尝试从Mootdx获取数据
             # Adjust stock code if necessary
             if stock_code.endswith((".SH", ".SZ")):
@@ -539,7 +606,7 @@ class DataManager:
             # Get the latest data using Mootdx (e.g., get last 1 day)
             df = Methods.getStockData(
                 code=stock_code,
-                offset=1,  # Get only the latest data
+                offset=2,  # Get only the latest data
                 freq=9,  # 日线
                 adjustflag='qfq'
             )
@@ -550,10 +617,12 @@ class DataManager:
 
             # Extract the latest data
             latest_data = df.iloc[-1].to_dict()
+            lastday_data = df.iloc[-2].to_dict()
 
             # Rename columns to match expected format
             latest_data = {
                 'lastPrice': float(latest_data.get('close', 0)),
+                'lastClose': float(lastday_data.get('close', 0)),
                 'volume': float(latest_data.get('volume', 0)),
                 'amount': float(latest_data.get('amount', 0)),
                 'date': latest_data.get('datetime', None)

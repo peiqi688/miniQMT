@@ -104,9 +104,25 @@ class IndicatorCalculator:
         pandas.Series: 移动平均线数据
         """
         try:
-            # 使用MyTT计算MA
+            # 检查数据长度是否足够
+            if len(df) < period:
+                logger.warning(f"数据长度不足以计算MA{period}，需要{period}条数据，实际{len(df)}条")
+                return pd.Series([None] * len(df))
+            
+            # 使用MyTT计算MA，并检查结果
             ma = SMA(df['close'].values.astype(float), N=period)
-            return ma
+            
+            # 检查计算结果
+            if ma is None or len(ma) == 0:
+                logger.warning(f"MA{period}计算结果为空")
+                return pd.Series([None] * len(df))
+                
+            # 转换为pandas Series并处理NaN
+            ma_series = pd.Series(ma)
+            ma_series = ma_series.replace([np.nan, np.inf, -np.inf], None)
+            
+            return ma_series
+            
         except Exception as e:
             logger.error(f"计算MA{period}指标时出错: {str(e)}")
             return pd.Series([None] * len(df))
@@ -122,6 +138,16 @@ class IndicatorCalculator:
         pandas.DataFrame: MACD指标数据
         """
         try:
+            # 检查数据长度是否足够
+            min_periods = max(config.MACD_FAST, config.MACD_SLOW, config.MACD_SIGNAL) + 10
+            if len(df) < min_periods:
+                logger.warning(f"数据长度不足以计算MACD，需要至少{min_periods}条数据，实际{len(df)}条")
+                return pd.DataFrame({
+                    'macd': [None] * len(df),
+                    'macd_signal': [None] * len(df),
+                    'macd_hist': [None] * len(df)
+                })
+            
             # 使用MyTT计算MACD
             macd, signal, hist = MACD(
                 df['close'].values.astype(float),
@@ -129,19 +155,28 @@ class IndicatorCalculator:
                 LONG=config.MACD_SLOW,
                 M=config.MACD_SIGNAL
             )
-
             
-            # 创建结果DataFrame
+            # 检查计算结果
+            if any(x is None or len(x) == 0 for x in [macd, signal, hist]):
+                logger.warning("MACD计算结果包含空值")
+                return pd.DataFrame({
+                    'macd': [None] * len(df),
+                    'macd_signal': [None] * len(df),
+                    'macd_hist': [None] * len(df)
+                })
+            
+            # 创建结果DataFrame并处理异常值
             result = pd.DataFrame({
-                'macd': macd,
-                'macd_signal': signal,
-                'macd_hist': hist
+                'macd': pd.Series(macd).replace([np.nan, np.inf, -np.inf], None),
+                'macd_signal': pd.Series(signal).replace([np.nan, np.inf, -np.inf], None),
+                'macd_hist': pd.Series(hist).replace([np.nan, np.inf, -np.inf], None)
             })
             
             return result
+            
         except Exception as e:
             logger.error(f"计算MACD指标时出错: {str(e)}")
-            # 返回空的DataFrame
+            # 返回包含None值的DataFrame
             return pd.DataFrame({
                 'macd': [None] * len(df),
                 'macd_signal': [None] * len(df),
@@ -254,15 +289,27 @@ class IndicatorCalculator:
                 # 检查前一天MACD柱为负，当天MACD柱为正（MACD金叉）
                 prev_hist = indicators_df.iloc[-2]['macd_hist']
                 curr_hist = indicators_df.iloc[-1]['macd_hist']
+
+                # 添加None值检查
+                if prev_hist is None or curr_hist is None:
+                    logger.debug(f"{stock_code} MACD数据包含None值，跳过金叉检查")
+                    return False                
                 
                 macd_cross = prev_hist < 0 and curr_hist > 0
                 
                 # 检查均线多头排列（MA10 > MA20 > MA30 > MA60）
                 latest = indicators_df.iloc[-1]
-                ma_alignment = (
-                    latest['ma10'] > latest['ma20'] > 
-                    latest['ma30'] > latest['ma60']
-                )
+                ma10 = latest['ma10']
+                ma20 = latest['ma20'] 
+                ma30 = latest['ma30']
+                ma60 = latest['ma60']
+                
+                # 添加None值检查
+                if any(ma is None for ma in [ma10, ma20, ma30, ma60]):
+                    logger.debug(f"{stock_code} 均线数据包含None值，跳过均线排列检查")
+                    return False
+                
+                ma_alignment = ma10 > ma20 > ma30 > ma60
                 
                 # 检查是否满足买入条件
                 if macd_cross and ma_alignment:
@@ -297,15 +344,27 @@ class IndicatorCalculator:
                 # 检查前一天MACD柱为正，当天MACD柱为负（MACD死叉）
                 prev_hist = indicators_df.iloc[-2]['macd_hist']
                 curr_hist = indicators_df.iloc[-1]['macd_hist']
+
+                # 添加None值检查
+                if prev_hist is None or curr_hist is None:
+                    logger.debug(f"{stock_code} MACD数据包含None值，跳过死叉检查")
+                    return False
                 
                 macd_cross = prev_hist > 0 and curr_hist < 0
                 
                 # 检查均线空头排列（MA10 < MA20 < MA30 < MA60）
                 latest = indicators_df.iloc[-1]
-                ma_alignment = (
-                    latest['ma10'] < latest['ma20'] < 
-                    latest['ma30'] < latest['ma60']
-                )
+                ma10 = latest['ma10']
+                ma20 = latest['ma20']
+                ma30 = latest['ma30'] 
+                ma60 = latest['ma60']
+                
+                # 添加None值检查
+                if any(ma is None for ma in [ma10, ma20, ma30, ma60]):
+                    logger.debug(f"{stock_code} 均线数据包含None值，跳过均线排列检查")
+                    return False
+                
+                ma_alignment = ma10 < ma20 < ma30 < ma60
                 
                 # 检查是否满足卖出条件
                 if macd_cross and ma_alignment:

@@ -16,16 +16,27 @@ LOG_MAX_SIZE = 10 * 1024 * 1024  # 10MB
 LOG_BACKUP_COUNT = 5  # 保留5个备份文件
 
 # ======================= 功能开关 =======================
-ENABLE_SIMULATION_MODE = True  # 设置为True开启模拟交易模式
-ENABLE_MONITORING = False    # 控制监控状态
-ENABLE_AUTO_TRADING = False  # 是否启用自动交易
-ENABLE_ALLOW_BUY = True  # 是否允许买入
-ENABLE_ALLOW_SELL = True  # 是否允许卖出
-ENABLE_DATA_SYNC = True  # 是否启用数据同步
-ENABLE_POSITION_MONITOR = False  # 是否启用持仓监控
-ENABLE_LOG_CLEANUP = True  # 是否启用日志清理
-ENABLE_GRID_TRADING = False  # 是否启用网格交易(自动交易)
-ENABLE_DYNAMIC_STOP_PROFIT = False  # 是否启用动态止盈(自动交易)
+ENABLE_SIMULATION_MODE = True   # 模拟交易模式开关（True=模拟，False=实盘）
+ENABLE_MONITORING = False       # 控制前端UI监控状态
+ENABLE_AUTO_TRADING = False     # 自动交易总开关：控制是否执行交易决策并形成交易记录
+ENABLE_ALLOW_BUY = True         # 是否允许买入操作
+ENABLE_ALLOW_SELL = True        # 是否允许卖出操作
+
+# 策略功能模块开关（独立控制）
+ENABLE_DYNAMIC_STOP_PROFIT = True   # 止盈止损功能开关
+ENABLE_GRID_TRADING = False         # 网格交易功能开关
+
+# 其他功能开关
+ENABLE_DATA_SYNC = True             # 是否启用数据同步
+ENABLE_POSITION_MONITOR = True      # 是否启用持仓监控
+ENABLE_LOG_CLEANUP = True           # 是否启用日志清理
+
+# 注释说明：
+# - 策略线程始终运行，进行信号检测和监控
+# - ENABLE_AUTO_TRADING 控制是否执行检测到的交易信号
+# - ENABLE_DYNAMIC_STOP_PROFIT 控制止盈止损模块
+# - ENABLE_GRID_TRADING 控制网格交易模块
+# - ENABLE_SIMULATION_MODE 控制交易执行方式（模拟/实盘）
 
 # ======================= 数据配置 =======================
 # 历史数据存储路径
@@ -42,6 +53,19 @@ INITIAL_DAYS = 365
 UPDATE_INTERVAL = 60
 # 备选池股票文件路径
 STOCK2BUY_FILE = os.path.join(DATA_DIR, "stock2buy.json")
+
+# 实时数据源配置
+REALTIME_DATA_CONFIG = {
+    'enable_multi_source': True,
+    'health_check_interval': 30,
+    'source_timeout': 5,
+    'max_error_count': 3,
+    'preferred_sources': [
+        'XtQuant',
+        'Mootdx'
+    ]
+}
+
 
 # ======================= 交易配置 =======================
 # 交易账号信息（从外部文件读取，避免敏感信息硬编码）

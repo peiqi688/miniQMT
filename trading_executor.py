@@ -883,44 +883,21 @@ class TradingExecutor:
                 
                 # 模拟交易模式处理
                 if is_simulation:
-                    # 处理模拟交易
-                    sim_order_id = self._generate_sim_order_id()
-                    trade_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    # 调用 position_manager 的模拟买入方法
+                    success = self.position_manager.simulate_buy_position(
+                        stock_code=stock_code,
+                        buy_volume=volume,
+                        buy_price=price,
+                        strategy=strategy if strategy != 'default' else 'simu'
+                    )
                     
-                    logger.info(f"模拟交易模式: 生成订单ID: {sim_order_id}")
-                    
-                    try:
-                        # 记录模拟交易
-                        trade_saved = self._save_trade_record(
-                            stock_code=stock_code,
-                            trade_time=trade_time,
-                            trade_type='BUY',
-                            price=price,
-                            volume=volume,
-                            amount=price * volume,
-                            trade_id=sim_order_id,
-                            commission=price * volume * 0.0003,  # 模拟手续费
-                            strategy=strategy if strategy != 'default' else 'simu'  # 如果没有指定策略，则使用'simu'
-                        )
-                        
-                        if not trade_saved:
-                            logger.error(f"模拟交易记录保存失败: {stock_code}")
-                        
-                        # 更新持仓
-                        self._update_position_after_trade(stock_code, 'BUY', price, volume)
-                        
-                        # 更新模拟账户资金
-                        cost = price * volume * 1.0003  # 包含手续费
-                        self.simulation_balance -= cost
-                        config.SIMULATION_BALANCE = self.simulation_balance
-                        logger.info(f"模拟账户资金更新: -{cost:.2f}, 余额: {self.simulation_balance:.2f}")
-                        
+                    if success:
+                        sim_order_id = self._generate_sim_order_id()
                         logger.info(f"[模拟] 买入 {stock_code} 成功，委托号: {sim_order_id}, 价格: {price}, 数量: {volume}")
                         return sim_order_id
-                    except Exception as e:
-                        logger.error(f"模拟交易记录保存异常: {str(e)}")
-                        # 即使出现异常，也返回一个订单ID以便测试继续
-                        return sim_order_id
+                    else:
+                        logger.error(f"[模拟] 买入 {stock_code} 失败")
+                        return None
                 
                 # 实盘交易模式处理
                 # 使用qmt_trader检查股票是否可买入
