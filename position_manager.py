@@ -253,7 +253,12 @@ class PositionManager:
             if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
                 logger.debug("模拟交易模式：跳过内存数据库到SQLite数据库的同步")
                 return
-        
+
+            # ✅ 添加交易时间检查 - 非交易时间不同步到SQLite
+            if not config.is_trade_time():
+                logger.debug("非交易时间，跳过内存数据库到SQLite的同步")
+                return
+
             # 获取内存数据库中的所有股票代码
             # memory_positions = pd.read_sql_query("SELECT stock_code, stock_name, open_date, profit_triggered, highest_price, stop_loss_price FROM positions", self.memory_conn)
             memory_positions = pd.read_sql_query("SELECT * FROM positions", self.memory_conn)
