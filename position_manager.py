@@ -213,6 +213,10 @@ class PositionManager:
             if not hasattr(config, 'ENABLE_SIMULATION_MODE') or not config.ENABLE_SIMULATION_MODE:
                 # 只在非模拟交易模式下执行删除操作
                 if current_positions:  # 只有当至少有一个有效的当前持仓时才执行删除
+                    # 只在有足够多的有效持仓数据时才执行删除
+                    if len(current_positions) < len(memory_stock_codes) * 0.5:
+                        logger.warning("外部持仓数据可能不完整，跳过删除操作")
+                        return
                     for stock_code in memory_stock_codes:
                         if stock_code:  # 确保stock_code不为None
                             self.remove_position(stock_code)
@@ -678,6 +682,11 @@ class PositionManager:
         bool: 是否删除成功
         """
         try:
+
+            position = self.get_position(stock_code)
+            if position and position.get('profit_triggered'):
+                logger.warning(f"删除已触发止盈的持仓 {stock_code}，请确认")
+
             cursor = self.memory_conn.cursor()
             cursor.execute("DELETE FROM positions WHERE stock_code=?", (stock_code,))
             self.memory_conn.commit()
