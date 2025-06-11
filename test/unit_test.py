@@ -1,6 +1,13 @@
 import unittest
 from unittest.mock import patch, MagicMock, Mock
 from datetime import datetime
+import sys
+import os
+
+# 获取当前文件所在目录的父目录（即项目根目录）
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+# 将项目根目录添加到sys.path
+sys.path.insert(0, project_root)
 
 import config
 from position_manager import PositionManager, get_position_manager

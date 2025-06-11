@@ -186,3 +186,1169 @@
 2025-06-06 00:21:59,918 - qmt_trading.main - INFO - 开始清理资源...
 2025-06-06 00:21:59,918 - qmt_trading.main - INFO - 停止 data_thread...
 2025-06-06 00:22:01,370 - qmt_trading.position_manager - WARNING - 未能获取 513100 从 2025-04-24 到 2025-06-06 的历史数据，跳过更新最高价
+2025-06-11 23:18:14,411 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-06-11 23:18:14,412 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-06-11 23:18:16,483 - qmt_trading.data_manager - INFO - xtquant行情服务连接成功
+2025-06-11 23:18:19,523 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-06-11 23:18:19,526 - qmt_trading.position_manager - WARNING - SQLite数据库中缺少stock_name字段，使用股票代码作为默认值
+2025-06-11 23:18:19,528 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-06-11 23:18:19,528 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-06-11 23:18:19,529 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-11 23:18:19,529 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-06-11 23:18:19,529 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-11 23:18:19,529 - qmt_trading.trading_executor - WARNING - 未配置交易账户ID，交易功能将不可用
+2025-06-11 23:18:19,530 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-06-11 23:18:19,542 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-06-11 23:18:20,404 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:18:24,106 - qmt_trading.position_manager - INFO - 模拟交易全量刷新完成，更新了 5 只股票的数据
+2025-06-11 23:18:44,051 - qmt_trading.web_server - INFO - 自动交易总开关: False -> True
+2025-06-11 23:18:44,051 - qmt_trading.web_server - INFO - 配置已更新: {'globalAllowBuySell': True}
+2025-06-11 23:21:09,003 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-06-11 23:21:09,004 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-06-11 23:21:11,062 - qmt_trading.data_manager - INFO - xtquant行情服务连接成功
+2025-06-11 23:21:11,095 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-06-11 23:21:11,096 - qmt_trading.position_manager - WARNING - SQLite数据库中缺少stock_name字段，使用股票代码作为默认值
+2025-06-11 23:21:11,100 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-06-11 23:21:11,100 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-06-11 23:21:11,101 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-11 23:21:11,101 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-06-11 23:21:11,101 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-11 23:21:11,101 - qmt_trading.trading_executor - WARNING - 未配置交易账户ID，交易功能将不可用
+2025-06-11 23:21:11,102 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-06-11 23:21:11,115 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-06-11 23:21:11,769 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:21:12,327 - qmt_trading.position_manager - INFO - 模拟交易全量刷新完成，更新了 5 只股票的数据
+2025-06-11 23:28:55,152 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-06-11 23:28:55,153 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-06-11 23:28:57,216 - qmt_trading.data_manager - INFO - xtquant行情服务连接成功
+2025-06-11 23:28:57,249 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-06-11 23:28:57,251 - qmt_trading.position_manager - WARNING - SQLite数据库中缺少stock_name字段，使用股票代码作为默认值
+2025-06-11 23:28:57,253 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-06-11 23:28:57,253 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-06-11 23:28:57,254 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-11 23:28:57,254 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-06-11 23:28:57,254 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-11 23:28:57,254 - qmt_trading.trading_executor - WARNING - 未配置交易账户ID，交易功能将不可用
+2025-06-11 23:28:57,255 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-06-11 23:28:57,263 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-06-11 23:28:58,087 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:28:58,681 - qmt_trading.position_manager - INFO - 模拟交易全量刷新完成，更新了 5 只股票的数据
+2025-06-11 23:52:05,856 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-06-11 23:52:05,857 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-06-11 23:52:07,903 - qmt_trading.data_manager - INFO - xtquant行情服务连接成功
+2025-06-11 23:52:07,940 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-06-11 23:52:07,943 - qmt_trading.position_manager - WARNING - SQLite数据库中缺少stock_name字段，使用股票代码作为默认值
+2025-06-11 23:52:07,946 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-06-11 23:52:07,947 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-06-11 23:52:07,947 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-11 23:52:07,947 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-06-11 23:52:07,948 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-11 23:52:07,948 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-06-11 23:52:07,960 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-06-11 23:52:08,848 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:52:09,465 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:52:09,594 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:52:11,617 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:52:11,618 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:52:11,620 - qmt_trading.position_manager - INFO - 更新 stock_pool.json with new positions.
+2025-06-11 23:52:12,249 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:52:12,471 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:52:12,982 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:52:13,590 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:52:13,689 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:52:13,689 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:52:14,163 - qmt_trading.position_manager - INFO - 模拟交易全量刷新完成，更新了 5 只股票的数据
+2025-06-11 23:53:09,720 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-11 23:53:09,720 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-11 23:53:09,820 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:53:10,357 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:53:10,537 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:53:10,659 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:53:10,660 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:53:11,269 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:53:11,795 - qmt_trading.position_manager - INFO - 模拟交易全量刷新完成，更新了 5 只股票的数据
+2025-06-11 23:53:55,401 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:53:55,930 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:53:56,380 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:53:56,505 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:53:56,505 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:04,590 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:05,139 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:05,351 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:05,458 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:05,459 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:08,595 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:09,131 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:11,107 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:11,229 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:11,230 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:12,351 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:12,432 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-11 23:54:12,432 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-11 23:54:12,533 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:12,964 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:13,103 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:13,179 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:13,179 - qmt_trading.data_manager - WARNING - 查询股票基本信息失败: 网络接收错误。
+2025-06-11 23:54:13,180 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:13,293 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:13,293 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:13,304 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:13,304 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:13,957 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:14,489 - qmt_trading.position_manager - INFO - 模拟交易全量刷新完成，更新了 5 只股票的数据
+2025-06-11 23:54:15,424 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:15,938 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:16,318 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:16,415 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:16,415 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:18,546 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:19,080 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:19,232 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:19,341 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:19,342 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:22,490 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:23,041 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:23,278 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:23,404 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:23,404 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:25,527 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:26,067 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:26,212 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:26,334 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:26,334 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:29,481 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:30,006 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:30,232 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:30,347 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:30,347 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:32,464 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:33,004 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:34,146 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:34,242 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:34,242 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:36,372 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:36,887 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:37,029 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:37,130 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:37,130 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:40,274 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:40,804 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:40,965 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:41,063 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:41,064 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:44,208 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:44,722 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:44,957 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:45,071 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:45,072 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:47,211 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:47,706 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:47,855 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:47,973 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:47,973 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:51,106 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:51,620 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:51,744 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:51,855 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:51,855 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:54,995 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:55,478 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:56,654 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:56,765 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:56,766 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:54:58,880 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:54:59,376 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:54:59,517 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:54:59,617 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:54:59,617 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:55:02,755 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:55:03,275 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:03,646 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:55:03,746 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:55:03,746 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:55:05,888 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:55:06,417 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:06,773 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:55:06,873 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:55:06,873 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:55:08,991 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:55:09,507 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:09,662 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:55:09,770 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:55:09,770 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:55:12,902 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:55:13,433 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:13,619 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:55:13,728 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:55:13,728 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:55:15,092 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-11 23:55:15,092 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-11 23:55:15,757 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:16,010 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:55:16,524 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:16,659 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:55:16,782 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:55:16,782 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:55:16,855 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:55:17,273 - qmt_trading.position_manager - INFO - 模拟交易全量刷新完成，更新了 5 只股票的数据
+2025-06-11 23:55:17,382 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:17,554 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:55:17,652 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:55:17,652 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:55:20,793 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:55:21,312 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:21,481 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:55:21,598 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:55:21,598 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:55:24,740 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:55:25,269 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:25,476 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:55:25,597 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:55:25,597 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:55:28,740 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:55:29,239 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:29,454 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:55:29,569 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:55:29,569 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:55:51,142 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-06-11 23:55:51,142 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-06-11 23:55:53,199 - qmt_trading.data_manager - INFO - xtquant行情服务连接成功
+2025-06-11 23:55:53,232 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-06-11 23:55:53,234 - qmt_trading.position_manager - WARNING - SQLite数据库中缺少stock_name字段，使用股票代码作为默认值
+2025-06-11 23:55:53,235 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-06-11 23:55:53,235 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-06-11 23:55:53,235 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-11 23:55:53,235 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-06-11 23:55:53,236 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-11 23:55:53,236 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-06-11 23:55:53,244 - qmt_trading.main - INFO - ==================================================
+2025-06-11 23:55:53,245 - qmt_trading.main - INFO - = QMT量化交易系统启动 - 2025-06-11 23:55:53 
+2025-06-11 23:55:53,245 - qmt_trading.main - INFO - ==================================================
+2025-06-11 23:55:53,245 - qmt_trading.main - INFO - 开始初始化系统...
+2025-06-11 23:55:53,246 - qmt_trading.main - INFO - 系统初始化完成
+2025-06-11 23:55:53,246 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-06-11 23:55:53,246 - qmt_trading.main - INFO - 下载 002261 的历史数据
+2025-06-11 23:55:53,569 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:55:54,085 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:54,239 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:55:54,378 - qmt_trading.main - INFO - 下载 159813 的历史数据
+2025-06-11 23:55:54,883 - qmt_trading.data_manager - WARNING - 下载 159813 数据时发生长度不匹配错误，使用默认数据
+2025-06-11 23:55:55,767 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:55:55,768 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:55:55,887 - qmt_trading.main - INFO - 下载 300638 的历史数据
+2025-06-11 23:55:56,284 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:56,505 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:55:57,022 - qmt_trading.main - INFO - 初始数据下载完成
+2025-06-11 23:55:57,022 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-06-11 23:55:57,035 - qmt_trading.indicator_calculator - INFO - 成功计算 002261 的技术指标，共 60 条记录
+2025-06-11 23:55:57,036 - qmt_trading.indicator_calculator - WARNING - 没有 159813 的历史数据，无法计算指标
+2025-06-11 23:55:57,048 - qmt_trading.indicator_calculator - INFO - 成功计算 300638 的技术指标，共 60 条记录
+2025-06-11 23:55:57,048 - qmt_trading.main - INFO - 初始指标计算完成
+2025-06-11 23:55:57,049 - qmt_trading.main - INFO - 启动数据更新线程
+2025-06-11 23:55:57,050 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-06-11 23:55:57,050 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-06-11 23:55:57,085 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-06-11 23:55:57,116 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-11 23:55:57,146 - qmt_trading.main - INFO - 启动策略线程
+2025-06-11 23:55:57,318 - qmt_trading.strategy - INFO - 策略线程已启动（独立于自动交易开关）
+2025-06-11 23:55:57,364 - qmt_trading.main - INFO - 启动日志清理线程
+2025-06-11 23:55:57,474 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-06-11 23:55:57,536 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-06-11 23:55:57,567 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-06-11 23:55:57,675 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-11 23:55:58,653 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-11 23:55:58,700 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-11 23:56:01,429 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-11 23:56:01,910 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-06-11 23:56:01,958 - qmt_trading.main - INFO - 开始清理资源...
+2025-06-11 23:56:02,004 - qmt_trading.main - INFO - 停止 data_thread...
+2025-06-11 23:56:02,144 - qmt_trading.data_manager - INFO - 数据更新线程已停止
+2025-06-11 23:56:02,222 - qmt_trading.main - INFO - 停止 position_thread...
+2025-06-11 23:56:02,253 - qmt_trading.position_manager - INFO - 持仓监控线程已停止
+2025-06-11 23:56:02,254 - qmt_trading.main - INFO - 停止 strategy_thread...
+2025-06-11 23:56:02,346 - qmt_trading.strategy - INFO - 策略线程已停止
+2025-06-11 23:56:02,347 - qmt_trading.main - INFO - 停止 log_thread...
+2025-06-11 23:56:02,347 - qmt_trading.main - INFO - 停止 web_thread...
+2025-06-11 23:56:02,347 - qmt_trading.main - ERROR - 关闭交易策略时出错: 'TradingStrategy' object has no attribute 'close'
+2025-06-11 23:56:02,347 - qmt_trading.trading_executor - INFO - 交易执行器已关闭
+2025-06-11 23:56:02,348 - qmt_trading.data_manager - INFO - 数据库连接已关闭
+2025-06-11 23:56:02,348 - qmt_trading.data_manager - ERROR - 断开行情连接出错: module 'xtquant.xtdata' has no attribute 'disconnect'
+2025-06-11 23:56:02,348 - qmt_trading.main - INFO - 资源清理完成
+2025-06-11 23:56:02,348 - qmt_trading.main - INFO - 系统已退出
+2025-06-11 23:57:30,457 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-06-11 23:57:30,458 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-06-11 23:57:32,513 - qmt_trading.data_manager - INFO - xtquant行情服务连接成功
+2025-06-11 23:57:32,544 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-06-11 23:57:32,547 - qmt_trading.position_manager - WARNING - SQLite数据库中缺少stock_name字段，使用股票代码作为默认值
+2025-06-11 23:57:32,548 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-06-11 23:57:32,548 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-06-11 23:57:32,549 - qmt_trading.trading_executor - WARNING - 非模拟交易模式，无法初始化模拟账户
+2025-06-11 23:57:32,555 - qmt_trading.main - INFO - ==================================================
+2025-06-11 23:57:32,556 - qmt_trading.main - INFO - = QMT量化交易系统启动 - 2025-06-11 23:57:32 
+2025-06-11 23:57:32,556 - qmt_trading.main - INFO - ==================================================
+2025-06-11 23:57:32,556 - qmt_trading.main - INFO - 开始初始化系统...
+2025-06-11 23:57:32,556 - qmt_trading.main - INFO - 系统初始化完成
+2025-06-11 23:57:32,556 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-06-11 23:57:32,557 - qmt_trading.main - INFO - 下载 002261 的历史数据
+2025-06-11 23:57:33,680 - qmt_trading.main - INFO - 下载 159813 的历史数据
+2025-06-11 23:57:34,265 - qmt_trading.data_manager - WARNING - 下载 159813 数据时发生长度不匹配错误，使用默认数据
+2025-06-11 23:57:35,269 - qmt_trading.main - INFO - 下载 300638 的历史数据
+2025-06-11 23:57:36,389 - qmt_trading.main - INFO - 初始数据下载完成
+2025-06-11 23:57:36,389 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-06-11 23:57:36,392 - qmt_trading.indicator_calculator - WARNING - 没有 159813 的历史数据，无法计算指标
+2025-06-11 23:57:36,393 - qmt_trading.main - INFO - 初始指标计算完成
+2025-06-11 23:57:36,394 - qmt_trading.main - INFO - 启动数据更新线程
+2025-06-11 23:57:36,394 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-06-11 23:57:36,394 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-06-11 23:57:36,405 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-06-11 23:57:36,467 - qmt_trading.main - INFO - 启动策略线程
+2025-06-11 23:57:36,560 - qmt_trading.strategy - INFO - 策略线程已启动（独立于自动交易开关）
+2025-06-11 23:57:36,607 - qmt_trading.main - INFO - 启动日志清理线程
+2025-06-11 23:57:36,731 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-06-11 23:57:36,825 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-06-11 23:57:36,856 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-06-11 23:58:36,255 - qmt_trading.web_server - INFO - 配置已更新: {'allowSell': False}
+2025-06-11 23:58:36,908 - qmt_trading.web_server - INFO - 配置已更新: {'allowSell': True}
+2025-06-11 23:58:47,839 - qmt_trading.web_server - INFO - 已清除当天(2025-06-11)的交易记录，共0条
+2025-06-12 00:02:39,872 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-06-12 00:02:39,873 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-06-12 00:02:41,921 - qmt_trading.data_manager - INFO - xtquant行情服务连接成功
+2025-06-12 00:02:41,951 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-06-12 00:02:41,953 - qmt_trading.position_manager - WARNING - SQLite数据库中缺少stock_name字段，使用股票代码作为默认值
+2025-06-12 00:02:41,955 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-06-12 00:02:41,956 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-06-12 00:02:41,956 - qmt_trading.trading_executor - WARNING - 非模拟交易模式，无法初始化模拟账户
+2025-06-12 00:02:41,962 - qmt_trading.main - INFO - ==================================================
+2025-06-12 00:02:41,963 - qmt_trading.main - INFO - = QMT量化交易系统启动 - 2025-06-12 00:02:41 
+2025-06-12 00:02:41,963 - qmt_trading.main - INFO - ==================================================
+2025-06-12 00:02:41,963 - qmt_trading.main - INFO - 开始初始化系统...
+2025-06-12 00:02:41,963 - qmt_trading.main - INFO - 系统初始化完成
+2025-06-12 00:02:41,963 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-06-12 00:02:41,964 - qmt_trading.main - INFO - 下载 002261 的历史数据
+2025-06-12 00:02:43,086 - qmt_trading.main - INFO - 下载 159813 的历史数据
+2025-06-12 00:02:43,697 - qmt_trading.data_manager - WARNING - 下载 159813 数据时发生长度不匹配错误，使用默认数据
+2025-06-12 00:02:44,702 - qmt_trading.main - INFO - 下载 300638 的历史数据
+2025-06-12 00:02:45,821 - qmt_trading.main - INFO - 初始数据下载完成
+2025-06-12 00:02:45,821 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-06-12 00:02:45,824 - qmt_trading.indicator_calculator - WARNING - 没有 159813 的历史数据，无法计算指标
+2025-06-12 00:02:45,825 - qmt_trading.main - INFO - 初始指标计算完成
+2025-06-12 00:02:45,825 - qmt_trading.main - INFO - 启动数据更新线程
+2025-06-12 00:02:45,826 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-06-12 00:02:45,826 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-06-12 00:02:45,836 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-06-12 00:02:45,867 - qmt_trading.main - INFO - 启动策略线程
+2025-06-12 00:02:45,976 - qmt_trading.strategy - INFO - 策略线程已启动（独立于自动交易开关）
+2025-06-12 00:02:46,039 - qmt_trading.main - INFO - 启动日志清理线程
+2025-06-12 00:02:46,147 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-06-12 00:02:46,225 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-06-12 00:02:46,256 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-06-12 00:13:14,774 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-06-12 00:13:14,775 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-06-12 00:13:16,825 - qmt_trading.data_manager - INFO - xtquant行情服务连接成功
+2025-06-12 00:13:16,826 - qmt_trading.data_manager - DEBUG - xtquant连接状态验证成功
+2025-06-12 00:13:16,858 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-06-12 00:13:16,861 - qmt_trading.position_manager - WARNING - SQLite数据库中缺少stock_name字段，使用股票代码作为默认值
+2025-06-12 00:13:16,862 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-06-12 00:13:16,863 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-06-12 00:13:16,863 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:13:16,863 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-06-12 00:13:16,863 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-12 00:13:16,864 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-06-12 00:13:16,864 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-12 00:13:16,871 - qmt_trading.main - INFO - ==================================================
+2025-06-12 00:13:16,872 - qmt_trading.main - INFO - = QMT量化交易系统启动 - 2025-06-12 00:13:16 
+2025-06-12 00:13:16,873 - qmt_trading.main - INFO - ==================================================
+2025-06-12 00:13:16,873 - qmt_trading.main - INFO - 开始初始化系统...
+2025-06-12 00:13:16,874 - qmt_trading.main - INFO - 系统初始化完成
+2025-06-12 00:13:16,874 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-06-12 00:13:16,874 - qmt_trading.main - INFO - 下载 002261 的历史数据
+2025-06-12 00:13:16,981 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:17,309 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:13:17,910 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:13:17,992 - qmt_trading.main - INFO - 下载 159813 的历史数据
+2025-06-12 00:13:18,307 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:13:18,420 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:18,510 - qmt_trading.data_manager - WARNING - 下载 159813 数据时发生长度不匹配错误，使用默认数据
+2025-06-12 00:13:18,798 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:13:18,798 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:13:18,801 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:13:19,411 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:13:19,411 - qmt_trading.position_manager - DEBUG - 无法获取 513100 的最新行情，跳过刷新
+2025-06-12 00:13:19,519 - qmt_trading.main - INFO - 下载 300638 的历史数据
+2025-06-12 00:13:19,525 - qmt_trading.data_manager - DEBUG - Mootdx:600787 最新行情: {'lastPrice': 5.87, 'lastClose': 5.88, 'volume': 509588.0, 'amount': 300133440.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:19,527 - qmt_trading.position_manager - DEBUG - 全量刷新 600787: 价格=5.87, 最高价=7.06, 盈亏率=-8.42%, 止损价=5.96
+2025-06-12 00:13:19,627 - qmt_trading.data_manager - DEBUG - Mootdx:002104 最新行情: {'lastPrice': 11.55, 'lastClose': 11.14, 'volume': 2569739.0, 'amount': 2967632384.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:19,628 - qmt_trading.position_manager - DEBUG - 动态止损计算：成本价=7.20, 最高价=11.55, 最高盈利=60.4%, 匹配区间=40.0%, 系数=0.85, 止损价=9.82
+2025-06-12 00:13:19,629 - qmt_trading.position_manager - DEBUG - 全量刷新 002104: 价格=11.55, 最高价=11.55, 盈亏率=60.42%, 止损价=9.82
+2025-06-12 00:13:19,731 - qmt_trading.data_manager - DEBUG - Mootdx:300277 最新行情: {'lastPrice': 12.81, 'lastClose': nan, 'volume': 67673.0, 'amount': 87242432.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:19,732 - qmt_trading.position_manager - DEBUG - 全量刷新 300277: 价格=12.81, 最高价=13.86, 盈亏率=-4.33%, 止损价=12.45
+2025-06-12 00:13:19,830 - qmt_trading.data_manager - DEBUG - Mootdx:300892 最新行情: {'lastPrice': 35.79, 'lastClose': 36.67, 'volume': 63562.0, 'amount': 226788288.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:19,831 - qmt_trading.position_manager - DEBUG - 全量刷新 300892: 价格=35.79, 最高价=39.98, 盈亏率=-6.36%, 止损价=35.54
+2025-06-12 00:13:19,944 - qmt_trading.data_manager - DEBUG - Mootdx:301252 最新行情: {'lastPrice': 23.45, 'lastClose': 23.46, 'volume': 19478.0, 'amount': 46160492.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:20,072 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:20,072 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:13:20,582 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:13:20,637 - qmt_trading.main - INFO - 初始数据下载完成
+2025-06-12 00:13:20,637 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-06-12 00:13:20,638 - qmt_trading.data_manager - DEBUG - 从数据库获取 002261 的历史数据, 共 60 条记录
+2025-06-12 00:13:20,639 - qmt_trading.indicator_calculator - DEBUG - 002261 的指标已是最新，不需要更新
+2025-06-12 00:13:20,640 - qmt_trading.data_manager - DEBUG - 从数据库获取 159813 的历史数据, 共 0 条记录
+2025-06-12 00:13:20,640 - qmt_trading.indicator_calculator - WARNING - 没有 159813 的历史数据，无法计算指标
+2025-06-12 00:13:20,641 - qmt_trading.data_manager - DEBUG - 从数据库获取 300638 的历史数据, 共 60 条记录
+2025-06-12 00:13:20,642 - qmt_trading.indicator_calculator - DEBUG - 300638 的指标已是最新，不需要更新
+2025-06-12 00:13:20,642 - qmt_trading.main - INFO - 初始指标计算完成
+2025-06-12 00:13:20,642 - qmt_trading.main - INFO - 启动数据更新线程
+2025-06-12 00:13:20,642 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-06-12 00:13:20,643 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-06-12 00:13:20,652 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-06-12 00:13:20,699 - qmt_trading.main - INFO - 启动策略线程
+2025-06-12 00:13:20,776 - qmt_trading.strategy - INFO - 策略线程已启动（独立于自动交易开关）
+2025-06-12 00:13:20,823 - qmt_trading.main - INFO - 启动日志清理线程
+2025-06-12 00:13:20,931 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-06-12 00:13:20,994 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-06-12 00:13:20,994 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-06-12 00:13:21,025 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:13:22,131 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:22,303 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:13:22,349 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:13:22,755 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:13:22,894 - qmt_trading.position_manager - DEBUG - 全量刷新 301252: 价格=23.45, 最高价=34.65, 盈亏率=-31.83%, 止损价=31.99
+2025-06-12 00:13:22,956 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v1
+2025-06-12 00:13:23,003 - qmt_trading.position_manager - INFO - 模拟交易全量刷新完成，更新了 5 只股票的数据
+2025-06-12 00:13:26,424 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:13:26,595 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:13:26,953 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:13:27,717 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:27,876 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:27,950 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: <sqlite3.Connection object at 0x000001A68C8EFE40> returned NULL without setting an error
+2025-06-12 00:13:28,013 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:13:28,137 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:13:28,296 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:28,542 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:13:29,788 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:13:29,803 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:13:30,178 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:13:30,348 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:13:30,348 - qmt_trading.data_manager - WARNING - 查询股票基本信息失败: 用户未登录
+2025-06-12 00:13:30,409 - qmt_trading.data_manager - WARNING - baostock登录失败: 网络接收错误。
+2025-06-12 00:13:30,611 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:13:30,876 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:13:31,625 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:31,672 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:31,672 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:13:31,737 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:31,750 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:13:31,890 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:13:31,936 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: not an error
+2025-06-12 00:13:31,937 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:13:32,029 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:13:32,264 - qmt_trading.position_manager - DEBUG - 获取到 6 条持仓记录（所有字段），并计算了涨跌幅
+2025-06-12 00:13:32,358 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:13:32,480 - qmt_trading.web_server - DEBUG - 当前状态: UI监控=False, 自动交易=False, 持仓监控=True
+2025-06-12 00:13:32,514 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:13:32,605 - qmt_trading.web_server - DEBUG - SSE推送持仓数据变化通知: v1
+2025-06-12 00:13:32,683 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:13:32,776 - qmt_trading.web_server - DEBUG - SSE推送持仓数据变化通知: v1
+2025-06-12 00:13:33,274 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:13:33,928 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:13:35,064 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:35,188 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:13:36,897 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:13:37,535 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:13:38,390 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:13:38,500 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:38,592 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:13:38,640 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:13:38,920 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:13:40,070 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:13:41,345 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:41,451 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:13:43,238 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:13:43,502 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:13:43,877 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:13:43,924 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:13:44,919 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:45,075 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:13:45,153 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:13:45,188 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:45,341 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:13:45,497 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:13:46,723 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:13:47,035 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:13:47,926 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:48,031 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:13:48,669 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:13:48,919 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:13:49,791 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:13:49,809 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:49,993 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:13:50,071 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:13:50,336 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:13:50,462 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:13:50,539 - qmt_trading.web_server - DEBUG - 当前状态: UI监控=False, 自动交易=False, 持仓监控=True
+2025-06-12 00:13:51,239 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:51,348 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:13:51,425 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:13:51,693 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:13:52,828 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:13:53,794 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:13:54,030 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:54,136 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:13:55,868 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:13:56,552 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:13:57,472 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:13:57,578 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:13:57,640 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:13:57,968 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:13:58,884 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:13:59,102 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:14:00,222 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:00,314 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:01,912 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:14:01,943 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:02,582 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:03,221 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:03,392 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:03,580 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:03,718 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:03,765 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:04,046 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:14:04,077 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:05,089 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:05,259 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:14:05,725 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:06,284 - qmt_trading.web_server - WARNING - UI监控状态未变化: False -> False (通过API)
+2025-06-12 00:14:06,500 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:06,518 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:06,545 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:06,685 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:06,731 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:07,014 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:07,152 - qmt_trading.web_server - DEBUG - 当前状态: UI监控=False, 自动交易=False, 持仓监控=True
+2025-06-12 00:14:08,178 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:08,724 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:09,175 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:14:09,677 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:09,783 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:09,845 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:10,142 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:11,261 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:14:12,413 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:12,503 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:14,044 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:14,340 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:14:14,823 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:15,741 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:15,849 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:15,895 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:16,115 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:17,280 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:14:18,324 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:18,414 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:19,425 - qmt_trading.data_manager - WARNING - baostock登录失败: 网络接收错误。
+2025-06-12 00:14:19,534 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:14:19,565 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-12 00:14:19,596 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-12 00:14:20,017 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:20,685 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:20,845 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:20,934 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:21,762 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:21,899 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:21,977 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:22,338 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:22,554 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:23,239 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:23,519 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:14:24,425 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:24,518 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:24,579 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:24,814 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:25,032 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:25,094 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:26,683 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:26,699 - qmt_trading.data_manager - ERROR - 获取 513100 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:26,745 - qmt_trading.position_manager - DEBUG - 无法获取 513100 的最新行情，跳过刷新
+2025-06-12 00:14:27,245 - qmt_trading.data_manager - ERROR - 获取股票 159813 名称时出错: list index out of range
+2025-06-12 00:14:27,323 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:27,759 - qmt_trading.data_manager - DEBUG - Mootdx:600787 最新行情: {'lastPrice': 5.87, 'lastClose': 5.88, 'volume': 509588.0, 'amount': 300133440.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:28,243 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:28,348 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:28,394 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:28,849 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:29,033 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:29,141 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:30,015 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:14:30,776 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:31,356 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:31,493 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:31,803 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:31,835 - qmt_trading.data_manager - WARNING - 查询股票基本信息失败: 网络接收错误。
+2025-06-12 00:14:32,614 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:32,753 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:32,784 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:33,080 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:33,096 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:33,236 - qmt_trading.position_manager - DEBUG - 全量刷新 600787: 价格=5.87, 最高价=7.06, 盈亏率=-8.42%, 止损价=5.96
+2025-06-12 00:14:33,673 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:34,206 - qmt_trading.data_manager - DEBUG - Mootdx:002104 最新行情: {'lastPrice': 11.55, 'lastClose': 11.14, 'volume': 2569739.0, 'amount': 2967632384.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:34,998 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:35,089 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:35,135 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:35,604 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:35,697 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:35,833 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:36,844 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:14:37,372 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:37,951 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:38,074 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:38,121 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:39,215 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:39,274 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:39,337 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:39,695 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:39,742 - qmt_trading.position_manager - DEBUG - 动态止损计算：成本价=7.20, 最高价=11.55, 最高盈利=60.4%, 匹配区间=40.0%, 系数=0.85, 止损价=9.82
+2025-06-12 00:14:39,928 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:39,943 - qmt_trading.position_manager - DEBUG - 全量刷新 002104: 价格=11.55, 最高价=11.55, 盈亏率=60.42%, 止损价=9.82
+2025-06-12 00:14:40,784 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:40,881 - qmt_trading.data_manager - DEBUG - Mootdx:300277 最新行情: {'lastPrice': 12.81, 'lastClose': nan, 'volume': 67673.0, 'amount': 87242432.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:41,796 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:41,892 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:41,905 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:41,952 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:41,984 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:42,236 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:43,403 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:14:43,544 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:44,540 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:44,632 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:45,565 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:46,160 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:46,395 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:46,519 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:46,565 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:46,894 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:46,984 - qmt_trading.position_manager - DEBUG - 全量刷新 300277: 价格=12.81, 最高价=13.86, 盈亏率=-4.33%, 止损价=12.45
+2025-06-12 00:14:47,530 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:47,905 - qmt_trading.data_manager - DEBUG - Mootdx:300892 最新行情: {'lastPrice': 35.79, 'lastClose': 36.67, 'volume': 63562.0, 'amount': 226788288.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:48,574 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:48,756 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:48,819 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:49,145 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:49,193 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:49,284 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:50,327 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:14:50,949 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:51,433 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:51,587 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: <sqlite3.Connection object at 0x000001A68C8EFE40> returned NULL without setting an error
+2025-06-12 00:14:51,649 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:52,691 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:52,798 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:52,829 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:53,079 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:53,249 - qmt_trading.position_manager - DEBUG - 全量刷新 300892: 价格=35.79, 最高价=39.98, 盈亏率=-6.36%, 止损价=35.54
+2025-06-12 00:14:53,250 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:54,171 - qmt_trading.data_manager - DEBUG - Mootdx:301252 最新行情: {'lastPrice': 23.45, 'lastClose': 23.46, 'volume': 19478.0, 'amount': 46160492.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:55,008 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:14:55,369 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:55,552 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:56,034 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:56,141 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:14:56,203 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:14:56,549 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:14:57,325 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:14:57,698 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 00:14:58,836 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:14:58,941 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:14:59,750 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: no more rows available
+2025-06-12 00:14:59,766 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-06-12 00:15:00,077 - qmt_trading.position_manager - WARNING - SQLite数据库中缺少stock_name字段，使用股票代码作为默认值
+2025-06-12 00:15:00,574 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-06-12 00:15:00,591 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:15:00,621 - qmt_trading.web_server - WARNING - 交易模式切换: 实盘交易
+2025-06-12 00:15:00,762 - qmt_trading.web_server - INFO - 配置已更新: {'simulationMode': False}
+2025-06-12 00:15:00,967 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:01,072 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:15:01,446 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:15:02,442 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:02,598 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:02,598 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:15:02,691 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:15:03,376 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-06-12 00:15:03,565 - qmt_trading.position_manager - WARNING - SQLite数据库中缺少stock_name字段，使用股票代码作为默认值
+2025-06-12 00:15:03,953 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:04,093 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-06-12 00:15:04,108 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:15:04,176 - qmt_trading.web_server - WARNING - 交易模式切换: 模拟交易
+2025-06-12 00:15:04,264 - qmt_trading.web_server - INFO - 配置已更新: {'simulationMode': True}
+2025-06-12 00:15:04,389 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:15:05,011 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:15:05,778 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:05,883 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:15:05,915 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:15:06,132 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:15:06,350 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 6 条记录
+2025-06-12 00:15:06,490 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v2
+2025-06-12 00:15:06,553 - qmt_trading.position_manager - INFO - 已删除 600787 的持仓记录
+2025-06-12 00:15:06,896 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:15:07,973 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:07,973 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:08,174 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: no more rows available
+2025-06-12 00:15:08,205 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:15:08,251 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:15:08,749 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 5 条记录
+2025-06-12 00:15:08,920 - qmt_trading.position_manager - WARNING - 未找到 600787 的持仓记录，无需删除
+2025-06-12 00:15:10,041 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:15:10,057 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:10,228 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:15:10,711 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:15:11,666 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:11,787 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:15:11,849 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:15:11,990 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:15:12,301 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 5 条记录
+2025-06-12 00:15:12,410 - qmt_trading.position_manager - WARNING - 删除已触发止盈的持仓 002104，请确认
+2025-06-12 00:15:12,456 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v3
+2025-06-12 00:15:12,486 - qmt_trading.position_manager - INFO - 已删除 002104 的持仓记录
+2025-06-12 00:15:12,813 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:15:13,487 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:13,533 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:13,595 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: <sqlite3.Connection object at 0x000001A68CB28D50> returned NULL without setting an error
+2025-06-12 00:15:13,657 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:15:13,657 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:15:14,016 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 4 条记录
+2025-06-12 00:15:14,138 - qmt_trading.position_manager - WARNING - 未找到 002104 的持仓记录，无需删除
+2025-06-12 00:15:15,167 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:15,289 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:15:15,305 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:15:16,023 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:15:16,881 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:16,989 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:15:17,051 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:15:17,192 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 00:15:17,301 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 4 条记录
+2025-06-12 00:15:17,533 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v4
+2025-06-12 00:15:17,534 - qmt_trading.position_manager - INFO - 已删除 300277 的持仓记录
+2025-06-12 00:15:18,202 - qmt_trading.position_manager - ERROR - 更新 159813 持仓Error: table positions has no column named available
+2025-06-12 00:15:18,594 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:18,779 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:15:18,826 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-06-12 00:15:18,919 - qmt_trading.main - INFO - 开始清理资源...
+2025-06-12 00:15:18,997 - qmt_trading.main - INFO - 停止 data_thread...
+2025-06-12 00:15:19,326 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:19,495 - qmt_trading.position_manager - ERROR - 更新 300638 持仓Error: table positions has no column named available
+2025-06-12 00:15:19,542 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 00:15:19,748 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 00:15:19,870 - qmt_trading.position_manager - WARNING - 未找到 300277 的持仓记录，无需删除
+2025-06-12 00:15:19,901 - qmt_trading.data_manager - INFO - 数据更新线程已停止
+2025-06-12 00:15:19,963 - qmt_trading.main - INFO - 停止 position_thread...
+2025-06-12 00:15:20,010 - qmt_trading.position_manager - INFO - 持仓监控线程已停止
+2025-06-12 00:15:20,011 - qmt_trading.main - INFO - 停止 strategy_thread...
+2025-06-12 00:15:20,114 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 00:15:20,114 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: table positions has no column named available
+2025-06-12 00:15:20,229 - qmt_trading.strategy - INFO - 策略线程已停止
+2025-06-12 00:15:20,229 - qmt_trading.main - INFO - 停止 log_thread...
+2025-06-12 00:15:20,238 - qmt_trading.main - INFO - 停止 web_thread...
+2025-06-12 00:15:20,238 - qmt_trading.main - ERROR - 关闭交易策略时出错: 'TradingStrategy' object has no attribute 'close'
+2025-06-12 00:15:20,239 - qmt_trading.trading_executor - INFO - 交易执行器已关闭
+2025-06-12 00:15:20,239 - qmt_trading.data_manager - INFO - 数据库连接已关闭
+2025-06-12 00:15:20,239 - qmt_trading.data_manager - ERROR - 断开行情连接出错: module 'xtquant.xtdata' has no attribute 'disconnect'
+2025-06-12 00:15:20,239 - qmt_trading.main - INFO - 资源清理完成
+2025-06-12 00:15:20,239 - qmt_trading.main - INFO - 系统已退出
+2025-06-12 00:36:13,152 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-06-12 00:36:13,153 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-06-12 00:36:15,211 - qmt_trading.data_manager - INFO - xtquant行情服务连接成功
+2025-06-12 00:36:15,212 - qmt_trading.data_manager - DEBUG - xtquant连接状态验证成功
+2025-06-12 00:36:15,253 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-06-12 00:36:15,256 - qmt_trading.position_manager - WARNING - SQLite数据库中缺少stock_name字段，使用股票代码作为默认值
+2025-06-12 00:36:15,258 - qmt_trading.position_manager - INFO - 数据库数据已同步到内存数据库
+2025-06-12 00:36:15,258 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-06-12 00:36:15,259 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 00:36:15,259 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-06-12 00:36:15,259 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-12 00:36:15,259 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-12 00:36:15,264 - qmt_trading.position_manager - WARNING - 动态止盈配置为空，使用保守止盈位
+2025-06-12 00:36:15,272 - qmt_trading.position_manager - DEBUG - 动态止损计算：成本价=100.00, 最高价=105.00, 最高盈利=5.0%, 匹配区间=5.0%, 系数=0.96, 止损价=100.80
+2025-06-12 00:36:15,277 - qmt_trading.position_manager - DEBUG - 动态止损计算：成本价=100.00, 最高价=110.00, 最高盈利=10.0%, 匹配区间=10.0%, 系数=0.93, 止损价=102.30
+2025-06-12 00:36:15,283 - qmt_trading.position_manager - DEBUG - 动态止损计算：成本价=100.00, 最高价=115.00, 最高盈利=15.0%, 匹配区间=15.0%, 系数=0.9, 止损价=103.50
+2025-06-12 00:36:15,288 - qmt_trading.position_manager - DEBUG - 动态止损计算：成本价=100.00, 最高价=130.00, 最高盈利=30.0%, 匹配区间=30.0%, 系数=0.87, 止损价=113.10
+2025-06-12 00:36:15,292 - qmt_trading.position_manager - DEBUG - 动态止损计算：成本价=100.00, 最高价=150.00, 最高盈利=50.0%, 匹配区间=40.0%, 系数=0.85, 止损价=127.50
+2025-06-12 00:36:15,297 - qmt_trading.position_manager - DEBUG - 动态止损计算：未达到任何盈利区间，使用最高价作为止损价
+2025-06-12 01:33:40,082 - qmt_trading.sell_strategy - INFO - 卖出策略模块初始化完成
+2025-06-12 01:33:40,085 - qmt_trading.sell_strategy - INFO - 卖出策略模块初始化完成
+2025-06-12 01:33:40,086 - qmt_trading.sell_strategy - INFO - 卖出策略模块初始化完成
+2025-06-12 01:33:40,087 - qmt_trading.sell_strategy - INFO - [规则1] 000001.SZ 触发卖出: 高开后涨2.86%，回落1.85%
+2025-06-12 01:33:40,088 - qmt_trading.sell_strategy - INFO - 卖出策略模块初始化完成
+2025-06-12 01:33:40,088 - qmt_trading.sell_strategy - INFO - [规则2] 000001.SZ 触发卖出: 低开后涨5.10%，回落2.91%
+2025-06-12 01:33:40,090 - qmt_trading.sell_strategy - INFO - 卖出策略模块初始化完成
+2025-06-12 01:33:40,091 - qmt_trading.sell_strategy - INFO - [规则5] 000001.SZ 尾盘卖出: 未涨停
+2025-06-12 01:33:40,093 - qmt_trading.sell_strategy - INFO - 卖出策略模块初始化完成
+2025-06-12 01:33:40,093 - qmt_trading.sell_strategy - INFO - [规则8] 000001.SZ 触发卖出: 最大回撤6.00%
+2025-06-12 01:33:40,095 - qmt_trading.sell_strategy - INFO - 卖出策略模块初始化完成
+2025-06-12 01:35:53,922 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-06-12 01:35:53,923 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-06-12 01:35:55,975 - qmt_trading.data_manager - INFO - xtquant行情服务连接成功
+2025-06-12 01:35:55,976 - qmt_trading.data_manager - DEBUG - xtquant连接状态验证成功
+2025-06-12 01:35:56,007 - qmt_trading.position_manager - INFO - 内存数据库表结构已创建
+2025-06-12 01:35:56,009 - qmt_trading.position_manager - WARNING - 系统以模拟交易模式运行 - 持仓变更只在内存中进行，不会写入数据库
+2025-06-12 01:35:56,010 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:35:56,010 - qmt_trading.position_manager - INFO - 定时同步线程已启动
+2025-06-12 01:35:56,010 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-12 01:35:56,010 - qmt_trading.trading_executor - INFO - 初始化模拟账户，初始资金: 1000000
+2025-06-12 01:35:56,010 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-12 01:35:56,011 - qmt_trading.sell_strategy - INFO - 卖出策略模块初始化完成
+2025-06-12 01:35:56,018 - qmt_trading.main - INFO - ==================================================
+2025-06-12 01:35:56,019 - qmt_trading.main - INFO - = QMT量化交易系统启动 - 2025-06-12 01:35:56 
+2025-06-12 01:35:56,020 - qmt_trading.main - INFO - ==================================================
+2025-06-12 01:35:56,020 - qmt_trading.main - INFO - 开始初始化系统...
+2025-06-12 01:35:56,020 - qmt_trading.sell_strategy - INFO - 卖出策略模块初始化完成
+2025-06-12 01:35:56,021 - qmt_trading.main - INFO - 系统初始化完成
+2025-06-12 01:35:56,021 - qmt_trading.main - INFO - 开始下载初始数据...
+2025-06-12 01:35:56,021 - qmt_trading.main - INFO - 下载 002261 的历史数据
+2025-06-12 01:35:56,126 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:35:56,314 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v1
+2025-06-12 01:35:56,984 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:35:57,139 - qmt_trading.main - INFO - 下载 159813 的历史数据
+2025-06-12 01:35:57,566 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v2
+2025-06-12 01:35:57,656 - qmt_trading.data_manager - WARNING - 下载 159813 数据时发生长度不匹配错误，使用默认数据
+2025-06-12 01:35:57,668 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:35:58,264 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v3
+2025-06-12 01:35:58,264 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:35:58,267 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:35:58,388 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:35:58,389 - qmt_trading.position_manager - DEBUG - 全量刷新 002261: 价格=30.21, 最高价=30.21, 盈亏率=-3.73%, 止损价=29.18
+2025-06-12 01:35:58,662 - qmt_trading.main - INFO - 下载 300638 的历史数据
+2025-06-12 01:35:58,912 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:35:58,913 - qmt_trading.position_manager - DEBUG - 无法获取 159813 的最新行情，跳过刷新
+2025-06-12 01:35:59,031 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:35:59,149 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:35:59,150 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v4
+2025-06-12 01:35:59,662 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:35:59,782 - qmt_trading.main - INFO - 初始数据下载完成
+2025-06-12 01:35:59,782 - qmt_trading.main - INFO - 开始计算初始指标...
+2025-06-12 01:35:59,783 - qmt_trading.data_manager - DEBUG - 从数据库获取 002261 的历史数据, 共 60 条记录
+2025-06-12 01:35:59,784 - qmt_trading.indicator_calculator - DEBUG - 002261 的指标已是最新，不需要更新
+2025-06-12 01:35:59,785 - qmt_trading.data_manager - DEBUG - 从数据库获取 159813 的历史数据, 共 0 条记录
+2025-06-12 01:35:59,785 - qmt_trading.indicator_calculator - WARNING - 没有 159813 的历史数据，无法计算指标
+2025-06-12 01:35:59,786 - qmt_trading.data_manager - DEBUG - 从数据库获取 300638 的历史数据, 共 60 条记录
+2025-06-12 01:35:59,787 - qmt_trading.indicator_calculator - DEBUG - 300638 的指标已是最新，不需要更新
+2025-06-12 01:35:59,787 - qmt_trading.main - INFO - 初始指标计算完成
+2025-06-12 01:35:59,787 - qmt_trading.main - INFO - 启动数据更新线程
+2025-06-12 01:35:59,788 - qmt_trading.data_manager - INFO - 数据更新线程已启动
+2025-06-12 01:35:59,788 - qmt_trading.main - INFO - 启动持仓监控线程
+2025-06-12 01:35:59,797 - qmt_trading.position_manager - INFO - 持仓监控线程已启动
+2025-06-12 01:35:59,860 - qmt_trading.main - INFO - 启动策略线程
+2025-06-12 01:35:59,953 - qmt_trading.strategy - INFO - 策略线程已启动（独立于自动交易开关）
+2025-06-12 01:36:00,015 - qmt_trading.main - INFO - 启动卖出策略线程
+2025-06-12 01:36:00,093 - qmt_trading.sell_strategy - INFO - 卖出策略监控循环开始
+2025-06-12 01:36:00,108 - qmt_trading.sell_strategy - INFO - 卖出策略监控线程已启动
+2025-06-12 01:36:00,264 - qmt_trading.main - INFO - 启动日志清理线程
+2025-06-12 01:36:00,435 - qmt_trading.main - INFO - 启动Web服务器线程
+2025-06-12 01:36:00,450 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v5
+2025-06-12 01:36:00,529 - qmt_trading.main - INFO - 系统启动完成，按 Ctrl+C 退出
+2025-06-12 01:36:00,544 - qmt_trading.web_server - INFO - 实时推送线程已启动
+2025-06-12 01:36:01,369 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:01,404 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:01,712 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v6
+2025-06-12 01:36:01,727 - qmt_trading.position_manager - ERROR - 更新 002261 持仓Error: cannot commit - no transaction is active
+2025-06-12 01:36:01,789 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:36:02,118 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:36:02,350 - qmt_trading.position_manager - DEBUG - 全量刷新 300638: 价格=26.25, 最高价=26.25, 盈亏率=-3.88%, 止损价=25.40
+2025-06-12 01:36:02,396 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v7
+2025-06-12 01:36:02,412 - qmt_trading.position_manager - INFO - 模拟交易全量刷新完成，更新了 2 只股票的数据
+2025-06-12 01:36:03,344 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:36:04,077 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v8
+2025-06-12 01:36:04,980 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:05,226 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v9
+2025-06-12 01:36:05,288 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:36:05,602 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:36:06,518 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stock_code 的最新行情为空
+2025-06-12 01:36:07,281 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stock_name 的最新行情为空
+2025-06-12 01:36:07,529 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:36:08,042 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 volume 的最新行情为空
+2025-06-12 01:36:08,774 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 available 的最新行情为空
+2025-06-12 01:36:09,458 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 cost_price 的最新行情为空
+2025-06-12 01:36:10,203 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 current_price 的最新行情为空
+2025-06-12 01:36:10,842 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 market_value 的最新行情为空
+2025-06-12 01:36:11,587 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_ratio 的最新行情为空
+2025-06-12 01:36:12,286 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 last_update 的最新行情为空
+2025-06-12 01:36:12,660 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:36:12,939 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 open_date 的最新行情为空
+2025-06-12 01:36:13,639 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_triggered 的最新行情为空
+2025-06-12 01:36:14,401 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 highest_price 的最新行情为空
+2025-06-12 01:36:15,100 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stop_loss_price 的最新行情为空
+2025-06-12 01:36:16,560 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 01:36:17,248 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:17,492 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v10
+2025-06-12 01:36:17,803 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:36:18,022 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:18,317 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v11
+2025-06-12 01:36:19,174 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:36:19,902 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:36:20,276 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v12
+2025-06-12 01:36:20,959 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v13
+2025-06-12 01:36:21,179 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:21,427 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v14
+2025-06-12 01:36:21,505 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:36:21,788 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:36:21,882 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:22,111 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v15
+2025-06-12 01:36:22,142 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:36:22,408 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:36:22,500 - qmt_trading.web_server - DEBUG - 当前状态: UI监控=False, 自动交易=False, 持仓监控=True
+2025-06-12 01:36:22,593 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stock_code 的最新行情为空
+2025-06-12 01:36:22,936 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:36:23,186 - qmt_trading.position_manager - DEBUG - 获取到 3 条持仓记录（所有字段），并计算了涨跌幅
+2025-06-12 01:36:23,310 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stock_name 的最新行情为空
+2025-06-12 01:36:24,027 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 volume 的最新行情为空
+2025-06-12 01:36:24,741 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 available 的最新行情为空
+2025-06-12 01:36:25,439 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 cost_price 的最新行情为空
+2025-06-12 01:36:26,202 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 current_price 的最新行情为空
+2025-06-12 01:36:26,965 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 market_value 的最新行情为空
+2025-06-12 01:36:27,617 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_ratio 的最新行情为空
+2025-06-12 01:36:28,053 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:36:28,318 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 last_update 的最新行情为空
+2025-06-12 01:36:29,065 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 open_date 的最新行情为空
+2025-06-12 01:36:29,782 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_triggered 的最新行情为空
+2025-06-12 01:36:30,466 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 highest_price 的最新行情为空
+2025-06-12 01:36:31,135 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stop_loss_price 的最新行情为空
+2025-06-12 01:36:33,174 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:36:33,330 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:33,593 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v16
+2025-06-12 01:36:35,321 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:36:35,758 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 01:36:35,943 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v17
+2025-06-12 01:36:36,843 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:36,905 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:37,075 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v18
+2025-06-12 01:36:37,153 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:36:37,168 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v19
+2025-06-12 01:36:37,389 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:36:38,087 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stock_code 的最新行情为空
+2025-06-12 01:36:38,320 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:36:38,654 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stock_name 的最新行情为空
+2025-06-12 01:36:38,802 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:36:39,361 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 volume 的最新行情为空
+2025-06-12 01:36:39,843 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v20
+2025-06-12 01:36:40,201 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 available 的最新行情为空
+2025-06-12 01:36:40,794 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:40,949 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 cost_price 的最新行情为空
+2025-06-12 01:36:41,277 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v21
+2025-06-12 01:36:41,354 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:36:41,637 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:36:41,666 - qmt_trading.web_server - DEBUG - SSE推送持仓数据变化通知: v16
+2025-06-12 01:36:41,869 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 current_price 的最新行情为空
+2025-06-12 01:36:42,164 - qmt_trading.position_manager - DEBUG - 获取到 3 条持仓记录（所有字段），并计算了涨跌幅
+2025-06-12 01:36:42,553 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 market_value 的最新行情为空
+2025-06-12 01:36:42,863 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 01:36:43,142 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_ratio 的最新行情为空
+2025-06-12 01:36:43,438 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:36:44,075 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 last_update 的最新行情为空
+2025-06-12 01:36:44,204 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:44,558 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v22
+2025-06-12 01:36:44,870 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 open_date 的最新行情为空
+2025-06-12 01:36:45,460 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_triggered 的最新行情为空
+2025-06-12 01:36:46,097 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:36:46,159 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 highest_price 的最新行情为空
+2025-06-12 01:36:46,904 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stop_loss_price 的最新行情为空
+2025-06-12 01:36:47,247 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v23
+2025-06-12 01:36:48,214 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:48,505 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v24
+2025-06-12 01:36:48,568 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:36:48,583 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:36:48,833 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:36:48,910 - qmt_trading.web_server - DEBUG - SSE推送持仓数据变化通知: v21
+2025-06-12 01:36:49,052 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:49,252 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v25
+2025-06-12 01:36:49,424 - qmt_trading.position_manager - DEBUG - 获取到 3 条持仓记录（所有字段），并计算了涨跌幅
+2025-06-12 01:36:50,075 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 01:36:50,806 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:36:50,966 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:51,258 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v26
+2025-06-12 01:36:51,461 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v27
+2025-06-12 01:36:52,317 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:52,551 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v28
+2025-06-12 01:36:52,613 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:36:53,034 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:36:53,097 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:36:53,689 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stock_code 的最新行情为空
+2025-06-12 01:36:53,704 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:36:54,124 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v29
+2025-06-12 01:36:54,515 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stock_name 的最新行情为空
+2025-06-12 01:36:55,138 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:55,138 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 volume 的最新行情为空
+2025-06-12 01:36:55,387 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v30
+2025-06-12 01:36:55,418 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:36:55,776 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:36:55,823 - qmt_trading.web_server - DEBUG - SSE推送持仓数据变化通知: v25
+2025-06-12 01:36:56,010 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 available 的最新行情为空
+2025-06-12 01:36:56,339 - qmt_trading.position_manager - DEBUG - 获取到 3 条持仓记录（所有字段），并计算了涨跌幅
+2025-06-12 01:36:56,805 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 cost_price 的最新行情为空
+2025-06-12 01:36:56,992 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 01:36:57,615 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 current_price 的最新行情为空
+2025-06-12 01:36:58,313 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:36:58,345 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 market_value 的最新行情为空
+2025-06-12 01:36:58,516 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v31
+2025-06-12 01:36:58,875 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:36:58,907 - qmt_trading.position_manager - INFO - 执行模拟交易全量数据刷新
+2025-06-12 01:36:58,954 - qmt_trading.position_manager - INFO - 开始执行模拟交易全量数据刷新
+2025-06-12 01:36:59,187 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_ratio 的最新行情为空
+2025-06-12 01:36:59,890 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 last_update 的最新行情为空
+2025-06-12 01:37:00,076 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:37:00,172 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:00,417 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v32
+2025-06-12 01:37:00,480 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 open_date 的最新行情为空
+2025-06-12 01:37:00,837 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v33
+2025-06-12 01:37:01,196 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_triggered 的最新行情为空
+2025-06-12 01:37:01,788 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:01,927 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 highest_price 的最新行情为空
+2025-06-12 01:37:02,051 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v34
+2025-06-12 01:37:02,099 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:37:02,319 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:37:02,347 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:37:02,363 - qmt_trading.web_server - DEBUG - SSE推送持仓数据变化通知: v30
+2025-06-12 01:37:02,721 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stop_loss_price 的最新行情为空
+2025-06-12 01:37:02,954 - qmt_trading.position_manager - DEBUG - 获取到 3 条持仓记录（所有字段），并计算了涨跌幅
+2025-06-12 01:37:03,077 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v35
+2025-06-12 01:37:03,495 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 01:37:04,025 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:04,243 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v36
+2025-06-12 01:37:04,274 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:37:04,650 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:04,697 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:37:04,973 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v37
+2025-06-12 01:37:05,084 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:05,284 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v38
+2025-06-12 01:37:05,767 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:06,609 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:37:06,935 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:06,998 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:37:07,216 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v39
+2025-06-12 01:37:07,403 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v40
+2025-06-12 01:37:08,133 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v41
+2025-06-12 01:37:08,339 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:08,522 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v42
+2025-06-12 01:37:08,584 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:37:08,927 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:37:08,928 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:37:09,083 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:09,083 - qmt_trading.web_server - DEBUG - SSE推送持仓数据变化通知: v35
+2025-06-12 01:37:09,332 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v43
+2025-06-12 01:37:09,379 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:37:09,690 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:37:09,690 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v44
+2025-06-12 01:37:10,328 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 01:37:10,499 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stock_code 的最新行情为空
+2025-06-12 01:37:10,810 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:11,089 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v45
+2025-06-12 01:37:11,121 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:37:11,246 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stock_name 的最新行情为空
+2025-06-12 01:37:11,400 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:37:11,495 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:11,618 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v46
+2025-06-12 01:37:11,618 - qmt_trading.position_manager - DEBUG - 全量刷新 002261: 价格=30.21, 最高价=30.21, 盈亏率=-3.73%, 止损价=29.18
+2025-06-12 01:37:12,148 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 volume 的最新行情为空
+2025-06-12 01:37:12,694 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 available 的最新行情为空
+2025-06-12 01:37:13,316 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 cost_price 的最新行情为空
+2025-06-12 01:37:13,317 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:37:13,347 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:37:13,564 - qmt_trading.position_manager - DEBUG - 无法获取 159813 的最新行情，跳过刷新
+2025-06-12 01:37:14,048 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 current_price 的最新行情为空
+2025-06-12 01:37:14,311 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v47
+2025-06-12 01:37:14,685 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:14,872 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 market_value 的最新行情为空
+2025-06-12 01:37:15,185 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:15,494 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v48
+2025-06-12 01:37:15,494 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_ratio 的最新行情为空
+2025-06-12 01:37:15,525 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:37:15,758 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:15,977 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:37:16,023 - qmt_trading.web_server - DEBUG - SSE推送持仓数据变化通知: v44
+2025-06-12 01:37:16,023 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v49
+2025-06-12 01:37:16,209 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 last_update 的最新行情为空
+2025-06-12 01:37:16,947 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 open_date 的最新行情为空
+2025-06-12 01:37:17,141 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 01:37:17,716 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_triggered 的最新行情为空
+2025-06-12 01:37:17,717 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:37:18,386 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 highest_price 的最新行情为空
+2025-06-12 01:37:18,415 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:18,461 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v50
+2025-06-12 01:37:18,709 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v51
+2025-06-12 01:37:19,099 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stop_loss_price 的最新行情为空
+2025-06-12 01:37:19,379 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:19,550 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v52
+2025-06-12 01:37:19,596 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:37:19,847 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:37:19,999 - qmt_trading.position_manager - DEBUG - 全量刷新 300638: 价格=26.25, 最高价=26.25, 盈亏率=-3.88%, 止损价=25.40
+2025-06-12 01:37:20,061 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v53
+2025-06-12 01:37:20,108 - qmt_trading.position_manager - INFO - 模拟交易全量刷新完成，更新了 2 只股票的数据
+2025-06-12 01:37:20,357 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:37:21,118 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v54
+2025-06-12 01:37:21,184 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:21,400 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v55
+2025-06-12 01:37:21,960 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:22,209 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v56
+2025-06-12 01:37:22,256 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:37:22,491 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:37:22,552 - qmt_trading.web_server - DEBUG - SSE推送持仓数据变化通知: v49
+2025-06-12 01:37:22,879 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:37:23,608 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v57
+2025-06-12 01:37:23,686 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 01:37:24,576 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:24,805 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v58
+2025-06-12 01:37:24,882 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:37:25,073 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:25,088 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:37:25,210 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v59
+2025-06-12 01:37:25,257 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:37:25,800 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stock_code 的最新行情为空
+2025-06-12 01:37:26,454 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stock_name 的最新行情为空
+2025-06-12 01:37:26,765 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:37:27,122 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 volume 的最新行情为空
+2025-06-12 01:37:27,588 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v60
+2025-06-12 01:37:27,885 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 available 的最新行情为空
+2025-06-12 01:37:28,512 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:28,518 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v61
+2025-06-12 01:37:28,518 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:37:28,525 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:37:28,526 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 cost_price 的最新行情为空
+2025-06-12 01:37:28,527 - qmt_trading.web_server - DEBUG - SSE推送持仓数据变化通知: v57
+2025-06-12 01:37:28,941 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 current_price 的最新行情为空
+2025-06-12 01:37:29,530 - qmt_trading.position_manager - DEBUG - 返回模拟账户信息，余额: 1000000
+2025-06-12 01:37:29,654 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 market_value 的最新行情为空
+2025-06-12 01:37:30,432 - qmt_trading.position_manager - DEBUG - 模拟交易模式：跳过内存数据库到SQLite数据库的同步
+2025-06-12 01:37:30,463 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_ratio 的最新行情为空
+2025-06-12 01:37:30,576 - qmt_trading.data_manager - DEBUG - Mootdx:002261 最新行情: {'lastPrice': 30.21, 'lastClose': 30.31, 'volume': 543915.0, 'amount': 1647271040.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:30,820 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v62
+2025-06-12 01:37:31,224 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 last_update 的最新行情为空
+2025-06-12 01:37:31,566 - qmt_trading.main - INFO - 接收到退出信号，开始清理...
+2025-06-12 01:37:31,644 - qmt_trading.main - INFO - 开始清理资源...
+2025-06-12 01:37:31,721 - qmt_trading.main - INFO - 停止 data_thread...
+2025-06-12 01:37:31,846 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 open_date 的最新行情为空
+2025-06-12 01:37:32,342 - qmt_trading.data_manager - ERROR - 获取 159813 的latest_data出错: Length mismatch: Expected axis has 4 elements, new values have 2 elements
+2025-06-12 01:37:32,357 - qmt_trading.data_manager - INFO - 数据更新线程已停止
+2025-06-12 01:37:32,482 - qmt_trading.main - INFO - 停止 position_thread...
+2025-06-12 01:37:32,513 - qmt_trading.position_manager - INFO - 持仓监控线程已停止
+2025-06-12 01:37:32,513 - qmt_trading.main - INFO - 停止 strategy_thread...
+2025-06-12 01:37:32,532 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_triggered 的最新行情为空
+2025-06-12 01:37:32,660 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 highest_price 的最新行情为空
+2025-06-12 01:37:32,661 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v63
+2025-06-12 01:37:32,756 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 stop_loss_price 的最新行情为空
+2025-06-12 01:37:32,792 - qmt_trading.data_manager - DEBUG - Mootdx:300638 最新行情: {'lastPrice': 26.25, 'lastClose': 26.05, 'volume': 228603.0, 'amount': 605667200.0, 'date': '2025-06-11 15:00'}
+2025-06-12 01:37:32,793 - qmt_trading.position_manager - DEBUG - 持仓数据版本更新: v64
+2025-06-12 01:37:32,793 - qmt_trading.position_manager - INFO - 模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除
+2025-06-12 01:37:32,796 - qmt_trading.position_manager - DEBUG - 更新持仓缓存，共 3 条记录
+2025-06-12 01:37:32,796 - qmt_trading.web_server - DEBUG - SSE推送持仓数据变化通知: v61
+2025-06-12 01:37:32,885 - qmt_trading.strategy - INFO - 策略线程已停止
+2025-06-12 01:37:32,886 - qmt_trading.main - INFO - 停止 sell_strategy_thread...
+2025-06-12 01:37:33,771 - qmt_trading.sell_strategy - INFO - 卖出策略监控循环结束
+2025-06-12 01:37:33,771 - qmt_trading.sell_strategy - INFO - 卖出策略监控线程已停止
+2025-06-12 01:37:33,771 - qmt_trading.main - INFO - 停止 log_thread...
+2025-06-12 01:37:33,771 - qmt_trading.main - INFO - 停止 web_thread...
+2025-06-12 01:37:33,772 - qmt_trading.main - ERROR - 关闭交易策略时出错: 'TradingStrategy' object has no attribute 'close'
+2025-06-12 01:37:33,772 - qmt_trading.trading_executor - INFO - 交易执行器已关闭
+2025-06-12 01:37:33,772 - qmt_trading.data_manager - INFO - 数据库连接已关闭
+2025-06-12 01:37:33,773 - qmt_trading.data_manager - ERROR - 断开行情连接出错: module 'xtquant.xtdata' has no attribute 'disconnect'
+2025-06-12 01:37:33,773 - qmt_trading.main - INFO - 资源清理完成
+2025-06-12 01:37:33,773 - qmt_trading.main - INFO - 系统已退出

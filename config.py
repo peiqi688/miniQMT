@@ -16,7 +16,7 @@ LOG_MAX_SIZE = 10 * 1024 * 1024  # 10MB
 LOG_BACKUP_COUNT = 5  # 保留5个备份文件
 
 # ======================= 功能开关 =======================
-ENABLE_SIMULATION_MODE = True   # 模拟交易模式开关（True=模拟，False=实盘）
+ENABLE_SIMULATION_MODE = False   # 模拟交易模式开关（True=模拟，False=实盘）
 ENABLE_MONITORING = False       # 控制前端UI监控状态
 ENABLE_AUTO_TRADING = False     # 自动交易总开关：控制是否执行交易决策并形成交易记录
 ENABLE_ALLOW_BUY = True         # 是否允许买入操作
@@ -70,7 +70,7 @@ REALTIME_DATA_CONFIG = {
 # ======================= 交易配置 =======================
 # 交易账号信息（从外部文件读取，避免敏感信息硬编码）
 ACCOUNT_CONFIG_FILE = "account_config.json"
-QMT_PATH = r'C:/光大证券金阳光QMT实盘/userdata_mini'
+QMT_PATH = r'd:/江海证券QMT实盘_交易/userdata_mini'
 
 def get_account_config():
     """从外部文件读取账号配置"""
@@ -79,7 +79,7 @@ def get_account_config():
             return json.load(f)
     except FileNotFoundError:
         # 如果配置文件不存在，返回默认空配置
-        return {"account_id": "", "account_type": "STOCK"}
+        return {"account_id": "80392832", "account_type": "STOCK"}
 
 # 账号信息
 ACCOUNT_CONFIG = get_account_config()
@@ -214,6 +214,59 @@ def is_trade_time():
         return True
     
     return False
+
+# ======================= 卖出策略配置 =======================
+# 卖出策略总开关
+ENABLE_SELL_STRATEGY = True
+
+# 卖出策略检查间隔（秒）
+SELL_STRATEGY_CHECK_INTERVAL = 1
+
+# 卖出策略冷却时间（秒）
+SELL_STRATEGY_COOLDOWN_SECONDS = 30
+
+# 规则1: 高开 + 最高价高于开盘价N% + 最高点回落M%卖出
+SELL_RULE1_RISE_THRESHOLD = 0.03    # 最高价高于开盘价3%
+SELL_RULE1_DRAWDOWN_THRESHOLD = 0.02  # 从最高点回落2%
+
+# 规则2: 低开 + 最高价高于开盘价N% + 最高点回落M%卖出
+SELL_RULE2_RISE_THRESHOLD = 0.05    # 最高价高于开盘价5%
+SELL_RULE2_DRAWDOWN_THRESHOLD = 0.03  # 从最高点回落3%
+
+# 规则3: 低开 + 最高价涨幅大于N% + 最高点回落M%卖出
+SELL_RULE3_GAIN_THRESHOLD = 0.06    # 最高价涨幅大于6%（相对昨收）
+SELL_RULE3_DRAWDOWN_THRESHOLD = 0.03  # 从最高点回落3%
+
+# 规则4: 不论高低开 + 最高价涨幅大于N% + 最高点回落M%卖出
+SELL_RULE4_GAIN_THRESHOLD = 0.08    # 最高价涨幅大于8%（相对昨收）
+SELL_RULE4_DRAWDOWN_THRESHOLD = 0.04  # 从最高点回落4%
+
+# 规则5: 尾盘5分钟若未涨停则定时卖出（在代码中硬编码为14:55-15:00）
+SELL_RULE5_ENABLE = True
+
+# 规则6: 涨停炸板前根据封单金额自动卖出
+SELL_RULE6_SEAL_THRESHOLD = 5000000  # 封单金额阈值（500万元）
+
+# 规则7: 卖出委托2秒未成交自动撤单重下
+SELL_RULE7_CANCEL_TIMEOUT = 2  # 委托超时时间（秒）
+
+# 规则8: 最大回撤达到x%，就卖出
+SELL_RULE8_MAX_DRAWDOWN = 0.05  # 最大回撤5%
+
+# 卖出策略参数范围定义（用于Web界面参数验证）
+SELL_STRATEGY_PARAM_RANGES = {
+    "rule1_rise": {"min": 0.01, "max": 0.20, "type": "float", "desc": "规则1涨幅阈值(%)"},
+    "rule1_drawdown": {"min": 0.01, "max": 0.10, "type": "float", "desc": "规则1回落阈值(%)"},
+    "rule2_rise": {"min": 0.01, "max": 0.20, "type": "float", "desc": "规则2涨幅阈值(%)"},
+    "rule2_drawdown": {"min": 0.01, "max": 0.10, "type": "float", "desc": "规则2回落阈值(%)"},
+    "rule3_gain": {"min": 0.01, "max": 0.20, "type": "float", "desc": "规则3涨幅阈值(%)"},
+    "rule3_drawdown": {"min": 0.01, "max": 0.10, "type": "float", "desc": "规则3回落阈值(%)"},
+    "rule4_gain": {"min": 0.01, "max": 0.20, "type": "float", "desc": "规则4涨幅阈值(%)"},
+    "rule4_drawdown": {"min": 0.01, "max": 0.10, "type": "float", "desc": "规则4回落阈值(%)"},
+    "rule6_seal": {"min": 100000, "max": 50000000, "type": "int", "desc": "规则6封单阈值(元)"},
+    "rule7_timeout": {"min": 1, "max": 10, "type": "int", "desc": "规则7超时时间(秒)"},
+    "rule8_drawdown": {"min": 0.01, "max": 0.20, "type": "float", "desc": "规则8最大回撤(%)"}
+}
 
 # ======================= 预设股票池 =======================
 # 可以在这里定义预设的股票池，也可以从外部文件加载

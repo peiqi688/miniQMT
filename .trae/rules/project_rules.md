@@ -1,6 +1,6 @@
 # miniQMT
 - miniQMT for Arthur
-
+新的改变
 我希望让AI帮我设计量化代码，包括系统架构与具体实现，以下是我的提词，请你给出修改建议，以让AI模型更精准地生成可用代码：
 
 使用python写一个用迅投miniqmt进行量化交易的系统，功能包括：
@@ -25,7 +25,7 @@
 2. 所有可配置参数集中管理，有调试开关和丰富的代码注释和调试信息；
 3. 如果有log文件，定期清理，不过多占用存储空间；
 4. xtquant的api参考https://dict.thinktrader.net；
-5. pywencai: 通过python获取问财数据，用于量化研究和学习 https://github.com/zsrl/pywencai  使用pywencai库的时候,要注释说明.
+
 # AI 优化提词
 请按照以下架构使用QMT Python API实现量化交易系统：
 ```python
@@ -39,7 +39,7 @@
 |-- position_mgr.py    # **持仓管理与止盈止损计算**
 |-- grid_trader.py     # 网格交易模块
 |-- risk_mgr.py        # 风控校验模块
-
+具体项目目录结构,先查看根目录下的mulu.md
 二、关键实现要点
 1. 数据管理 (data_mgr.py)
 - 使用xtdata.get_market_data获取股票历史数据

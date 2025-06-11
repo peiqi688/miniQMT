@@ -14,6 +14,7 @@ from data_manager import get_data_manager
 from indicator_calculator import get_indicator_calculator
 from position_manager import get_position_manager
 from trading_executor import get_trading_executor
+from sell_strategy import SellStrategy
 
 # 获取logger
 logger = get_logger("strategy")
@@ -27,6 +28,9 @@ class TradingStrategy:
         self.indicator_calculator = get_indicator_calculator()
         self.position_manager = get_position_manager()
         self.trading_executor = get_trading_executor()
+        
+        # 初始化卖出策略
+        self.sell_strategy = SellStrategy()
         
         # 策略运行线程
         self.strategy_thread = None
@@ -559,7 +563,14 @@ class TradingStrategy:
         bool: 是否执行成功
         """
         try:
-            # 检查是否有卖出信号
+            # 1. 检查高级卖出策略（8个规则）
+            if config.ENABLE_SELL_STRATEGY:
+                sell_result = self.sell_strategy.check_sell_signals(stock_code)
+                if sell_result:
+                    logger.info(f"{stock_code} 触发高级卖出策略: {sell_result['rule']}")
+                    return True
+            
+            # 2. 检查传统技术指标卖出信号
             sell_signal = self.indicator_calculator.check_sell_signal(stock_code)
             
             if sell_signal:
@@ -801,4 +812,4 @@ def get_trading_strategy():
     global _instance
     if _instance is None:
         _instance = TradingStrategy()
-    return _instance            
+    return _instance

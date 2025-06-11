@@ -15,6 +15,7 @@ from indicator_calculator import get_indicator_calculator
 from position_manager import get_position_manager
 from trading_executor import get_trading_executor
 from strategy import get_trading_strategy
+from sell_strategy import SellStrategy
 from web_server import start_web_server
 
 # 获取logger
@@ -46,8 +47,11 @@ def init_system():
     trading_executor = get_trading_executor()
     trading_strategy = get_trading_strategy()
     
+    # 初始化卖出策略
+    sell_strategy = SellStrategy()
+    
     logger.info("系统初始化完成")
-    return data_manager, indicator_calculator, position_manager, trading_executor, trading_strategy
+    return data_manager, indicator_calculator, position_manager, trading_executor, trading_strategy, sell_strategy
 
 def start_data_thread(data_manager):
     """启动数据更新线程"""
@@ -69,6 +73,13 @@ def start_strategy_thread(trading_strategy):
     logger.info("启动策略线程")
     trading_strategy.start_strategy_thread()
     threads.append(("strategy_thread", trading_strategy.stop_strategy_thread))
+
+def start_sell_strategy_thread(sell_strategy):
+    """启动卖出策略线程"""
+    if config.ENABLE_SELL_STRATEGY:
+        logger.info("启动卖出策略线程")
+        sell_strategy.start_monitoring()
+        threads.append(("sell_strategy_thread", sell_strategy.stop_monitoring))
 
 def start_log_cleanup_thread():
     """启动日志清理线程"""
@@ -153,7 +164,7 @@ def main():
         signal.signal(signal.SIGTERM, signal_handler)
         
         # 初始化系统
-        data_manager, indicator_calculator, position_manager, trading_executor, trading_strategy = init_system()
+        data_manager, indicator_calculator, position_manager, trading_executor, trading_strategy, sell_strategy = init_system()
         
         # 下载初始数据
         download_initial_data(data_manager)
@@ -165,6 +176,7 @@ def main():
         start_data_thread(data_manager)
         start_position_thread(position_manager)
         start_strategy_thread(trading_strategy)
+        start_sell_strategy_thread(sell_strategy)
         start_log_cleanup_thread()
         
         # 最后启动Web服务器

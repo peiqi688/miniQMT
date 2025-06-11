@@ -249,11 +249,31 @@ def get_config():
             "connectPort": config.WEB_SERVER_PORT,
             "totalAccounts": "127.0.0.1",
             "globalAllowBuySell": config.ENABLE_AUTO_TRADING,
-            "simulationMode": getattr(config, 'ENABLE_SIMULATION_MODE', False)
+            "simulationMode": getattr(config, 'ENABLE_SIMULATION_MODE', False),
+            
+            # 卖出策略配置
+            "sellStrategyEnabled": getattr(config, 'ENABLE_SELL_STRATEGY', True),
+            "sellRule1Rise": getattr(config, 'SELL_RULE1_RISE_THRESHOLD', 0.03) * 100,
+            "sellRule1Drawdown": getattr(config, 'SELL_RULE1_DRAWDOWN_THRESHOLD', 0.02) * 100,
+            "sellRule2Rise": getattr(config, 'SELL_RULE2_RISE_THRESHOLD', 0.05) * 100,
+            "sellRule2Drawdown": getattr(config, 'SELL_RULE2_DRAWDOWN_THRESHOLD', 0.03) * 100,
+            "sellRule3Gain": getattr(config, 'SELL_RULE3_GAIN_THRESHOLD', 0.06) * 100,
+            "sellRule3Drawdown": getattr(config, 'SELL_RULE3_DRAWDOWN_THRESHOLD', 0.03) * 100,
+            "sellRule4Gain": getattr(config, 'SELL_RULE4_GAIN_THRESHOLD', 0.08) * 100,
+            "sellRule4Drawdown": getattr(config, 'SELL_RULE4_DRAWDOWN_THRESHOLD', 0.04) * 100,
+            "sellRule5Enabled": getattr(config, 'SELL_RULE5_ENABLE', True),
+            "sellRule6Seal": getattr(config, 'SELL_RULE6_SEAL_THRESHOLD', 5000000),
+            "sellRule7Timeout": getattr(config, 'SELL_RULE7_CANCEL_TIMEOUT', 2),
+            "sellRule8Drawdown": getattr(config, 'SELL_RULE8_MAX_DRAWDOWN', 0.05) * 100
         }
         
         # 获取参数范围
         param_ranges = {k: {'min': v['min'], 'max': v['max']} for k, v in config.CONFIG_PARAM_RANGES.items()}
+        
+        # 添加卖出策略参数范围
+        if hasattr(config, 'SELL_STRATEGY_PARAM_RANGES'):
+            sell_ranges = {k: {'min': v['min'], 'max': v['max']} for k, v in config.SELL_STRATEGY_PARAM_RANGES.items()}
+            param_ranges.update(sell_ranges)
         
         return jsonify({
             'status': 'success',
@@ -326,6 +346,34 @@ def save_config():
             old_auto_trading = config.ENABLE_AUTO_TRADING
             config.ENABLE_AUTO_TRADING = bool(config_data["globalAllowBuySell"])
             logger.info(f"自动交易总开关: {old_auto_trading} -> {config.ENABLE_AUTO_TRADING}")
+        
+        # 卖出策略配置更新
+        if "sellStrategyEnabled" in config_data:
+            setattr(config, 'ENABLE_SELL_STRATEGY', bool(config_data["sellStrategyEnabled"]))
+        if "sellRule1Rise" in config_data:
+            setattr(config, 'SELL_RULE1_RISE_THRESHOLD', float(config_data["sellRule1Rise"]) / 100)
+        if "sellRule1Drawdown" in config_data:
+            setattr(config, 'SELL_RULE1_DRAWDOWN_THRESHOLD', float(config_data["sellRule1Drawdown"]) / 100)
+        if "sellRule2Rise" in config_data:
+            setattr(config, 'SELL_RULE2_RISE_THRESHOLD', float(config_data["sellRule2Rise"]) / 100)
+        if "sellRule2Drawdown" in config_data:
+            setattr(config, 'SELL_RULE2_DRAWDOWN_THRESHOLD', float(config_data["sellRule2Drawdown"]) / 100)
+        if "sellRule3Gain" in config_data:
+            setattr(config, 'SELL_RULE3_GAIN_THRESHOLD', float(config_data["sellRule3Gain"]) / 100)
+        if "sellRule3Drawdown" in config_data:
+            setattr(config, 'SELL_RULE3_DRAWDOWN_THRESHOLD', float(config_data["sellRule3Drawdown"]) / 100)
+        if "sellRule4Gain" in config_data:
+            setattr(config, 'SELL_RULE4_GAIN_THRESHOLD', float(config_data["sellRule4Gain"]) / 100)
+        if "sellRule4Drawdown" in config_data:
+            setattr(config, 'SELL_RULE4_DRAWDOWN_THRESHOLD', float(config_data["sellRule4Drawdown"]) / 100)
+        if "sellRule5Enabled" in config_data:
+            setattr(config, 'SELL_RULE5_ENABLE', bool(config_data["sellRule5Enabled"]))
+        if "sellRule6Seal" in config_data:
+            setattr(config, 'SELL_RULE6_SEAL_THRESHOLD', int(config_data["sellRule6Seal"]))
+        if "sellRule7Timeout" in config_data:
+            setattr(config, 'SELL_RULE7_CANCEL_TIMEOUT', int(config_data["sellRule7Timeout"]))
+        if "sellRule8Drawdown" in config_data:
+            setattr(config, 'SELL_RULE8_MAX_DRAWDOWN', float(config_data["sellRule8Drawdown"]) / 100)
         
         # 在处理保存配置的API中添加
         if "simulationMode" in config_data:

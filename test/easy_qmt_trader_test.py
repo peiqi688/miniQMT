@@ -26,8 +26,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 #继承交易类
-trader=easy_qmt_trader(path= r'C:/光大证券金阳光QMT实盘/userdata_mini',
-                account='25105132',account_type='STOCK',
+trader=easy_qmt_trader(path= r'd:/江海证券QMT实盘_交易/userdata_mini',
+                account='80392832',account_type='STOCK',
                 )
 #连接qmt
 trader.connect()
