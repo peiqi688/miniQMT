@@ -2,6 +2,8 @@
 from stock_data_fetcher import get_overlap_stocks
 import adata
 import pandas as pd
+import os
+from datetime import datetime
 
 # 配置参数
 COOKIE = 'your_cookie_here'  # 替换为你的实际cookie
@@ -44,19 +46,27 @@ def analyze_overlap_stocks():
         industry_dist = overlap_data['行业'].value_counts()
         print("\n行业分布:")
         print(industry_dist)
+
+    def analyze_and_save(overlap_data):
+        # 示例4: 保存处理后的数据
+        # 选择关键列保存
+        key_columns = ['股票代码', '股票简称', '最新价', '涨跌幅', '人气值', '所属行业']
+        # 只保留实际存在的列
+        existing_columns = [col for col in overlap_data.columns if col in key_columns]
     
-    # 示例4: 保存处理后的数据
-    # 选择关键列保存
-    key_columns = ['股票代码', '股票简称', '最新价', '涨跌幅', '人气值', '所属行业']
-    # 只保留实际存在的列
-    existing_columns = [col for col in key_columns if col in overlap_data.columns]
+        if existing_columns:
+            processed_data = overlap_data[existing_columns]
+            # 定义保存目录
+            output_dir = 'logs/test/'
+            # 确保目录存在，如果不存在则创建
+            os.makedirs(output_dir, exist_ok=True)
+            # 构建完整的文件路径
+            filename = os.path.join(output_dir, 'processed_overlap_stocks.csv')
+            # 将处理后的数据保存到CSV文件
+            processed_data.to_csv(filename, index=False, encoding='utf_8_sig')
+            print(f"\n处理后的数据已保存到 {filename}")
     
-    if existing_columns:
-        processed_data = overlap_data[existing_columns]
-        processed_data.to_csv('processed_overlap_stocks.csv', index=False, encoding='utf_8_sig')
-        print("\n处理后的数据已保存到 processed_overlap_stocks.csv")
-    
-    return overlap_data
+        return overlap_data
 
 if __name__ == "__main__":
     # 执行分析
