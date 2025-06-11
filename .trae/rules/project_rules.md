@@ -1,6 +1,6 @@
 # miniQMT
 - miniQMT for Arthur
-
+新的改变
 我希望让AI帮我设计量化代码，包括系统架构与具体实现，以下是我的提词，请你给出修改建议，以让AI模型更精准地生成可用代码：
 
 使用python写一个用迅投miniqmt进行量化交易的系统，功能包括：
@@ -25,7 +25,7 @@
 2. 所有可配置参数集中管理，有调试开关和丰富的代码注释和调试信息；
 3. 如果有log文件，定期清理，不过多占用存储空间；
 4. xtquant的api参考https://dict.thinktrader.net；
-5. pywencai: 通过python获取问财数据，用于量化研究和学习 https://github.com/zsrl/pywencai  使用pywencai库的时候,要注释说明.
+
 # AI 优化提词
 请按照以下架构使用QMT Python API实现量化交易系统：
 ```python
@@ -39,7 +39,7 @@
 |-- position_mgr.py    # **持仓管理与止盈止损计算**
 |-- grid_trader.py     # 网格交易模块
 |-- risk_mgr.py        # 风控校验模块
-
+具体项目目录结构,先查看根目录下的mulu.md
 二、关键实现要点
 1. 数据管理 (data_mgr.py)
 - 使用xtdata.get_market_data获取股票历史数据
@@ -98,3 +98,10 @@ def check_position_risk(position):
 2. 日志管理建议：
    - 使用RotatingFileHandler实现日志轮换
    - 保留最近7天日志，单个日志≤10MB
+# MCP Interactive Feedback 规则
+
+1. 在任何流程、任务、对话进行时，无论是询问、回复、或完成阶段性任务，皆必须调用 MCP mcp-feedback-enhanced。
+2. 每当收到用户反馈，若反馈内容非空，必须再次调用 MCP mcp-feedback-enhanced，并根据反馈内容调整行为。
+3. 仅当用户明确表示「结束」或「不再需要交互」时，才可停止调用 MCP mcp-feedback-enhanced，流程才算结束。
+4. 除非收到结束指令，否则所有步骤都必须重复调用 MCP mcp-feedback-enhanced。
+5. 完成任务前，必须使用 MCP mcp-feedback-enhanced 工具向用户询问反馈。
