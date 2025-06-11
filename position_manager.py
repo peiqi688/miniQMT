@@ -213,6 +213,10 @@ class PositionManager:
             if not hasattr(config, 'ENABLE_SIMULATION_MODE') or not config.ENABLE_SIMULATION_MODE:
                 # 只在非模拟交易模式下执行删除操作
                 if current_positions:  # 只有当至少有一个有效的当前持仓时才执行删除
+                    # 只在有足够多的有效持仓数据时才执行删除
+                    if len(current_positions) < len(memory_stock_codes) * 0.5:
+                        logger.warning("外部持仓数据可能不完整，跳过删除操作")
+                        return
                     for stock_code in memory_stock_codes:
                         if stock_code:  # 确保stock_code不为None
                             self.remove_position(stock_code)
@@ -249,7 +253,12 @@ class PositionManager:
             if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
                 logger.debug("模拟交易模式：跳过内存数据库到SQLite数据库的同步")
                 return
-        
+
+            # ✅ 添加交易时间检查 - 非交易时间不同步到SQLite
+            if not config.is_trade_time():
+                logger.debug("非交易时间，跳过内存数据库到SQLite的同步")
+                return
+
             # 获取内存数据库中的所有股票代码
             # memory_positions = pd.read_sql_query("SELECT stock_code, stock_name, open_date, profit_triggered, highest_price, stop_loss_price FROM positions", self.memory_conn)
             memory_positions = pd.read_sql_query("SELECT * FROM positions", self.memory_conn)
@@ -314,7 +323,7 @@ class PositionManager:
                         current_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         cursor.execute("""
                             INSERT INTO positions (stock_code, stock_name, volume, available, cost_price, open_date, profit_triggered, highest_price, stop_loss_price, last_update) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """, (stock_code, stock_name, volume, available, cost_price, current_date, profit_triggered, highest_price, stop_loss_price, now))
                         
                         # 插入新记录后，立即从数据库读取 open_date，以确保内存数据库与数据库一致
@@ -678,6 +687,11 @@ class PositionManager:
         bool: 是否删除成功
         """
         try:
+
+            position = self.get_position(stock_code)
+            if position and position.get('profit_triggered'):
+                logger.warning(f"删除已触发止盈的持仓 {stock_code}，请确认")
+
             cursor = self.memory_conn.cursor()
             cursor.execute("DELETE FROM positions WHERE stock_code=?", (stock_code,))
             self.memory_conn.commit()
