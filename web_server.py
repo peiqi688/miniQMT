@@ -665,30 +665,30 @@ def clear_logs():
             'message': f"清空当天日志失败: {str(e)}"
         }), 500
 
-@app.route('/api/data/clear_current', methods=['POST'])
-def clear_current_data():
-    try:
-        # 修改：清空内存数据库中的持仓数据，而非SQLite
-        cursor = position_manager.memory_conn.cursor()
-        cursor.execute("DELETE FROM positions")
-        position_manager.memory_conn.commit()
+# @app.route('/api/data/clear_current', methods=['POST'])
+# def clear_current_data():
+#     try:
+#         # 修改：清空内存数据库中的持仓数据，而非SQLite
+#         cursor = position_manager.memory_conn.cursor()
+#         cursor.execute("DELETE FROM positions")
+#         position_manager.memory_conn.commit()
         
-        # 重置缓存
-        position_manager.positions_cache = None
-        position_manager.last_position_update_time = 0
+#         # 重置缓存
+#         position_manager.positions_cache = None
+#         position_manager.last_position_update_time = 0
         
-        logger.info("内存数据库中的持仓数据已清空")
+#         logger.info("内存数据库中的持仓数据已清空")
         
-        return jsonify({
-            'status': 'success',
-            'message': '当前数据已清空'
-        })
-    except Exception as e:
-        logger.error(f"清空当前数据时出错: {str(e)}")
-        return jsonify({
-            'status': 'error',
-            'message': f"清空当前数据失败: {str(e)}"
-        }), 500
+#         return jsonify({
+#             'status': 'success',
+#             'message': '当前数据已清空'
+#         })
+#     except Exception as e:
+#         logger.error(f"清空当前数据时出错: {str(e)}")
+#         return jsonify({
+#             'status': 'error',
+#             'message': f"清空当前数据失败: {str(e)}"
+#         }), 500
 
 @app.route('/api/data/clear_buysell', methods=['POST'])
 def clear_buysell_data():
@@ -795,9 +795,9 @@ def init_holdings():
         positions = trading_executor.get_stock_positions()
         
         # 清空已有持仓数据
-        cursor = data_manager.conn.cursor()
-        cursor.execute("DELETE FROM positions")
-        data_manager.conn.commit()
+        # cursor = data_manager.conn.cursor()
+        # cursor.execute("DELETE FROM positions")
+        # data_manager.conn.commit()
         
         # 导入最新持仓
         for pos in positions:
