@@ -1,3 +1,10 @@
+
+mcp依赖 python 版本3.9
+pip install uv   
+uvx mcp-feedback-enhanced@latest 
+项目 依赖库 
+pip install xtquant pandas requests baostock flask flask_cors mootdx adata pywencai 
+
 # miniQMT 项目目录结构
 
 ## 一、系统架构设计
@@ -82,3 +89,4 @@
 2.  日志管理建议：
     *   使用 `RotatingFileHandler` 实现日志轮换。
     *   保留最近 7 天日志，单个日志 ≤ 10MB。
+

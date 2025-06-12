@@ -122,7 +122,7 @@ DYNAMIC_TAKE_PROFIT = [
 # 4. 止损价格计算：未触发首次止盈时为成本价×(1-7%)，已触发后为最高价×对应系数
 
 # 网格交易参数
-GRID_TRADING_ENABLED = True
+GRID_TRADING_ENABLED = False
 GRID_STEP_RATIO = 0.03  # 网格步长（价格变动3%创建一个网格）
 GRID_POSITION_RATIO = 0.2  # 每个网格交易的仓位比例 10%
 GRID_MAX_LEVELS = 6  # 最大网格数量
