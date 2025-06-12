@@ -61,7 +61,7 @@ class PositionManager:
         self.data_changed = False
         self.version_lock = threading.Lock()
 
-        # ✅新增：全量刷新控制 - 在这里添加缺失的属性
+        # 新增：全量刷新控制 - 在这里添加缺失的属性
         self.last_full_refresh_time = 0
         self.full_refresh_interval = 60  # 1分钟全量刷新间隔
 
@@ -126,6 +126,9 @@ class PositionManager:
             cursor.execute("SELECT stock_code FROM positions")
             memory_stock_codes = {row[0] for row in cursor.fetchall() if row[0] is not None}
             current_positions = set()
+
+            # 新增：记录更新过程中的错误
+            update_errors = []
 
             # 遍历实盘持仓数据
             for _, row in real_positions_df.iterrows():
@@ -207,19 +210,51 @@ class PositionManager:
                 
                 except Exception as e:
                     logger.error(f"处理持仓行数据时出错: {str(e)}")
+                    update_errors.append(f"处理 {stock_code if 'stock_code' in locals() else '未知'} 时出错: {str(e)}")
                     continue  # 跳过这一行，继续处理其他行
-            
+
+            # 关键修改：只有在没有更新错误且数据完整时才执行删除
+            if update_errors:
+                logger.error(f"数据更新过程中出现 {len(update_errors)} 个错误，跳过删除操作以保护数据")
+                for error in update_errors:
+                    logger.error(f"  - {error}")
+                return
+
+            # 数据完整性检查
+            if len(current_positions) == 0:
+                logger.warning("外部持仓数据为空，可能是接口异常，跳过删除操作")
+                return
+                
+            # 数据量合理性检查
+            if len(memory_stock_codes) > 0 and len(current_positions) < len(memory_stock_codes) * 0.3:
+                logger.warning(f"外部持仓数据过少 ({len(current_positions)}) 相比内存数据 ({len(memory_stock_codes)})，可能是接口异常，跳过删除操作")
+                return
+
             # 修改：在模拟交易模式下，不删除内存中存在但实盘中不存在的持仓记录
             if not hasattr(config, 'ENABLE_SIMULATION_MODE') or not config.ENABLE_SIMULATION_MODE:
-                # 只在非模拟交易模式下执行删除操作
-                if current_positions:  # 只有当至少有一个有效的当前持仓时才执行删除
-                    # 只在有足够多的有效持仓数据时才执行删除
-                    if len(current_positions) < len(memory_stock_codes) * 0.5:
-                        logger.warning("外部持仓数据可能不完整，跳过删除操作")
-                        return
+                # 只有通过所有检查后才执行删除
+                if memory_stock_codes:  # 有需要删除的记录
+                    logger.info(f"准备删除 {len(memory_stock_codes)} 个不在外部数据中的持仓: {list(memory_stock_codes)}")
+                    
+                    # 逐个删除并记录结果
+                    successfully_deleted = []
+                    failed_deletions = []
+                    
                     for stock_code in memory_stock_codes:
-                        if stock_code:  # 确保stock_code不为None
-                            self.remove_position(stock_code)
+                        if stock_code:
+                            try:
+                                if self.remove_position(stock_code):
+                                    successfully_deleted.append(stock_code)
+                                else:
+                                    failed_deletions.append(stock_code)
+                            except Exception as e:
+                                logger.error(f"删除 {stock_code} 时出错: {str(e)}")
+                                failed_deletions.append(stock_code)
+                    
+                    if successfully_deleted:
+                        logger.info(f"成功删除持仓: {successfully_deleted}")
+                    if failed_deletions:
+                        logger.error(f"删除失败的持仓: {failed_deletions}")
             else:
                 logger.info(f"模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除")
 
@@ -254,7 +289,7 @@ class PositionManager:
                 logger.debug("模拟交易模式：跳过内存数据库到SQLite数据库的同步")
                 return
 
-            # ✅ 添加交易时间检查 - 非交易时间不同步到SQLite
+            # 添加交易时间检查 - 非交易时间不同步到SQLite
             if not config.is_trade_time():
                 logger.debug("非交易时间，跳过内存数据库到SQLite的同步")
                 return
@@ -264,12 +299,12 @@ class PositionManager:
             memory_positions = pd.read_sql_query("SELECT * FROM positions", self.memory_conn)
             memory_stock_codes = set(memory_positions['stock_code'].tolist()) if not memory_positions.empty else set()
             
-            # ✅ 获取SQLite数据库中的所有股票代码
+            # 获取SQLite数据库中的所有股票代码
             cursor = self.conn.cursor()
             cursor.execute("SELECT stock_code FROM positions")
             sqlite_stock_codes = {row[0] for row in cursor.fetchall() if row[0] is not None}
             
-            # ✅ 删除SQLite中存在但内存数据库中不存在的记录
+            # 删除SQLite中存在但内存数据库中不存在的记录
             stocks_to_delete = sqlite_stock_codes - memory_stock_codes
             if stocks_to_delete:
                 deleted_count = 0
@@ -361,7 +396,7 @@ class PositionManager:
                 # 原有的数据库同步
                 self._sync_memory_to_db()
 
-                # ✅ 新增：每1分钟执行一次全量刷新
+                # 新增：每1分钟执行一次全量刷新
                 current_time = time.time()
                 if (current_time - self.last_full_refresh_time) >= self.full_refresh_interval:
                     if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
@@ -369,7 +404,7 @@ class PositionManager:
                         self._full_refresh_simulation_data()
                         self.last_full_refresh_time = current_time
 
-                # ✅ 新增：模拟交易模式下的价格更新
+                # 新增：模拟交易模式下的价格更新
                 if hasattr(config, 'ENABLE_SIMULATION_MODE') and config.ENABLE_SIMULATION_MODE:
                     # 在交易时间内更频繁地更新价格
                     if config.is_trade_time():
@@ -618,7 +653,7 @@ class PositionManager:
                 if final_highest_price is None: # if not passed or calculated yet
                     final_highest_price = max(old_db_highest_price, final_current_price) if old_db_highest_price is not None else final_current_price
                 
-                # ✅ 修复：如果最高价发生变化，强制重新计算止损价格
+                # 修复：如果最高价发生变化，强制重新计算止损价格
                 if old_db_highest_price != final_highest_price:
                     logger.info(f"{stock_code} 最高价变化：{old_db_highest_price} -> {final_highest_price}，重新计算止损价格")
                     calculated_slp = self.calculate_stop_loss_price(final_cost_price, final_highest_price, profit_triggered)
@@ -667,7 +702,7 @@ class PositionManager:
             
             self.memory_conn.commit()
 
-            # ✅ 触发持仓数据版本更新
+            # 触发持仓数据版本更新
             self._increment_data_version()
             return True
             
@@ -689,15 +724,21 @@ class PositionManager:
         try:
 
             position = self.get_position(stock_code)
-            if position and position.get('profit_triggered'):
-                logger.warning(f"删除已触发止盈的持仓 {stock_code}，请确认")
+            if position:
+                profit_triggered = position.get('profit_triggered', False)
+                profit_ratio = position.get('profit_ratio', 0)
+                
+                if profit_triggered:
+                    logger.warning(f"⚠️  删除已触发止盈的持仓 {stock_code}，盈亏率: {profit_ratio:.2f}%")
+                else:
+                    logger.info(f"删除持仓 {stock_code}，盈亏率: {profit_ratio:.2f}%")
 
             cursor = self.memory_conn.cursor()
             cursor.execute("DELETE FROM positions WHERE stock_code=?", (stock_code,))
             self.memory_conn.commit()
             
             if cursor.rowcount > 0:
-                # ✅ 触发持仓数据版本更新
+                # 触发持仓数据版本更新
                 self._increment_data_version()
                 logger.info(f"已删除 {stock_code} 的持仓记录")
                 return True
@@ -916,7 +957,7 @@ class PositionManager:
                                 # 忽略无效值
                                 pass
                 
-                # ✅ 计算总资产
+                # 计算总资产
                 available = float(config.SIMULATION_BALANCE)
                 total_asset = available + market_value  # 可用资金 + 持仓市值
                 
@@ -925,7 +966,7 @@ class PositionManager:
                     'account_type': 'SIMULATION',
                     'available': available,
                     'market_value': float(market_value),
-                    'total_asset': total_asset,  # ✅ 添加总资产字段
+                    'total_asset': total_asset,  # 添加总资产字段
                     'profit_loss': 0.0,
                     'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }
@@ -1149,7 +1190,7 @@ class PositionManager:
                 profit_triggered = bool(profit_triggered)
             
             if profit_triggered:
-        # ✅ 检查配置有效性
+                # 检查配置有效性
                 if not config.DYNAMIC_TAKE_PROFIT:
                     logger.warning("动态止盈配置为空，使用保守止盈位")
                     return highest_price * 0.95  # 保守的5%回撤止盈
@@ -1160,7 +1201,7 @@ class PositionManager:
                 else:
                     highest_profit_ratio = 0.0
                     
-                # ✅ 修正：从高到低遍历，找到最高匹配区间
+                # 修正：从高到低遍历，找到最高匹配区间
                 take_profit_coefficient = 1.0  # 默认值改为1.0，表示不进行动态止损
                 matched_level = None
                 
@@ -1273,16 +1314,16 @@ class PositionManager:
                         'sell_ratio': config.INITIAL_TAKE_PROFIT_RATIO_PERCENTAGE
                     }
             
-            # 7. 动态止盈检查（已触发首次止盈后）- ✅ 优化版本
+            # 7. 动态止盈检查（已触发首次止盈后）- 优化版本
             if profit_triggered and highest_price > 0:
-                # ✅ 直接调用calculate_stop_loss_price获取动态止盈位
+                # 直接调用calculate_stop_loss_price获取动态止盈位
                 dynamic_take_profit_price = self.calculate_stop_loss_price(
                     cost_price, highest_price, profit_triggered
                 )
                 
                 # 如果当前价格跌破动态止盈位，触发止盈
                 if current_price <= dynamic_take_profit_price:
-                    # ✅ 获取匹配的级别信息（用于日志）
+                    # 获取匹配的级别信息（用于日志）
                     matched_level, take_profit_coefficient = self._get_profit_level_info(
                         cost_price, highest_price
                     )
@@ -1639,7 +1680,7 @@ class PositionManager:
                 open_date = position.get('open_date')
                 stock_name = position.get('stock_name')
                 
-                # ✅ 关键修改：动态成本价计算
+                # 关键修改：动态成本价计算
                 if sell_type == 'partial' and not profit_triggered:
                     # 首次止盈卖出，计算获利分摊后的新成本价
                     sell_cost = sell_volume * current_cost_price  # 卖出部分的原成本
@@ -1886,10 +1927,12 @@ class PositionManager:
             cursor = self.memory_conn.cursor()
             cursor.execute("UPDATE positions SET profit_triggered = ? WHERE stock_code = ?", (True, stock_code))
             self.memory_conn.commit()
-            logger.info(f"已标记 {stock_code} 触发首次止盈")
+            logger.info(f"已标记 {stock_code} profit_triggered已标记为True")
+            return True
         except Exception as e:
-            logger.error(f"标记 {stock_code} 触发首次止盈时出错: {str(e)}")
+            logger.error(f"标记 {stock_code} profit_triggered时出错: {str(e)}")
             self.memory_conn.rollback()
+            return False
 
     def start_position_monitor_thread(self):
         """启动持仓监控线程"""

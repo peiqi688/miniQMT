@@ -1058,7 +1058,7 @@ def sse():
                     }
                 }
                 
-                # ✅ 如果持仓数据有变化，添加持仓更新通知
+                # 如果持仓数据有变化，添加持仓更新通知
                 if current_version > last_positions_version:
                     current_data['positions_update'] = {
                         'version': current_version,

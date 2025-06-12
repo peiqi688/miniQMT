@@ -1154,7 +1154,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 新的格式化逻辑，符合要求的格式
             const formattedLogs = logEntries.map(entry => {
                 if (typeof entry === 'object' && entry !== null) {
-                    // ✅ 修改：转换日期格式为 MM-DD HH:MM:SS
+                    // 修改：转换日期格式为 MM-DD HH:MM:SS
                     let dateStr = '';
                     if (entry.trade_time) {
                         const date = new Date(entry.trade_time);
@@ -1271,7 +1271,7 @@ document.addEventListener('DOMContentLoaded', () => {
         requestLocks.holdings = true;
 
         try {
-            // ✅ 带版本号的请求
+            // 带版本号的请求
             const url = `${API_ENDPOINTS.getPositionsAll}?version=${currentHoldingsVersion}`;
             const data = await apiRequest(url);
             
@@ -1831,7 +1831,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateMonitoringInfo(data.monitoring);
                 }
                 
-                // ✅ 处理持仓数据变化通知
+                // 处理持仓数据变化通知
                 if (data.positions_update && data.positions_update.changed) {
                     console.log(`Received positions update notification: v${data.positions_update.version}`);
                     // 立即获取最新持仓数据
