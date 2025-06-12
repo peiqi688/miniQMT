@@ -1121,10 +1121,13 @@ class TradingExecutor:
                 # 使用qmt_trader检查股票是否可卖出
                 can_sell = True
                 try:
+                    # 提取6位股票代码用于持仓检查（去掉.SZ/.SH后缀）
+                    check_stock_code = formatted_stock_code.split('.')[0] if '.' in formatted_stock_code else formatted_stock_code
                     can_sell = self.position_manager.qmt_trader.check_stock_is_av_sell(
-                        stock=formatted_stock_code,
+                        stock=check_stock_code,  # 使用6位代码进行检查
                         amount=volume
                     )
+                    logger.info(f"可卖出检查: 原始代码={formatted_stock_code}, 检查代码={check_stock_code}, 结果={can_sell}")
                 except Exception as e:
                     logger.warning(f"检查股票是否可卖出时出错: {str(e)}，将继续尝试卖出")
                     can_sell = True  # 如果检查失败，仍然尝试卖出

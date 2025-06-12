@@ -127,6 +127,9 @@ class PositionManager:
             memory_stock_codes = {row[0] for row in cursor.fetchall() if row[0] is not None}
             current_positions = set()
 
+            # ✅ 新增：记录更新过程中的错误
+            update_errors = []
+
             # 遍历实盘持仓数据
             for _, row in real_positions_df.iterrows():
                 try:
@@ -207,19 +210,51 @@ class PositionManager:
                 
                 except Exception as e:
                     logger.error(f"处理持仓行数据时出错: {str(e)}")
+                    update_errors.append(f"处理 {stock_code if 'stock_code' in locals() else '未知'} 时出错: {str(e)}")
                     continue  # 跳过这一行，继续处理其他行
-            
+
+            # ✅ 关键修改：只有在没有更新错误且数据完整时才执行删除
+            if update_errors:
+                logger.error(f"数据更新过程中出现 {len(update_errors)} 个错误，跳过删除操作以保护数据")
+                for error in update_errors:
+                    logger.error(f"  - {error}")
+                return
+
+            # ✅ 数据完整性检查
+            if len(current_positions) == 0:
+                logger.warning("外部持仓数据为空，可能是接口异常，跳过删除操作")
+                return
+                
+            # ✅ 数据量合理性检查
+            if len(memory_stock_codes) > 0 and len(current_positions) < len(memory_stock_codes) * 0.3:
+                logger.warning(f"外部持仓数据过少 ({len(current_positions)}) 相比内存数据 ({len(memory_stock_codes)})，可能是接口异常，跳过删除操作")
+                return
+
             # 修改：在模拟交易模式下，不删除内存中存在但实盘中不存在的持仓记录
             if not hasattr(config, 'ENABLE_SIMULATION_MODE') or not config.ENABLE_SIMULATION_MODE:
-                # 只在非模拟交易模式下执行删除操作
-                if current_positions:  # 只有当至少有一个有效的当前持仓时才执行删除
-                    # 只在有足够多的有效持仓数据时才执行删除
-                    if len(current_positions) < len(memory_stock_codes) * 0.5:
-                        logger.warning("外部持仓数据可能不完整，跳过删除操作")
-                        return
+                # ✅ 只有通过所有检查后才执行删除
+                if memory_stock_codes:  # 有需要删除的记录
+                    logger.info(f"准备删除 {len(memory_stock_codes)} 个不在外部数据中的持仓: {list(memory_stock_codes)}")
+                    
+                    # ✅ 逐个删除并记录结果
+                    successfully_deleted = []
+                    failed_deletions = []
+                    
                     for stock_code in memory_stock_codes:
-                        if stock_code:  # 确保stock_code不为None
-                            self.remove_position(stock_code)
+                        if stock_code:
+                            try:
+                                if self.remove_position(stock_code):
+                                    successfully_deleted.append(stock_code)
+                                else:
+                                    failed_deletions.append(stock_code)
+                            except Exception as e:
+                                logger.error(f"删除 {stock_code} 时出错: {str(e)}")
+                                failed_deletions.append(stock_code)
+                    
+                    if successfully_deleted:
+                        logger.info(f"成功删除持仓: {successfully_deleted}")
+                    if failed_deletions:
+                        logger.error(f"删除失败的持仓: {failed_deletions}")
             else:
                 logger.info(f"模拟交易模式：保留内存中的模拟持仓记录，不与实盘同步删除")
 
@@ -689,8 +724,14 @@ class PositionManager:
         try:
 
             position = self.get_position(stock_code)
-            if position and position.get('profit_triggered'):
-                logger.warning(f"删除已触发止盈的持仓 {stock_code}，请确认")
+            if position:
+                profit_triggered = position.get('profit_triggered', False)
+                profit_ratio = position.get('profit_ratio', 0)
+                
+                if profit_triggered:
+                    logger.warning(f"⚠️  删除已触发止盈的持仓 {stock_code}，盈亏率: {profit_ratio:.2f}%")
+                else:
+                    logger.info(f"删除持仓 {stock_code}，盈亏率: {profit_ratio:.2f}%")
 
             cursor = self.memory_conn.cursor()
             cursor.execute("DELETE FROM positions WHERE stock_code=?", (stock_code,))
