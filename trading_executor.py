@@ -934,7 +934,7 @@ class TradingExecutor:
                         )
                         
                         if order_id:
-                            # ✅ 添加：实盘下单成功后也立即保存交易记录
+                            # 添加：实盘下单成功后也立即保存交易记录
                             trade_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                             trade_saved= self._save_trade_record(
                                 stock_code=stock_code,
@@ -948,7 +948,7 @@ class TradingExecutor:
                                 strategy=strategy
                             )
                             if trade_saved:
-                                # ✅ 缓存订单信息，供回调使用
+                                # 缓存订单信息，供回调使用
                                 self.order_cache[order_id] = {
                                     'stock_code': stock_code,
                                     'strategy': strategy,
@@ -1143,7 +1143,7 @@ class TradingExecutor:
                 
                 while retry_count < max_retries:
                     try:
-                        # 使用position_manager中的easy_qmt_trader进行卖出
+                        # 参考buy_stock：使用easy_qmt_trader进行卖出
                         order_id = self.position_manager.qmt_trader.sell(
                             security=formatted_stock_code,
                             price=price,
@@ -1154,16 +1154,48 @@ class TradingExecutor:
                         )
                         
                         if order_id:
-                            logger.info(f"卖出 {formatted_stock_code} 下单成功，委托号: {order_id}, 价格: {price}, 数量: {volume}, 价格类型: {price_type}")
+                            # 参考buy_stock：立即保存交易记录到数据库
+                            trade_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            trade_saved = self._save_trade_record(
+                                stock_code=stock_code,
+                                trade_time=trade_time,
+                                trade_type='SELL',
+                                price=price,
+                                volume=volume,
+                                amount=price * volume,
+                                trade_id=f"ORDER_{order_id}",  # 使用订单ID作为交易ID
+                                commission=price * volume * 0.0003,  # 预估手续费
+                                strategy=strategy
+                            )
+                            
+                            if trade_saved:
+                                # 参考buy_stock：缓存订单信息
+                                self.order_cache[order_id] = {
+                                    'stock_code': stock_code,
+                                    'strategy': strategy,
+                                    'trade_type': 'SELL',
+                                    'price': price,
+                                    'volume': volume,
+                                    'order_time': datetime.now(),
+                                    'amount': price * volume
+                                }
+                                
+                                logger.info(f"卖出 {formatted_stock_code} 下单成功，委托号: {order_id}, 价格: {price}, 数量: {volume}, 价格类型: {price_type}")
+                                
+                                # 注册回调（如果有）
+                                if callback:
+                                    self.callbacks[order_id] = callback
+                                    
                             break
                         else:
                             logger.warning(f"卖出 {formatted_stock_code} 下单失败，尝试重试 ({retry_count + 1}/{max_retries})")
                             retry_count += 1
-                            time.sleep(1)  # 等待1秒再重试
+                            time.sleep(1)
+                            
                     except Exception as e:
                         logger.error(f"卖出 {formatted_stock_code} 时出错: {str(e)}，尝试重试 ({retry_count + 1}/{max_retries})")
                         retry_count += 1
-                        time.sleep(1)  # 等待1秒再重试
+                        time.sleep(1)
                 
                 if not order_id:
                     logger.error(f"卖出 {formatted_stock_code} 经过 {max_retries} 次尝试后仍然失败")

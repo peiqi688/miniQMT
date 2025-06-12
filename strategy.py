@@ -38,7 +38,7 @@ class TradingStrategy:
         # 已处理的止盈止损信号记录
         self.processed_signals = set()
 
-        # ✅ 添加这行 - 重试计数器
+        # 添加这行 - 重试计数器
         self.retry_counts = {}
     
     def init_grid_trading(self, stock_code):
@@ -335,14 +335,22 @@ class TradingStrategy:
                 
                 # 实盘交易
                 order_id = self.trading_executor.sell_stock(
-                    stock_code, sell_volume, price_type=5, strategy='take_profit_half'
+                    stock_code, sell_volume, price_type=5, strategy='auto_partial'
                 )
                 if order_id:
+                    logger.info(f"[实盘交易] {stock_code} 首次止盈卖出委托已下达，委托号: {order_id}")
                     # 标记已触发首次止盈
-                    self.position_manager.mark_profit_triggered(stock_code)
-                    return True
-                
-                return False  # 暂时返回False，表示未执行实盘交易
+                    mark_success = self.position_manager.mark_profit_triggered(stock_code)
+                    if mark_success:
+                        logger.info(f"[状态标记] {stock_code} profit_triggered已标记为True")                        
+                        # 返回True表示整个止盈操作成功
+                        return True
+                    else:
+                        logger.error(f"[状态标记] {stock_code} profit_triggered标记失败")
+                        return False            
+                else:
+                    logger.error(f"[实盘交易] {stock_code} 首次止盈卖出委托下达失败")
+                    return False
                 
         except Exception as e:
             logger.error(f"执行 {stock_code} 首次止盈信号时出错: {str(e)}")
@@ -386,14 +394,20 @@ class TradingStrategy:
                 
                 # 实盘交易
                 order_id = self.trading_executor.sell_stock(
-                    stock_code, volume, price_type=5, strategy='take_profit_full'
+                    stock_code, volume, price_type=5, strategy='auto_full'
                 )
-                return order_id is not None
+
+                if order_id:
+                    logger.info(f"[实盘交易] {stock_code} 止盈全仓卖出委托已下达，委托号: {order_id}")
+                    return True
+                else:
+                    logger.error(f"[实盘交易] {stock_code} 全仓止盈卖出委托下达失败")
+                    return False
                 
             return False  # 暂时返回False，表示未执行实盘交易
                 
         except Exception as e:
-            logger.error(f"执行 {stock_code} 动态止盈信号时出错: {str(e)}")
+            logger.error(f"执行 {stock_code} 动态全仓止盈信号时出错: {str(e)}")
             return False
 
     # ========== 向后兼容的旧版本接口 ==========
@@ -598,7 +612,7 @@ class TradingStrategy:
         策略检测始终运行，但交易执行依赖ENABLE_AUTO_TRADING
         """
         try:
-            # ✅ 添加调试日志
+            # 添加调试日志
             logger.debug(f"开始检查 {stock_code} 的交易策略，自动交易状态: {config.ENABLE_AUTO_TRADING}")
             
             # 更新数据（始终执行）
@@ -609,7 +623,7 @@ class TradingStrategy:
             if config.ENABLE_DYNAMIC_STOP_PROFIT:
                 pending_signals = self.position_manager.get_pending_signals()
                 
-                # ✅ 添加调试日志
+                # 添加调试日志
                 logger.debug(f"{stock_code} 待处理信号: {list(pending_signals.keys())}")
                 
                 if stock_code in pending_signals:
@@ -628,7 +642,7 @@ class TradingStrategy:
                         return
                     
                     if config.ENABLE_AUTO_TRADING:
-                        # ✅ 添加调试日志
+                        # 添加调试日志
                         logger.info(f"{stock_code} 开始执行{signal_type}信号，重试次数: {retry_count}")
                         
                         success = self.execute_trading_signal_direct(stock_code, signal_type, signal_info)
