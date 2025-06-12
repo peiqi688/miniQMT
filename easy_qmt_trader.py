@@ -85,8 +85,8 @@ class MyXtQuantTraderCallback(XtQuantTraderCallback):
         self.order_id_map[response.seq] = response.order_id
 
 class easy_qmt_trader:
-    def __init__(self,path= r'D:/国金QMT交易端模拟/userdata_mini',
-                  session_id = 123456,account='55009640',account_type='STOCK',
+    def __init__(self,path= r'D:/江海证券QMT实盘_交易/userdata_mini',
+                  session_id = 123456,account='80392832',account_type='STOCK',
                   is_slippage=True,slippage=0.01) -> None:
         '''
         简化版的qmt_trder方便大家做策略的开发类的继承
