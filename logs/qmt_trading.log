@@ -3043,3 +3043,6 @@
 2025-06-13 00:55:12,739 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 current_price 的最新行情为空
 2025-06-13 00:55:13,422 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 market_value 的最新行情为空
 2025-06-13 00:55:13,997 - qmt_trading.data_manager - WARNING - 使用Mootdx获取 profit_ratio 的最新行情为空
+2025-06-13 10:22:14,538 - qmt_trading.data_manager - INFO - 已连接数据库: data\trading.db
+2025-06-13 10:22:14,539 - qmt_trading.data_manager - INFO - 数据表结构已创建
+2025-06-13 10:22:16,586 - qmt_trading.data_manager - INFO - xtquant行情服务连接成功
